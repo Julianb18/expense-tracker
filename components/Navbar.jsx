@@ -10,7 +10,7 @@ export const Navbar = () => {
     <div className="flex justify-between px-4 py-2 bg-neutral-600 text-white">
       <span className="border border-black">image</span>
       <h2 className="border border-green-500">
-        Budget App / {authUser?.email}
+        Budget App / {authUser?.displayName}
       </h2>
       <Menu
         as="div"
