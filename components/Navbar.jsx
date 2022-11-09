@@ -7,7 +7,7 @@ export const Navbar = () => {
   const { authUser, signOut } = useAuth();
 
   return (
-    <div className="flex justify-between px-4 py-2 bg-neutral-600 text-white">
+    <div className="sticky z-50 top-0 flex justify-between px-3 py-3 bg-neutral-600 text-white">
       <span className="border border-black">image</span>
       <h2 className="border border-green-500">
         Budget App / {authUser?.displayName}

@@ -12,10 +12,6 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
-// import { useAuth } from "../context/AuthContext";
-
-// const userExpenses = collection(db, "userExpenses");
-
 const hardCodedArrayOfMonths = [
   "January",
   "February",
@@ -44,13 +40,13 @@ const userMonthsSetup = () => {
       income: 0,
       categories: [],
       month,
+      monthBalance: 0,
     };
     createdMonthsArray.push(createdMonth);
   }
 };
 
 userMonthsSetup();
-// console.log(createdMonthsArray);
 
 const userYearsSetup = () => {
   for (let year of hardCodedArrayOfYears) {
@@ -63,22 +59,11 @@ const userYearsSetup = () => {
   }
 };
 userYearsSetup();
-// console.log(createdYearsArray);
-
-// export const add
-// export const userDocExists = async (uid) => {
-//   const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
-//   const querySnapshot = await getDocs(q);
-
-//   console.log("user doc exists", querySnapshot.docs.length > 0);
-//   return querySnapshot.docs.length > 0;
-// };
 
 export const addANewUserExpenseDoc = async (uid, displayName) => {
   const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
   const querySnapshot = await getDocs(q);
 
-  console.log("user doc exists", querySnapshot.docs.length > 0);
   if (querySnapshot.docs.length > 0) {
     console.log("user doc exists");
     return;
@@ -92,17 +77,278 @@ export const addANewUserExpenseDoc = async (uid, displayName) => {
   }
 };
 
-export const getUserExpenses = async (uid) => {
+// export const getUserExpenses = async (uid) => {
+//   const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
+//   const querySnapshot = await getDocs(q);
+
+//   return querySnapshot.docs[0].data();
+// };
+
+/**
+ * @param {string} uid
+ * @param {number} year
+ * @param {string} month
+ * @param {number} income
+ */
+export const addMonthIncome = async (uid, year, month, income) => {
   const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
   const querySnapshot = await getDocs(q);
-  // console.log("DATA", querySnapshot.docs[0].data());
-  return querySnapshot.docs[0].data();
+  const userDoc = querySnapshot.docs[0].data();
+
+  const yearIndex = userDoc.years.findIndex((y) => y.year === year);
+  const monthIndex = userDoc.years[yearIndex].months.findIndex(
+    (m) => m.month === month
+  );
+
+  // console.log("USER INFO", userDoc);
+  // console.log("YEAR INDEX", yearIndex);
+  // console.log("MONTH INDEX", monthIndex);
+
+  const updatedUserDoc = {
+    ...userDoc,
+    years: [
+      ...userDoc.years.slice(0, yearIndex),
+      {
+        ...userDoc.years[yearIndex],
+        months: [
+          ...userDoc.years[yearIndex].months.slice(0, monthIndex),
+          {
+            ...userDoc.years[yearIndex].months[monthIndex],
+            income,
+          },
+          ...userDoc.years[yearIndex].months.slice(monthIndex + 1),
+        ],
+      },
+      ...userDoc.years.slice(yearIndex + 1),
+    ],
+  };
+
+  console.log("UPDATED USER DOC", updatedUserDoc);
+  await setDoc(
+    doc(db, "userExpenses", querySnapshot.docs[0].id),
+    updatedUserDoc
+  );
 };
 
-//   const newDoc = await addDoc(userExpenses, {
-//     userName: "testUser",
-//     currentBalance: 3000,
-//     years
-//   });
+/**
+ * @param {string} uid
+ * @param {number} year
+ * @param {string} month
+ * @param {object} category
+ */
+export const addCategory = async (uid, year, month, category) => {
+  const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
+  const querySnapshot = await getDocs(q);
+  const userDoc = querySnapshot.docs[0].data();
 
-// addANewUserExpenseDoc();
+  const yearIndex = userDoc.years.findIndex((y) => y.year === year);
+  const monthIndex = userDoc.years[yearIndex].months.findIndex(
+    (m) => m.month === month
+  );
+
+  const updatedUserDoc = {
+    ...userDoc,
+    years: [
+      ...userDoc.years.slice(0, yearIndex),
+      {
+        ...userDoc.years[yearIndex],
+        months: [
+          ...userDoc.years[yearIndex].months.slice(0, monthIndex),
+          {
+            ...userDoc.years[yearIndex].months[monthIndex],
+            categories: [
+              ...userDoc.years[yearIndex].months[monthIndex].categories,
+              category,
+            ],
+          },
+          ...userDoc.years[yearIndex].months.slice(monthIndex + 1),
+        ],
+      },
+      ...userDoc.years.slice(yearIndex + 1),
+    ],
+  };
+
+  // console.log("UPDATED CATEGORY", updatedUserDoc);
+  await setDoc(
+    doc(db, "userExpenses", querySnapshot.docs[0].id),
+    updatedUserDoc
+  );
+};
+
+export const deleteCategory = async (uid, year, month, category) => {
+  const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
+  const querySnapshot = await getDocs(q);
+  const userDoc = querySnapshot.docs[0].data();
+
+  const yearIndex = userDoc.years.findIndex((y) => y.year === year);
+  const monthIndex = userDoc.years[yearIndex].months.findIndex(
+    (m) => m.month === month
+  );
+
+  const categoryIndex = userDoc.years[yearIndex].months[
+    monthIndex
+  ].categories.findIndex((c) => c.title === category.title);
+
+  const updatedUserDoc = {
+    ...userDoc,
+    years: [
+      ...userDoc.years.slice(0, yearIndex),
+      {
+        ...userDoc.years[yearIndex],
+        months: [
+          ...userDoc.years[yearIndex].months.slice(0, monthIndex),
+          {
+            ...userDoc.years[yearIndex].months[monthIndex],
+            categories: [
+              ...userDoc.years[yearIndex].months[monthIndex].categories.slice(
+                0,
+                categoryIndex
+              ),
+              ...userDoc.years[yearIndex].months[monthIndex].categories.slice(
+                categoryIndex + 1
+              ),
+            ],
+          },
+          ...userDoc.years[yearIndex].months.slice(monthIndex + 1),
+        ],
+      },
+      ...userDoc.years.slice(yearIndex + 1),
+    ],
+  };
+
+  // console.log("Delete CATEGORY", updatedUserDoc);
+  await setDoc(
+    doc(db, "userExpenses", querySnapshot.docs[0].id),
+    updatedUserDoc
+  );
+};
+
+export const addExpense = async (uid, year, month, category, expense) => {
+  const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
+  const querySnapshot = await getDocs(q);
+  const userDoc = querySnapshot.docs[0].data();
+
+  const yearIndex = userDoc.years.findIndex((y) => y.year === year);
+  const monthIndex = userDoc.years[yearIndex].months.findIndex(
+    (m) => m.month === month
+  );
+
+  const categoryIndex = userDoc.years[yearIndex].months[
+    monthIndex
+  ].categories.findIndex((c) => c.title === category);
+
+  const updatedUserDoc = {
+    ...userDoc,
+    years: [
+      ...userDoc.years.slice(0, yearIndex),
+      {
+        ...userDoc.years[yearIndex],
+        months: [
+          ...userDoc.years[yearIndex].months.slice(0, monthIndex),
+          {
+            ...userDoc.years[yearIndex].months[monthIndex],
+            categories: [
+              ...userDoc.years[yearIndex].months[monthIndex].categories.slice(
+                0,
+                categoryIndex
+              ),
+              {
+                ...userDoc.years[yearIndex].months[monthIndex].categories[
+                  categoryIndex
+                ],
+                expenses: [
+                  ...userDoc.years[yearIndex].months[monthIndex].categories[
+                    categoryIndex
+                  ].expenses,
+                  expense,
+                ],
+              },
+              ...userDoc.years[yearIndex].months[monthIndex].categories.slice(
+                categoryIndex + 1
+              ),
+            ],
+          },
+          ...userDoc.years[yearIndex].months.slice(monthIndex + 1),
+        ],
+      },
+      ...userDoc.years.slice(yearIndex + 1),
+    ],
+  };
+
+  // console.log("Add Expense", updatedUserDoc);
+  await setDoc(
+    doc(db, "userExpenses", querySnapshot.docs[0].id),
+    updatedUserDoc
+  );
+};
+
+export const deleteExpense = async (
+  uid,
+  year,
+  month,
+  selectedCategory,
+  expenseId
+) => {
+  const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
+  const querySnapshot = await getDocs(q);
+  const userDoc = querySnapshot.docs[0].data();
+
+  const yearIndex = userDoc.years.findIndex((y) => y.year === year);
+  const monthIndex = userDoc.years[yearIndex].months.findIndex(
+    (m) => m.month === month
+  );
+
+  const categoryIndex = userDoc.years[yearIndex].months[
+    monthIndex
+  ].categories.findIndex((c) => c.title === selectedCategory);
+
+  const expenseIndex = userDoc.years[yearIndex].months[monthIndex].categories[
+    categoryIndex
+  ].expenses.findIndex((e) => e.id === expenseId);
+
+  const updatedUserDoc = {
+    ...userDoc,
+    years: [
+      ...userDoc.years.slice(0, yearIndex),
+      {
+        ...userDoc.years[yearIndex],
+        months: [
+          ...userDoc.years[yearIndex].months.slice(0, monthIndex),
+          {
+            ...userDoc.years[yearIndex].months[monthIndex],
+            categories: [
+              ...userDoc.years[yearIndex].months[monthIndex].categories.slice(
+                0,
+                categoryIndex
+              ),
+              {
+                ...userDoc.years[yearIndex].months[monthIndex].categories[
+                  categoryIndex
+                ],
+                expenses: [
+                  ...userDoc.years[yearIndex].months[monthIndex].categories[
+                    categoryIndex
+                  ].expenses.slice(0, expenseIndex),
+                  ...userDoc.years[yearIndex].months[monthIndex].categories[
+                    categoryIndex
+                  ].expenses.slice(expenseIndex + 1),
+                ],
+              },
+              ...userDoc.years[yearIndex].months[monthIndex].categories.slice(
+                categoryIndex + 1
+              ),
+            ],
+          },
+          ...userDoc.years[yearIndex].months.slice(monthIndex + 1),
+        ],
+      },
+      ...userDoc.years.slice(yearIndex + 1),
+    ],
+  };
+
+  console.log("Delete Expense", updatedUserDoc);
+  await setDoc(
+    doc(db, "userExpenses", querySnapshot.docs[0].id),
+    updatedUserDoc
+  );
+};

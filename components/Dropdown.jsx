@@ -7,33 +7,25 @@ const classNames = (...classes) => {
   return classes.filter(Boolean).join(" ");
 };
 
-export const Dropdown = ({ years, changeEvent, selected }) => {
-  //   const [selected, setSelected] = useState(years.years[0]);
-
-  //   const changeEvent = (e) => {
-  //       setSelected(e);
-  //       console.log("this is e", e);
-  //     };
-
-  //   console.log("YEARS AS PROP", years.year[0]);
-  //   useEffect(() => {
-  //     setSelected(years.years[0]);
-  //   }, [years]);
-  console.log("HERE ======>", selected);
+export const Dropdown = ({ years, changeEvent, selectedYear }) => {
+  //   console.log("HERE ======>", selectedYear);
   return (
-    <Listbox value={selected} onChange={changeEvent}>
+    <Listbox
+      value={selectedYear}
+      onChange={changeEvent}
+      className="outline-none border-none"
+    >
       {({ open }) => (
-        <>
+        <div className="flex flex-col">
           <Listbox.Label className="block text-sm font-medium text-gray-700">
             Year
           </Listbox.Label>
           <div className="relative mt-1">
-            <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm sm:text-sm">
+            <Listbox.Button className="relative w-full cursor-default rounded-3xl border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm sm:text-sm">
               <span className="flex items-center">
                 <span className="ml-3 block truncate">
                   {/* not working because we have to store the whole object in selected not just the year*/}
-
-                  {selected.year}
+                  {selectedYear.year}
                 </span>
               </span>
               <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
@@ -51,7 +43,7 @@ export const Dropdown = ({ years, changeEvent, selected }) => {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+              <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-3xl bg-white py-1 text-base shadow-lg focus:outline-none sm:text-sm">
                 {years &&
                   years.map((year) => (
                     <Listbox.Option
@@ -67,11 +59,6 @@ export const Dropdown = ({ years, changeEvent, selected }) => {
                       {({ selected, active }) => (
                         <>
                           <div className="flex items-center">
-                            {/* <img
-                            src={year.avatar}
-                            alt=""
-                            className="h-6 w-6 flex-shrink-0 rounded-full"
-                          /> */}
                             <span
                               className={classNames(
                                 selected ? "font-semibold" : "font-normal",
@@ -99,7 +86,7 @@ export const Dropdown = ({ years, changeEvent, selected }) => {
               </Listbox.Options>
             </Transition>
           </div>
-        </>
+        </div>
       )}
     </Listbox>
   );
