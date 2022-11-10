@@ -15,6 +15,8 @@ export const CategoryModal = ({
     title: "",
     maxSpending: 0,
     expenses: [],
+    categoryExpense: 0,
+    totalCategoryExpenses: 0,
   });
 
   const handleSubmit = (e) => {
@@ -28,7 +30,7 @@ export const CategoryModal = ({
   };
   return (
     <Dialog
-      className="absolute min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
+      className="absolute z-30 min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
       open={isCategoryModalOpen}
       onClose={() => setIsCategoryModalOpen(false)}
     >
@@ -61,7 +63,10 @@ export const CategoryModal = ({
               <label htmlFor="maxSpending">Maximum Spending</label>
               <input
                 onChange={(e) =>
-                  setCategory({ ...category, maxSpending: e.target.value })
+                  setCategory({
+                    ...category,
+                    maxSpending: Number(e.target.value) || "",
+                  })
                 }
                 value={category.maxSpending}
                 onFocus={(e) => (e.target.value = "")}

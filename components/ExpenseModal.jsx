@@ -2,7 +2,11 @@ import { Dialog } from "@headlessui/react";
 import React, { useState } from "react";
 import { v4 as uuid } from "uuid";
 
-import { addCategory, addExpense } from "../firebase/firestore";
+import {
+  addCategory,
+  addExpense,
+  addTotalCategoryExpenses,
+} from "../firebase/firestore";
 import { Button } from "./Button";
 import { XMarkSvg } from "./svg/XMarkSvg";
 
@@ -13,6 +17,7 @@ export const ExpenseModal = ({
   selectedCategory,
   isExpenseModalOpen,
   setIsExpenseModalOpen,
+  selectedExpenses,
 }) => {
   const [expense, setExpense] = useState({
     title: "",
@@ -23,7 +28,7 @@ export const ExpenseModal = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     let tempExpense = { ...expense, id: uuid() };
-    if (expense.title !== "" && expense.amount !== 0) {
+    if (tempExpense.title !== "" && tempExpense.amount !== 0) {
       addExpense(uid, year, month, selectedCategory, tempExpense);
       setIsExpenseModalOpen(false);
       console.log("submitted");
@@ -31,9 +36,11 @@ export const ExpenseModal = ({
     setExpense(tempExpense);
     console.log("not submitted");
   };
+  // console.log("NEW====>", selectedExpenses);
+  // console.log("CATEGORY", selectedCategory);
   return (
     <Dialog
-      className="absolute min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
+      className="absolute z-30 min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
       open={isExpenseModalOpen}
       onClose={() => setIsExpenseModalOpen(false)}
     >
@@ -66,7 +73,10 @@ export const ExpenseModal = ({
               <label htmlFor="amount">Amount</label>
               <input
                 onChange={(e) =>
-                  setExpense({ ...expense, amount: e.target.value })
+                  setExpense({
+                    ...expense,
+                    amount: Number(e.target.value) || "",
+                  })
                 }
                 value={expense.amount}
                 onFocus={(e) => (e.target.value = "")}

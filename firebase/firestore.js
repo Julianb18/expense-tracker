@@ -237,6 +237,18 @@ export const addExpense = async (uid, year, month, category, expense) => {
     monthIndex
   ].categories.findIndex((c) => c.title === category);
 
+  const currentExpenses =
+    userDoc.years[yearIndex].months[monthIndex].categories[categoryIndex]
+      .expenses;
+
+  const currentExpenseTotal = currentExpenses.reduce((acc, curr) => {
+    return acc + curr.amount;
+  }, 0);
+
+  const updatedTotalCategoryExpense = currentExpenseTotal + expense.amount;
+
+  console.log("Add Total Category Expenses", updatedTotalCategoryExpense);
+
   const updatedUserDoc = {
     ...userDoc,
     years: [
@@ -262,6 +274,7 @@ export const addExpense = async (uid, year, month, category, expense) => {
                   ].expenses,
                   expense,
                 ],
+                totalCategoryExpenses: updatedTotalCategoryExpense,
               },
               ...userDoc.years[yearIndex].months[monthIndex].categories.slice(
                 categoryIndex + 1
@@ -275,7 +288,7 @@ export const addExpense = async (uid, year, month, category, expense) => {
     ],
   };
 
-  // console.log("Add Expense", updatedUserDoc);
+  console.log("Add Expense", updatedUserDoc);
   await setDoc(
     doc(db, "userExpenses", querySnapshot.docs[0].id),
     updatedUserDoc
@@ -306,6 +319,23 @@ export const deleteExpense = async (
     categoryIndex
   ].expenses.findIndex((e) => e.id === expenseId);
 
+  const deletedExpenseAmount = userDoc.years[yearIndex].months[
+    monthIndex
+  ].categories[categoryIndex].expenses.find((e) => e.id === expenseId);
+
+  const currentExpenses =
+    userDoc.years[yearIndex].months[monthIndex].categories[categoryIndex]
+      .expenses;
+
+  const currentExpenseTotal = currentExpenses.reduce((acc, curr) => {
+    return acc + curr.amount;
+  }, 0);
+
+  const updatedTotalCategoryExpense =
+    currentExpenseTotal - deletedExpenseAmount.amount;
+
+  console.log("EXPENSE INDEX", updatedTotalCategoryExpense);
+
   const updatedUserDoc = {
     ...userDoc,
     years: [
@@ -333,6 +363,7 @@ export const deleteExpense = async (
                     categoryIndex
                   ].expenses.slice(expenseIndex + 1),
                 ],
+                totalCategoryExpenses: updatedTotalCategoryExpense,
               },
               ...userDoc.years[yearIndex].months[monthIndex].categories.slice(
                 categoryIndex + 1
@@ -352,3 +383,54 @@ export const deleteExpense = async (
     updatedUserDoc
   );
 };
+
+export const addMonthBalanceAndExpense = async (
+  uid,
+  year,
+  month,
+  monthBalance,
+  totalMonthlyExpenses
+) => {
+  const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
+  const querySnapshot = await getDocs(q);
+  const userDoc = querySnapshot.docs[0].data();
+
+  const yearIndex = userDoc.years.findIndex((y) => y.year === year);
+  const monthIndex = userDoc.years[yearIndex].months.findIndex(
+    (m) => m.month === month
+  );
+
+  const updatedUserDoc = {
+    ...userDoc,
+    years: [
+      ...userDoc.years.slice(0, yearIndex),
+      {
+        ...userDoc.years[yearIndex],
+        months: [
+          ...userDoc.years[yearIndex].months.slice(0, monthIndex),
+          {
+            ...userDoc.years[yearIndex].months[monthIndex],
+            monthBalance: monthBalance,
+            totalMonthlyExpenses: totalMonthlyExpenses,
+          },
+          ...userDoc.years[yearIndex].months.slice(monthIndex + 1),
+        ],
+      },
+      ...userDoc.years.slice(yearIndex + 1),
+    ],
+  };
+
+  // console.log("Add Monthly Balance", updatedUserDoc);
+  await setDoc(
+    doc(db, "userExpenses", querySnapshot.docs[0].id),
+    updatedUserDoc
+  );
+};
+
+// addTotalCategoryExpenses(
+//   "xb8xiDqmuAT8TFRRKCYJuHbEaGI3",
+//   2022,
+//   "March",
+//   "Rent",
+//   100
+// );

@@ -23,7 +23,7 @@ export const IncomeModal = ({
 
   return (
     <Dialog
-      className="absolute min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl p-3"
+      className="absolute z-30 min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl p-3"
       open={incomeModalIsOpen}
       onClose={() => setIncomeModalIsOpen(false)}
     >
@@ -31,7 +31,8 @@ export const IncomeModal = ({
         <Dialog.Panel className="flex flex-col space-y-4">
           <Dialog.Title>Add Income</Dialog.Title>
           <input
-            onChange={(e) => setInputVal(e.target.value)}
+            onChange={(e) => setInputVal(Number(e.target.value) || "")}
+            onFocus={(e) => (e.target.value = "")}
             value={inputVal}
             className="border border-black rounded-3xl pl-3 py-1"
             type="number"

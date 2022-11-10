@@ -13,23 +13,25 @@ export const ViewExpensesModal = ({
   isViewExpensesModalOpen,
   setIsViewExpensesModalOpen,
   selectedExpenses,
+  setSelectedExpenses,
 }) => {
-  console.log("HERE", selectedExpenses);
+  // console.log("HERE", selectedExpenses);
 
-  const handleSubmit = (e, expenseId) => {
+  const handleDelete = (e, expenseId) => {
     e.preventDefault();
     console.log(expenseId);
     deleteExpense(uid, year, month, selectedCategory, expenseId);
+    setSelectedExpenses(selectedExpenses.filter((e) => e.id !== expenseId));
   };
   return (
     <Dialog
-      className="absolute min-w-[90%] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
+      className="absolute z-30 min-w-[90%] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
       open={isViewExpensesModalOpen}
       onClose={() => setIsViewExpensesModalOpen(false)}
     >
       <Dialog.Panel className="flex flex-col space-y-4">
         <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2">
-          <Dialog.Title>Expenses</Dialog.Title>
+          <Dialog.Title>{selectedCategory} - Expenses</Dialog.Title>
           <button
             className="cursor-pointer p-1"
             onClick={() => setIsViewExpensesModalOpen(false)}
@@ -43,12 +45,12 @@ export const ViewExpensesModal = ({
           {selectedExpenses?.map((expense) => (
             <div
               key={expense.id}
-              className="flex justify-between py-2 px-3 even:bg-gray-100"
+              className="flex justify-between py-2 px-3 even:bg-gray-100 last:rounded-b-xl"
             >
               <span>{expense.title}</span>
               <div className="flex justify-center">
                 <span className="mr-7">{expense.amount}</span>
-                <button onClick={(e) => handleSubmit(e, expense.id)}>
+                <button onClick={(e) => handleDelete(e, expense.id)}>
                   <DeleteSvg />
                 </button>
               </div>
