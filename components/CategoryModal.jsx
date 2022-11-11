@@ -1,8 +1,10 @@
 import { Dialog } from "@headlessui/react";
 import React, { useState } from "react";
-import { addCategory } from "../firebase/firestore";
+
 import { Button } from "./Button";
 import { XMarkSvg } from "./svg/XMarkSvg";
+
+import { addCategory } from "../firebase/firestore";
 
 export const CategoryModal = ({
   isCategoryModalOpen,

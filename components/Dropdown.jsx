@@ -1,5 +1,6 @@
-import React, { useState, Fragment, useEffect } from "react";
+import React, { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
+
 import { ChevronDown } from "./svg/ChevronDown";
 import { Check } from "./svg/Check";
 
@@ -12,7 +13,7 @@ export const Dropdown = ({ years, changeEvent, selectedYear }) => {
     <Listbox
       value={selectedYear}
       onChange={changeEvent}
-      className="outline-none border-none "
+      className="outline-none border-none z-10"
     >
       {({ open }) => (
         <div className="flex flex-col">
@@ -22,10 +23,7 @@ export const Dropdown = ({ years, changeEvent, selectedYear }) => {
           <div className="relative mt-1">
             <Listbox.Button className="relative w-full cursor-default rounded-3xl border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-gray-800 shadow-lg">
               <span className="flex items-center">
-                <span className="ml-3 block truncate">
-                  {/* not working because we have to store the whole object in selected not just the year*/}
-                  {selectedYear.year}
-                </span>
+                <span className="ml-3 block truncate">{selectedYear.year}</span>
               </span>
               <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
                 <ChevronDown

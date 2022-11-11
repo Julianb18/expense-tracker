@@ -1,38 +1,20 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Menu } from "@headlessui/react";
-// import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import Link from "next/link";
 
-import { useAuth } from "../context/AuthContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import {
-  addANewUserExpenseDoc,
-  addYearBalance,
-  getUserExpenses,
-} from "../firebase/firestore";
 import { Dropdown } from "../components/Dropdown";
 import { MonthCard } from "../components/MonthCard";
-import { showCurrentYear } from "../helperFunctions/showCurrentYear";
-import Link from "next/link";
+
 import { UserDataContext } from "../context/UserDataContext";
-import { Carousel } from "react-responsive-carousel";
+import { useAuth } from "../context/AuthContext";
+
+import { addYearBalance } from "../firebase/firestore";
 
 const Dashboard = () => {
   const { userData, selectedYear, changeEvent } = useContext(UserDataContext);
   const { authUser, isLoading } = useAuth();
   const router = useRouter();
-
-  // const [userData, setUserData] = useState({});
-
-  // const [selectedYear, setSelectedYear] = useState(
-  //   userData && userData.years && userData.years[0]
-  // );
-
-  // console.log("current year", showCurrentYear());
-
-  // const changeEvent = (e) => {
-  //   setSelectedYear(e);
-  // };
 
   useEffect(() => {
     if (!isLoading && !authUser) {
@@ -76,8 +58,7 @@ const Dashboard = () => {
             scroll-smooth overflow-y-scroll flex-col md:overflow-visible md:h-full 
             md:gap-6 md:space-y-0 items-center md:flex-wrap md:justify-center md:flex-row"
           >
-            {/* <div className=""></div>  */}
-            <div className="sticky xl:hidden z-10 top-0 left-0 right-0 w-screen bg-gradient-to-b from-primaryDark to-transparent">
+            <div className="sticky xl:hidden top-0 left-0 right-0 w-screen bg-gradient-to-b from-primaryDark to-transparent">
               <div className="h-[40px]"></div>
             </div>
             <div className="fixed xl:hidden bottom-0 left-0 w-full h-[40px] bg-gradient-to-t from-primaryDark to-transparent"></div>

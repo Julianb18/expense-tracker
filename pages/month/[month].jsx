@@ -18,6 +18,7 @@ import { UserDataContext } from "../../context/UserDataContext";
 
 import { addMonthBalanceAndExpense } from "../../firebase/firestore";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
+import { ConfirmDeleteModal } from "../../components/ConfirmDeleteModal";
 
 const Month = () => {
   const router = useRouter();
@@ -28,6 +29,8 @@ const Month = () => {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [isViewExpensesModalOpen, setIsViewExpensesModalOpen] = useState(false);
+  const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] =
+    useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedExpenses, setSelectedExpenses] = useState([]);
 
@@ -41,11 +44,18 @@ const Month = () => {
     setIsExpenseModalOpen(true);
     setSelectedExpenses(expenses);
   };
+
   const handleViewExpense = (currentCategory, expenses) => {
     setSelectedCategory(currentCategory);
     setIsViewExpensesModalOpen(true);
     setSelectedExpenses(expenses);
   };
+
+  const handleCategoryDelete = (currentCategory) => {
+    setSelectedCategory(currentCategory);
+    setIsConfirmDeleteModalOpen(true);
+  };
+
   useEffect(() => {
     if (selectedMonth) {
       const tempMonthlyExpense = selectedMonth.categories.reduce(
@@ -78,9 +88,8 @@ const Month = () => {
     }
   }, [totalMonthlyExpenses, selectedMonth, userData, selectedYear, month]);
 
-  console.log("TOTAL MONTHLY====>", totalMonthlyExpenses);
+  console.log("CATEGORY", selectedCategory);
 
-  // sm:max-w-[780px] mx-auto
   return selectedMonth ? (
     <div className="relative py-3">
       <IncomeModal
@@ -116,7 +125,20 @@ const Month = () => {
         selectedExpenses={selectedExpenses}
         setSelectedExpenses={setSelectedExpenses}
       />
-      {incomeModalIsOpen || isCategoryModalOpen || isExpenseModalOpen ? (
+
+      <ConfirmDeleteModal
+        isConfirmDeleteModalOpen={isConfirmDeleteModalOpen}
+        setIsConfirmDeleteModalOpen={setIsConfirmDeleteModalOpen}
+        selectedCategory={selectedCategory}
+        uid={userData?.uid}
+        year={selectedYear?.year}
+        month={month}
+      />
+
+      {incomeModalIsOpen ||
+      isCategoryModalOpen ||
+      isExpenseModalOpen ||
+      isConfirmDeleteModalOpen ? (
         <div className="absolute z-20 top-0 left-0 bg-black opacity-60 h-screen w-full"></div>
       ) : null}
       <div className="flex justify-between items-center mb-8 px-4">
@@ -149,7 +171,6 @@ const Month = () => {
           Add Category
         </Button>
       </div>
-      {/* <div className="flex flex-col gap-4 items-center pb-24 sm:flex-wrap sm:flex-row sm:justify-center"> */}
 
       <div
         className="relative flex px-4 md:px-0 pb-11 h-[calc(100vh-212px)] overflow-hidden 
@@ -165,10 +186,7 @@ const Month = () => {
             category={category}
             handleAddExpense={handleAddExpense}
             handleViewExpense={handleViewExpense}
-            uid={userData?.uid}
-            year={selectedYear?.year}
-            month={month}
-            setIsViewExpensesModalOpen={setIsViewExpensesModalOpen}
+            handleCategoryDelete={handleCategoryDelete}
           />
         ))}
       </div>

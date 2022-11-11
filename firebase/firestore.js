@@ -176,7 +176,7 @@ export const addCategory = async (uid, year, month, category) => {
   );
 };
 
-export const deleteCategory = async (uid, year, month, category) => {
+export const deleteCategory = async (uid, year, month, selectedCategory) => {
   const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
   const querySnapshot = await getDocs(q);
   const userDoc = querySnapshot.docs[0].data();
@@ -188,7 +188,7 @@ export const deleteCategory = async (uid, year, month, category) => {
 
   const categoryIndex = userDoc.years[yearIndex].months[
     monthIndex
-  ].categories.findIndex((c) => c.title === category.title);
+  ].categories.findIndex((c) => c.title === selectedCategory);
 
   const updatedUserDoc = {
     ...userDoc,

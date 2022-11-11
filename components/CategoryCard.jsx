@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  addTotalCategoryExpense,
-  addTotalCategoryExpenses,
-  deleteCategory,
-} from "../firebase/firestore";
+import { deleteCategory } from "../firebase/firestore";
 import { expenseColor } from "../helperFunctions/expenseColor";
 import { Button } from "./Button";
 
@@ -11,18 +7,12 @@ export const CategoryCard = ({
   category,
   handleAddExpense,
   handleViewExpense,
-  uid,
-  month,
-  year,
+  handleCategoryDelete,
 }) => {
   const { title, maxSpending, expenses } = category;
 
   const [spentPercentage, setSpentPercentage] = useState("");
   const [totalExpenses, setTotalExpenses] = useState(0);
-
-  // const totalExpenses = expenses.reduce((acc, curr) => {
-  //   return acc + curr.amount;
-  // }, 0);
 
   useEffect(() => {
     const total = expenses.reduce((acc, curr) => {
@@ -37,35 +27,15 @@ export const CategoryCard = ({
 
     setTotalExpenses(total);
   }, [expenses, maxSpending]);
-  // useEffect(() => {
-  //   // setTotalMonthlyExpenses((prev) => prev + totalExpenses);
-  //   // expenses.forEach((expense) => {
-  //   //   addTotalCategoryExpense(uid, year, month, title, expense);})
-  //   console.log("add expense!!!");
-  //   addTotalCategoryExpenses(uid, year, month, title, totalExpenses);
-  // }, [uid, year, month, title, totalExpenses]);
-  // useEffect(() => {
-  //   addTotalCategoryExpense(uid, year, month, title, totalExpenses);
-  //   // addTotalMonthlyExpenses(uid, year, month, totalExpenses);
-  // }, [uid, year, month, title, totalExpenses]);
 
-  // useEffect(() => {
-  //   let percentage = (totalExpenses / maxSpending) * 100;
-  //   if (percentage > 100) {
-  //     percentage = 100;
-  //   }
-  //   setSpentPercentage(Math.round(percentage));
-  // }, [totalExpenses, maxSpending]);
-
-  // console.log("TEST", title);
-  // console.log("Total EX", totalExpenses);
-  // console.log("TOTAL", spentPercentage);
-  // console.log("EXPENSES HERE", expenses);
   return (
-    <div className="flex flex-col w-full xs:max-w-[350px] bg-white rounded-3xl mb-6 md:mb-0 p-3">
+    <div className="flex flex-col shadow-xl shadow-primaryDark w-full xs:max-w-[350px] bg-white rounded-3xl mb-6 md:mb-0 p-3">
       <div className="flex justify-between mb-2">
         <span>{title}</span>
-        <button onClick={() => deleteCategory(uid, year, month, category)}>
+        <button
+          className="border border-gray-400 rounded-3xl text-gray-400 px-2"
+          onClick={() => handleCategoryDelete(title)}
+        >
           delete
         </button>
       </div>

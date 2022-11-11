@@ -18,7 +18,6 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-firebaseui": "^6.0.0",
-    "react-responsive-carousel": "^3.2.23",
     "uuidv4": "^6.2.13"
   },
   "devDependencies": {

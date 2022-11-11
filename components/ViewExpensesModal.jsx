@@ -15,8 +15,6 @@ export const ViewExpensesModal = ({
   selectedExpenses,
   setSelectedExpenses,
 }) => {
-  // console.log("HERE", selectedExpenses);
-
   const handleDelete = (e, expenseId) => {
     e.preventDefault();
     console.log(expenseId);
@@ -49,7 +47,7 @@ export const ViewExpensesModal = ({
             >
               <span>{expense.title}</span>
               <div className="flex justify-center">
-                <span className="mr-7">{expense.amount}</span>
+                <span className="mr-7 text-red-400">-{expense.amount}</span>
                 <button onClick={(e) => handleDelete(e, expense.id)}>
                   <DeleteSvg />
                 </button>

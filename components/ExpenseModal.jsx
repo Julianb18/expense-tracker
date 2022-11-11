@@ -1,14 +1,11 @@
-import { Dialog } from "@headlessui/react";
 import React, { useState } from "react";
+import { Dialog } from "@headlessui/react";
 import { v4 as uuid } from "uuid";
 
-import {
-  addCategory,
-  addExpense,
-  addTotalCategoryExpenses,
-} from "../firebase/firestore";
 import { Button } from "./Button";
 import { XMarkSvg } from "./svg/XMarkSvg";
+
+import { addExpense } from "../firebase/firestore";
 
 export const ExpenseModal = ({
   uid,
@@ -17,7 +14,6 @@ export const ExpenseModal = ({
   selectedCategory,
   isExpenseModalOpen,
   setIsExpenseModalOpen,
-  selectedExpenses,
 }) => {
   const [expense, setExpense] = useState({
     title: "",
@@ -33,11 +29,14 @@ export const ExpenseModal = ({
       setIsExpenseModalOpen(false);
       console.log("submitted");
     }
-    setExpense(tempExpense);
+    setExpense({
+      title: "",
+      amount: 0,
+      id: uuid(),
+    });
     console.log("not submitted");
   };
-  // console.log("NEW====>", selectedExpenses);
-  // console.log("CATEGORY", selectedCategory);
+
   return (
     <Dialog
       className="absolute z-30 min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
