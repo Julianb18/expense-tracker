@@ -30,7 +30,7 @@ export const CategoryModal = ({
   };
   return (
     <Dialog
-      className="absolute z-30 min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
+      className="absolute shadow-xl shadow-primaryDark z-30 min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
       open={isCategoryModalOpen}
       onClose={() => setIsCategoryModalOpen(false)}
     >
@@ -54,6 +54,7 @@ export const CategoryModal = ({
                   setCategory({ ...category, title: e.target.value })
                 }
                 value={category.title}
+                onFocus={(e) => (e.target.value = "")}
                 className="w-full border border-black rounded-3xl pl-3 py-1"
                 type="text"
                 name="categoryName"

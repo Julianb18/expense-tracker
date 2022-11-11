@@ -64,6 +64,7 @@ export const ExpenseModal = ({
                   setExpense({ ...expense, title: e.target.value })
                 }
                 value={expense.title}
+                onFocus={(e) => (e.target.value = "")}
                 className="w-full border border-black rounded-3xl pl-3 py-1"
                 type="text"
                 name="title"

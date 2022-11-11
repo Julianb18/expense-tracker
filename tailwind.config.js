@@ -7,7 +7,17 @@ module.exports = {
   ],
   // darkMode: "class",
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primaryDark: "#022b2e",
+        secondaryDark: "#09596c",
+        buttonPrimary: "#36cfde",
+        buttonSecondary: "#2eb8aa",
+      },
+      boxShadow: {
+        innerTopShadow: "inset 0px 44px 5px 0px rgba(0,0,0,0.75)",
+      },
+    },
     screens: {
       xs: "320px",
       sm: "480px",

@@ -33,7 +33,7 @@ const Home = () => {
   return isLoading || (!isLoading && !!authUser) ? (
     <LoadingSpinner />
   ) : (
-    <div>
+    <div className="">
       <div>
         <h1>Expense/Budget Tracker App</h1>
         <h3>Keeping it basic!</h3>

@@ -8,20 +8,19 @@ const classNames = (...classes) => {
 };
 
 export const Dropdown = ({ years, changeEvent, selectedYear }) => {
-  //   console.log("HERE ======>", selectedYear);
   return (
     <Listbox
       value={selectedYear}
       onChange={changeEvent}
-      className="outline-none border-none"
+      className="outline-none border-none "
     >
       {({ open }) => (
         <div className="flex flex-col">
-          <Listbox.Label className="block text-sm font-medium text-gray-700">
+          <Listbox.Label className="block text-white ml-3 font-medium ">
             Year
           </Listbox.Label>
           <div className="relative mt-1">
-            <Listbox.Button className="relative w-full cursor-default rounded-3xl border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm sm:text-sm">
+            <Listbox.Button className="relative w-full cursor-default rounded-3xl border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-gray-800 shadow-lg">
               <span className="flex items-center">
                 <span className="ml-3 block truncate">
                   {/* not working because we have to store the whole object in selected not just the year*/}
@@ -43,14 +42,16 @@ export const Dropdown = ({ years, changeEvent, selectedYear }) => {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-3xl bg-white py-1 text-base shadow-lg focus:outline-none sm:text-sm">
+              <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-3xl bg-white py-1 text-base focus:outline-none shadow-gray-800 shadow-lg">
                 {years &&
                   years.map((year) => (
                     <Listbox.Option
                       key={year.year}
                       className={({ active }) =>
                         classNames(
-                          active ? "text-white bg-indigo-600" : "text-gray-900",
+                          active
+                            ? "text-white bg-buttonSecondary"
+                            : "text-gray-900",
                           "relative cursor-default select-none py-2 pl-3 pr-9"
                         )
                       }
@@ -72,7 +73,7 @@ export const Dropdown = ({ years, changeEvent, selectedYear }) => {
                           {selected ? (
                             <span
                               className={classNames(
-                                active ? "text-white" : "text-indigo-600",
+                                active ? "text-white" : "text-buttonSecondary",
                                 "absolute inset-y-0 right-0 flex items-center pr-4"
                               )}
                             >

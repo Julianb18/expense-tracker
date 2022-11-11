@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-import { UserDataContext } from "../../context/UserDataContext";
 import { BackSvg } from "../../components/svg/BackSvg";
 import { ArrowUpSvg } from "../../components/svg/ArrowUpSvg";
 import { ArrowDownSvg } from "../../components/svg/ArrowDownSvg";
@@ -14,8 +13,11 @@ import { IncomeModal } from "../../components/IncomeModal";
 import { CategoryModal } from "../../components/CategoryModal";
 import { ExpenseModal } from "../../components/ExpenseModal";
 import { ViewExpensesModal } from "../../components/ViewExpensesModal";
+
+import { UserDataContext } from "../../context/UserDataContext";
+
 import { addMonthBalanceAndExpense } from "../../firebase/firestore";
-// import { getUserExpenses } from "../firebase/firestore";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
 
 const Month = () => {
   const router = useRouter();
@@ -58,7 +60,6 @@ const Month = () => {
         },
         0
       );
-      console.log("TEMP", tempMonthlyExpense);
       setTotalMonthlyExpenses(tempMonthlyExpense);
       setMonthlyExpectation(tempMonthlyExpectation);
     }
@@ -67,12 +68,6 @@ const Month = () => {
   useEffect(() => {
     const mBalance = selectedMonth?.income - totalMonthlyExpenses;
     if (userData && userData.uid && selectedYear && month) {
-      // addTotalMonthlyExpenses(
-      //   userData.uid,
-      //   selectedYear.year,
-      //   month,
-      //   totalMonthlyExpenses
-      // );
       addMonthBalanceAndExpense(
         userData.uid,
         selectedYear.year,
@@ -83,27 +78,11 @@ const Month = () => {
     }
   }, [totalMonthlyExpenses, selectedMonth, userData, selectedYear, month]);
 
-  // useEffect(() => {
-  //   const mBalance = selectedMonth?.income - totalMonthlyExpenses;
-  //   if (userData && userData.uid && selectedYear && month) {
-  //     addMonthBalance(userData.uid, selectedYear.year, month, mBalance);
-  //   }
-  // }, [
-  //   totalMonthlyExpenses,
-  //   selectedMonth?.income,
-  //   userData,
-  //   selectedYear,
-  //   month,
-  // ]);
-  // console.log("EXPENSES", selectedExpenses);
-  // console.log("CAT", selectedCategory);
-  // console.log("CURR MONTH", month);
   console.log("TOTAL MONTHLY====>", totalMonthlyExpenses);
-  // min-h-[calc(100vh-58px)]
-  // () =>
-  //           addMonthIncome(userData?.uid, selectedYear?.year, month, 100)
+
+  // sm:max-w-[780px] mx-auto
   return selectedMonth ? (
-    <div className="relative min-h-[calc(100vh-58px)] sm:max-w-[780px] mx-auto bg-stone-200 p-3">
+    <div className="relative py-3">
       <IncomeModal
         incomeModalIsOpen={incomeModalIsOpen}
         setIncomeModalIsOpen={setIncomeModalIsOpen}
@@ -140,23 +119,29 @@ const Month = () => {
       {incomeModalIsOpen || isCategoryModalOpen || isExpenseModalOpen ? (
         <div className="absolute z-20 top-0 left-0 bg-black opacity-60 h-screen w-full"></div>
       ) : null}
-      <div className="flex justify-between mb-8">
-        <Link href="/dashboard" className="">
+      <div className="flex justify-between items-center mb-8 px-4">
+        <Link href="/dashboard" className="text-white py-1 px-2">
           <BackSvg />
         </Link>
-        <h1>{selectedMonth.month}</h1>
+        <h2 className="text-white text-xl">{selectedMonth.month}</h2>
         <div className="flex">
-          <span>{selectedMonth.monthBalance}</span>
+          <span className="text-white">{selectedMonth.monthBalance}</span>
           {selectedMonth.monthBalance > 0 ? (
-            <ArrowUpSvg />
+            <div className="text-green-400">
+              <ArrowUpSvg />
+            </div>
           ) : selectedMonth.monthBalance < 0 ? (
-            <ArrowDownSvg />
+            <div className="text-red-400">
+              <ArrowDownSvg />
+            </div>
           ) : selectedMonth.monthBalance === 0 ? (
-            <MinusSvg />
+            <div className="text-white">
+              <MinusSvg />
+            </div>
           ) : null}
         </div>
       </div>
-      <div className="flex justify-between mb-10">
+      <div className="flex justify-between mb-5 md:mb-10 px-4">
         <Button filled onClick={() => setIncomeModalIsOpen(true)}>
           Add Income
         </Button>
@@ -164,7 +149,16 @@ const Month = () => {
           Add Category
         </Button>
       </div>
-      <div className="flex flex-col gap-4 items-center sm:flex-wrap sm:flex-row sm:justify-center">
+      {/* <div className="flex flex-col gap-4 items-center pb-24 sm:flex-wrap sm:flex-row sm:justify-center"> */}
+
+      <div
+        className="relative flex px-4 md:px-0 pb-11 h-[calc(100vh-212px)] overflow-hidden 
+            scroll-smooth overflow-y-scroll flex-col md:overflow-visible md:h-full 
+            md:gap-6 md:space-y-0 items-center md:flex-wrap md:justify-center md:flex-row"
+      >
+        <div className="sticky md:hidden z-10 top-0 left-0 right-0 w-screen bg-gradient-to-b from-primaryDark to-transparent">
+          <div className="h-[40px]"></div>
+        </div>
         {selectedMonth.categories.map((category) => (
           <CategoryCard
             key={category.title}
@@ -177,17 +171,8 @@ const Month = () => {
             setIsViewExpensesModalOpen={setIsViewExpensesModalOpen}
           />
         ))}
-        {/* uid={userData?.uid}
-            year={selectedYear?.year}
-            month={month}
-            isExpenseModalOpen={isExpenseModalOpen}
-            setIsExpenseModalOpen={setIsExpenseModalOpen} */}
-        {/* <CategoryCard />
-        <CategoryCard />
-        <CategoryCard />
-        <CategoryCard /> */}
       </div>
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[374px] sm:max-w-[550px] px-3 rounded-3xl">
+      <div className="fixed z-10 bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[374px] sm:max-w-[550px] px-4 rounded-3xl">
         <MonthBudgetDisplay
           monthIncome={selectedMonth.income}
           totalMonthlyExpenses={totalMonthlyExpenses}
@@ -196,7 +181,9 @@ const Month = () => {
       </div>
     </div>
   ) : (
-    <div>There is a problem with the selected Month</div>
+    <div className="h-[40vh] flex justify-center items-center">
+      <LoadingSpinner />
+    </div>
   );
 };
 

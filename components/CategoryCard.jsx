@@ -62,7 +62,7 @@ export const CategoryCard = ({
   // console.log("TOTAL", spentPercentage);
   // console.log("EXPENSES HERE", expenses);
   return (
-    <div className="flex flex-col w-full xs:max-w-[350px] bg-white rounded-3xl p-3">
+    <div className="flex flex-col w-full xs:max-w-[350px] bg-white rounded-3xl mb-6 md:mb-0 p-3">
       <div className="flex justify-between mb-2">
         <span>{title}</span>
         <button onClick={() => deleteCategory(uid, year, month, category)}>
@@ -70,6 +70,9 @@ export const CategoryCard = ({
         </button>
       </div>
       <div className="relative flex justify-center w-full bg-gray-300 h-6 rounded-3xl mb-7">
+        <span className="text-gray-700 z-[1]">
+          {totalExpenses}/{maxSpending}
+        </span>
         <div
           className="absolute left-0 h-full rounded-3xl"
           style={{
@@ -78,9 +81,6 @@ export const CategoryCard = ({
             backgroundColor: expenseColor(spentPercentage),
           }}
         ></div>
-        <span className="z-10 text-gray-700">
-          {totalExpenses}/{maxSpending}
-        </span>
       </div>
       <div className="flex justify-end">
         <Button

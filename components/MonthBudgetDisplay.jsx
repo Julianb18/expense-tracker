@@ -25,7 +25,7 @@ export const MonthBudgetDisplay = ({
 
   return (
     <div
-      className={`flex flex-col items-center z-10 cursor-pointer w-full bg-white rounded-3xl ${
+      className={`flex flex-col items-center shadow-2xl shadow-primaryDark z-10 cursor-pointer w-full bg-white rounded-3xl ${
         !fullView ? "p-2" : "p-4"
       }`}
       onClick={handleClickEvent}
@@ -39,6 +39,7 @@ export const MonthBudgetDisplay = ({
       </span>
       <Transition
         show={fullView}
+        as="div"
         enter="transition-all transform duration-300"
         enterFrom="translate-y-full opacity-0"
         enterTo="translate-y-0 opacity-100"
