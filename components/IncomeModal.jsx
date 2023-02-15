@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Dialog } from "@headlessui/react";
 
-import { addMonthIncome } from "../firebase/firestore";
 import { Button } from "./Button";
 
-// userData?.uid, selectedYear?.year, month
+import { addMonthIncome } from "../firebase/firestore";
 
 export const IncomeModal = ({
   incomeModalIsOpen,
