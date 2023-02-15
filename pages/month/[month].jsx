@@ -5,7 +5,6 @@ import Link from "next/link";
 import { BackSvg } from "../../components/svg/BackSvg";
 import { ArrowUpSvg } from "../../components/svg/ArrowUpSvg";
 import { ArrowDownSvg } from "../../components/svg/ArrowDownSvg";
-import { MinusSvg } from "../../components/svg/MinusSvg";
 import { CategoryCard } from "../../components/CategoryCard";
 import { Button } from "../../components/Button";
 import { MonthBudgetDisplay } from "../../components/MonthBudgetDisplay";
@@ -88,8 +87,6 @@ const Month = () => {
     }
   }, [totalMonthlyExpenses, selectedMonth, userData, selectedYear, month]);
 
-  console.log("CATEGORY", selectedCategory);
-
   return selectedMonth ? (
     <div className="relative py-3">
       <IncomeModal
@@ -155,10 +152,6 @@ const Month = () => {
           ) : selectedMonth.monthBalance < 0 ? (
             <div className="text-red-400">
               <ArrowDownSvg />
-            </div>
-          ) : selectedMonth.monthBalance === 0 ? (
-            <div className="text-white">
-              <MinusSvg />
             </div>
           ) : null}
         </div>

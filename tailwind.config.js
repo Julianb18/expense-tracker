@@ -17,6 +17,25 @@ module.exports = {
       boxShadow: {
         innerTopShadow: "inset 0px 44px 5px 0px rgba(0,0,0,0.75)",
       },
+      keyframes: {
+        bounceArrow: {
+          "0%": {
+            transform: "translateY(-15%)",
+            animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)",
+          },
+          "50%": {
+            transform: "translateY(20%)",
+            animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)",
+          },
+          "100%": {
+            transform: "translateY(-15%)",
+            animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)",
+          },
+        },
+      },
+      animation: {
+        bounceArrow: "bounceArrow 2s infinite",
+      },
     },
     screens: {
       xs: "320px",
