@@ -160,7 +160,7 @@ const Month = () => {
         <Button filled onClick={() => setIncomeModalIsOpen(true)}>
           Add Income
         </Button>
-        <Button onClick={() => setIsCategoryModalOpen(true)}>
+        <Button filled onClick={() => setIsCategoryModalOpen(true)}>
           Add Category
         </Button>
       </div>
