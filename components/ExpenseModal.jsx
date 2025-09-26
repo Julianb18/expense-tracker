@@ -75,13 +75,11 @@ export const ExpenseModal = ({
                 onChange={(e) =>
                   setExpense({
                     ...expense,
-                    amount: Number(e.target.value) || "",
+                    amount: Number(e.target.value),
                   })
                 }
                 value={expense.amount}
-                onFocus={(e) => (e.target.value = "")}
                 className="w-full border border-black rounded-3xl pl-3 py-1"
-                type="number"
                 name="amount"
               />
             </div>

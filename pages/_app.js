@@ -19,7 +19,7 @@ function MyApp({ Component, pageProps }) {
       <AuthUserProvider>
         <UserDataProvider>
           <Navbar />
-          <div className="min-h-[calc(100vh-55px)] overflow-y-none bg-gradient-to-bl from-primaryDark via-secondaryDark to-primaryDark">
+          <div className="h-[calc(100vh-55px)] overflow-y-none bg-gradient-to-bl from-primaryDark via-secondaryDark to-primaryDark">
             <Component {...pageProps} />
           </div>
         </UserDataProvider>

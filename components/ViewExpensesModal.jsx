@@ -21,6 +21,7 @@ export const ViewExpensesModal = ({
     deleteExpense(uid, year, month, selectedCategory, expenseId);
     setSelectedExpenses(selectedExpenses.filter((e) => e.id !== expenseId));
   };
+
   return (
     <Dialog
       className="absolute z-30 min-w-[90%] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"

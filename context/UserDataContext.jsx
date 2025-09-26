@@ -9,12 +9,31 @@ import { colRef } from "../firebase/firebase";
 
 const UserDataContext = createContext();
 
+const getCurrentMonth = () => {
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  return monthNames[new Date().getMonth()];
+};
+
 const UserDataProvider = ({ children }) => {
   const { authUser } = useAuth();
   const [userData, setUserData] = useState({});
   const [selectedYear, setSelectedYear] = useState(
     userData && userData.years && userData.years[0]
   );
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
 
   const changeEvent = (e) => {
     setSelectedYear(e);
@@ -36,7 +55,15 @@ const UserDataProvider = ({ children }) => {
   }, [authUser]);
 
   return (
-    <UserDataContext.Provider value={{ userData, selectedYear, changeEvent }}>
+    <UserDataContext.Provider
+      value={{
+        userData,
+        selectedYear,
+        selectedMonth,
+        setSelectedMonth,
+        changeEvent,
+      }}
+    >
       {children}
     </UserDataContext.Provider>
   );

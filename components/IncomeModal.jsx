@@ -30,11 +30,9 @@ export const IncomeModal = ({
         <Dialog.Panel className="flex flex-col space-y-4">
           <Dialog.Title>Add Income</Dialog.Title>
           <input
-            onChange={(e) => setInputVal(Number(e.target.value) || "")}
-            onFocus={(e) => (e.target.value = "")}
+            onChange={(e) => setInputVal(Number(e.target.value))}
             value={inputVal}
             className="border border-black rounded-3xl pl-3 py-1"
-            type="number"
           />
           <div className="flex justify-end">
             <Button filled customClassName="mr-1" onClick={handleSubmit}>

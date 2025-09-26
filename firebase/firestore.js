@@ -167,3 +167,37 @@ export const addYearBalance = async (uid, year, yearBalance) => {
 
   await updateUserDoc(userDoc.id, updatedUserDoc);
 };
+
+export const updateCategoryTitle = async (uid, year, month, oldTitle, newTitle) => {
+  const userDoc = await getUserDocRef(uid);
+  if (!userDoc) return;
+
+  const userData = userDoc.data();
+  const updatedUserDoc = { ...userData };
+
+  const yearData = updatedUserDoc.years.find((y) => y.year === year);
+  const monthData = yearData.months.find((m) => m.month === month);
+  const categoryData = monthData.categories.find((c) => c.title === oldTitle);
+  
+  if (categoryData) {
+    categoryData.title = newTitle;
+    await updateUserDoc(userDoc.id, updatedUserDoc);
+  }
+};
+
+export const updateCategoryMaxSpending = async (uid, year, month, categoryTitle, newMaxSpending) => {
+  const userDoc = await getUserDocRef(uid);
+  if (!userDoc) return;
+
+  const userData = userDoc.data();
+  const updatedUserDoc = { ...userData };
+
+  const yearData = updatedUserDoc.years.find((y) => y.year === year);
+  const monthData = yearData.months.find((m) => m.month === month);
+  const categoryData = monthData.categories.find((c) => c.title === categoryTitle);
+  
+  if (categoryData) {
+    categoryData.maxSpending = newMaxSpending;
+    await updateUserDoc(userDoc.id, updatedUserDoc);
+  }
+};

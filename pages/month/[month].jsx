@@ -180,6 +180,9 @@ const Month = () => {
             handleAddExpense={handleAddExpense}
             handleViewExpense={handleViewExpense}
             handleCategoryDelete={handleCategoryDelete}
+            uid={userData?.uid}
+            year={selectedYear?.year}
+            month={month}
           />
         ))}
       </div>
