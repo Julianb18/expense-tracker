@@ -79,10 +79,11 @@ export const CategoryModal = ({
                 <div className="relative">
                   <div className="relative w-full cursor-default overflow-hidden rounded-3xl bg-white text-left border border-black">
                     <Combobox.Input
-                      className="w-full border-none py-1 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0 focus:outline-none rounded-3xl"
+                      className="w-full border-none py-1 pl-3 pr-10 text-base leading-5 text-gray-900 focus:ring-0 focus:outline-none rounded-3xl"
                       displayValue={(category) => category}
                       onChange={(event) => setQuery(event.target.value)}
                       placeholder="Select or type a category"
+                      style={{ fontSize: '16px' }}
                     />
                     <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                       <ChevronDown
@@ -153,9 +154,10 @@ export const CategoryModal = ({
                 }
                 value={category.maxSpending}
                 onFocus={(e) => (e.target.value = "")}
-                className="w-full border border-black rounded-3xl pl-3 py-1"
+                className="w-full border border-black rounded-3xl pl-3 py-1 text-base"
                 type="number"
                 name="maxSpending"
+                style={{ fontSize: '16px' }}
               />
             </div>
           </div>

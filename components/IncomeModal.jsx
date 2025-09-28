@@ -32,7 +32,9 @@ export const IncomeModal = ({
           <input
             onChange={(e) => setInputVal(Number(e.target.value))}
             value={inputVal}
-            className="border border-black rounded-3xl pl-3 py-1"
+            className="border border-black rounded-3xl pl-3 py-1 text-base"
+            style={{ fontSize: '16px' }}
+            placeholder="Enter income amount"
           />
           <div className="flex justify-end">
             <Button filled customClassName="mr-1" onClick={handleSubmit}>

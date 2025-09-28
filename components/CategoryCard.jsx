@@ -84,7 +84,8 @@ export const CategoryCard = ({
             onChange={(e) => setEditTitle(e.target.value)}
             onBlur={handleTitleSave}
             onKeyDown={handleTitleKeyPress}
-            className="border border-gray-300 rounded px-2 py-1 text-sm flex-1 mr-2"
+            className="border border-gray-300 rounded px-2 py-1 text-base flex-1 mr-2"
+            style={{ fontSize: '16px' }}
             autoFocus
           />
         ) : (
@@ -112,7 +113,8 @@ export const CategoryCard = ({
               onChange={(e) => setEditMaxSpending(e.target.value)}
               onBlur={handleMaxSpendingSave}
               onKeyDown={handleMaxSpendingKeyPress}
-              className="w-16 text-center border border-gray-300 rounded px-1 mx-1 text-sm"
+              className="w-16 text-center border border-gray-300 rounded px-1 mx-1 text-base"
+              style={{ fontSize: '16px' }}
               autoFocus
             />
           </div>

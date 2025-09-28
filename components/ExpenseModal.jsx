@@ -64,9 +64,11 @@ export const ExpenseModal = ({
                 }
                 value={expense.title}
                 onFocus={(e) => (e.target.value = "")}
-                className="w-full border border-black rounded-3xl pl-3 py-1"
+                className="w-full border border-black rounded-3xl pl-3 py-1 text-base"
+                style={{ fontSize: '16px' }}
                 type="text"
                 name="title"
+                placeholder="Enter expense description"
               />
             </div>
             <div>
@@ -79,8 +81,10 @@ export const ExpenseModal = ({
                   })
                 }
                 value={expense.amount}
-                className="w-full border border-black rounded-3xl pl-3 py-1"
+                className="w-full border border-black rounded-3xl pl-3 py-1 text-base"
+                style={{ fontSize: '16px' }}
                 name="amount"
+                placeholder="Enter amount"
               />
             </div>
           </div>
