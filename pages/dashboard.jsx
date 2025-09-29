@@ -106,7 +106,7 @@ const Dashboard = () => {
       <div className="fixed bottom-12 right-8 z-10">
         <Button
           onClick={() => setIsDefaultCategoriesModalOpen(true)}
-          customClassName="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 shadow-lg"
+          customClassName="bg-buttonPrimary text-white px-6 py-3 shadow-lg"
         >
           Default Categories
         </Button>

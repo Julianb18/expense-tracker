@@ -1,22 +1,21 @@
-import { Dialog, Combobox, Transition } from "@headlessui/react";
-import React, { useState, Fragment } from "react";
+import { Dialog } from "@headlessui/react";
+import React, { useState } from "react";
 
 import { Button } from "./Button";
 import { XMarkSvg } from "./svg/XMarkSvg";
 import { ChevronDown } from "./svg/ChevronDown";
-import { Check } from "./svg/Check";
 
 import { addCategory } from "../firebase/firestore";
 
 const PREDEFINED_CATEGORIES = [
   "Rent",
-  "Groceries", 
+  "Groceries",
   "Car",
   "Utilities",
   "Loans",
   "Insurance",
   "Kita",
-  "Miscellaneous"
+  "Miscellaneous",
 ];
 
 export const CategoryModal = ({
@@ -33,14 +32,8 @@ export const CategoryModal = ({
     categoryExpense: 0,
     totalCategoryExpenses: 0,
   });
-  
-  const [query, setQuery] = useState("");
-  
-  const filteredCategories = query === ""
-    ? PREDEFINED_CATEGORIES
-    : PREDEFINED_CATEGORIES.filter((cat) =>
-        cat.toLowerCase().includes(query.toLowerCase())
-      );
+
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -48,126 +41,133 @@ export const CategoryModal = ({
       console.log("submitted");
       addCategory(uid, year, month, category);
       setIsCategoryModalOpen(false);
+      setCategory({
+        title: "",
+        maxSpending: 0,
+        expenses: [],
+        categoryExpense: 0,
+        totalCategoryExpenses: 0,
+      });
     }
-    console.log("not submitted");
   };
+
+  const handleCancel = () => {
+    setIsCategoryModalOpen(false);
+    setCategory({
+      title: "",
+      maxSpending: 0,
+      expenses: [],
+      categoryExpense: 0,
+      totalCategoryExpenses: 0,
+    });
+  };
+
   return (
     <Dialog
-      className="absolute shadow-xl shadow-primaryDark z-30 min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
       open={isCategoryModalOpen}
-      onClose={() => setIsCategoryModalOpen(false)}
+      onClose={handleCancel}
+      className="relative z-50"
     >
-      <form onSubmit={handleSubmit}>
-        <Dialog.Panel className="flex flex-col space-y-4">
-          <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2">
-            <Dialog.Title>New Category</Dialog.Title>
-            <button
-              className="cursor-pointer p-1"
-              onClick={() => setIsCategoryModalOpen(false)}
+      <div className="fixed inset-0 bg-transparent" />
+
+      <div className="fixed inset-0 overflow-y-auto z-50">
+        <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl">
+            <Dialog.Title
+              as="div"
+              className="flex justify-between items-center text-lg font-medium leading-6 text-gray-900 p-3 relative"
             >
-              <XMarkSvg />
-            </button>
-            <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-400"></span>
-          </div>
-          <div className="space-y-4 px-3">
-            <div className="">
-              <label htmlFor="categoryName">Category Name</label>
-              <Combobox
-                value={category.title}
-                onChange={(value) => setCategory({ ...category, title: value })}
-              >
+              <h3>Add Category</h3>
+              <button onClick={handleCancel}>
+                <XMarkSvg />
+              </button>
+              <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-400"></span>
+            </Dialog.Title>
+            <div className="space-y-4 px-3">
+              <div className="">
+                <label htmlFor="categoryName">Category Name</label>
                 <div className="relative">
-                  <div className="relative w-full cursor-default overflow-hidden rounded-3xl bg-white text-left border border-black">
-                    <Combobox.Input
-                      className="w-full border-none py-1 pl-3 pr-10 text-base leading-5 text-gray-900 focus:ring-0 focus:outline-none rounded-3xl"
-                      displayValue={(category) => category}
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder="Select or type a category"
-                      style={{ fontSize: '16px' }}
-                    />
-                    <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                      <ChevronDown
-                        className="h-5 w-5 text-gray-400"
-                        aria-hidden="true"
-                      />
-                    </Combobox.Button>
-                  </div>
-                  <Transition
-                    as={Fragment}
-                    leave="transition ease-in duration-100"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                    afterLeave={() => setQuery("")}
+                  <input
+                    type="text"
+                    className="w-full px-3 py-1 text-base border border-black rounded-3xl focus:outline-none focus:ring-2 focus:ring-buttonSecondary"
+                    style={{ fontSize: "16px" }}
+                    placeholder="Type category name"
+                    value={category.title}
+                    onChange={(e) => {
+                      const inputValue = e.target.value;
+                      setCategory({ ...category, title: inputValue });
+
+                      // Show dropdown if there are matching categories
+                      const hasMatches = PREDEFINED_CATEGORIES.some((cat) =>
+                        cat.toLowerCase().includes(inputValue.toLowerCase())
+                      );
+                      setShowDropdown(inputValue.length > 0 && hasMatches);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex items-center pr-2"
+                    onClick={() => setShowDropdown(!showDropdown)}
                   >
-                    <Combobox.Options className="absolute mt-1 max-h-44 w-full overflow-auto rounded-3xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-10">
-                      {filteredCategories.length === 0 && query !== "" ? (
-                        <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                          Nothing found.
+                    <ChevronDown
+                      className="h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  </button>
+
+                  {showDropdown && (
+                    <div className="absolute mt-1 max-h-44 w-full overflow-auto rounded-3xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-10">
+                      {PREDEFINED_CATEGORIES.filter((cat) =>
+                        cat.toLowerCase().includes(category.title.toLowerCase())
+                      ).map((categoryName) => (
+                        <div
+                          key={categoryName}
+                          className="relative cursor-pointer select-none py-2 pl-3 pr-4 hover:bg-buttonSecondary hover:text-white text-gray-900"
+                          onClick={() => {
+                            setCategory({ ...category, title: categoryName });
+                            setShowDropdown(false);
+                          }}
+                        >
+                          <span className="block truncate">{categoryName}</span>
                         </div>
-                      ) : (
-                        filteredCategories.map((categoryName) => (
-                          <Combobox.Option
-                            key={categoryName}
-                            className={({ active }) =>
-                              `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                active ? "bg-buttonSecondary text-white" : "text-gray-900"
-                              }`
-                            }
-                            value={categoryName}
-                          >
-                            {({ selected, active }) => (
-                              <>
-                                <span
-                                  className={`block truncate ${
-                                    selected ? "font-medium" : "font-normal"
-                                  }`}
-                                >
-                                  {categoryName}
-                                </span>
-                                {selected ? (
-                                  <span
-                                    className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                                      active ? "text-white" : "text-buttonSecondary"
-                                    }`}
-                                  >
-                                    <Check className="h-5 w-5" aria-hidden="true" />
-                                  </span>
-                                ) : null}
-                              </>
-                            )}
-                          </Combobox.Option>
-                        ))
-                      )}
-                    </Combobox.Options>
-                  </Transition>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </Combobox>
+              </div>
+              <div>
+                <label htmlFor="maxSpending">Max Spending Amount</label>
+                <input
+                  className="w-full px-3 py-1 text-base border border-black rounded-3xl focus:outline-none focus:ring-2 focus:ring-buttonSecondary"
+                  style={{ fontSize: "16px" }}
+                  type="number"
+                  placeholder="0"
+                  value={category.maxSpending}
+                  onChange={(e) =>
+                    setCategory({
+                      ...category,
+                      maxSpending: parseFloat(e.target.value),
+                    })
+                  }
+                />
+              </div>
             </div>
-            <div>
-              <label htmlFor="maxSpending">Maximum Spending</label>
-              <input
-                onChange={(e) =>
-                  setCategory({
-                    ...category,
-                    maxSpending: Number(e.target.value) || "",
-                  })
-                }
-                value={category.maxSpending}
-                onFocus={(e) => (e.target.value = "")}
-                className="w-full border border-black rounded-3xl pl-3 py-1 text-base"
-                type="number"
-                name="maxSpending"
-                style={{ fontSize: '16px' }}
-              />
+
+            <div className="flex justify-end gap-4 m-3">
+              <Button
+                buttonType="outlined"
+                onClick={handleCancel}
+                customClassName="px-3 py-1"
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSubmit} customClassName="px-3 py-1">
+                Submit
+              </Button>
             </div>
-          </div>
-          <div className="flex justify-end px-3 pb-3">
-            <Button filled customClassName="mr-1" onClick={handleSubmit}>
-              Add
-            </Button>
-          </div>
-        </Dialog.Panel>
-      </form>
+          </Dialog.Panel>
+        </div>
+      </div>
     </Dialog>
   );
 };
