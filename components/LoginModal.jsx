@@ -39,25 +39,21 @@ export const LoginModal = forwardRef((props, ref) => {
         <Dialog.Title className="text-lg text-center flex-1">
           Sign In / Register
         </Dialog.Title>
-        <button
-          className="cursor-pointer p-1"
-          onClick={handleClose}
-        >
+        <button className="cursor-pointer p-1" onClick={handleClose}>
           <XMarkSvg />
         </button>
       </div>
       <div>
         <div className="mb-6">
-          <StyledFirebaseAuth
-            uiConfig={uiConfig}
-            firebaseAuth={auth}
-          />
+          <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth} />
         </div>
         <Dialog.Description className="text-xs text-gray-500">
-          You can Sign Up / Login from here. Even if you do not have an
-          account yet, click Sign and the Sign Up process will be started
+          You can Sign Up / Login from here. Even if you do not have an account
+          yet, click Sign and the Sign Up process will be started
         </Dialog.Description>
       </div>
     </Dialog>
   );
 });
+
+LoginModal.displayName = "LoginModal";
