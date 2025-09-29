@@ -14,8 +14,9 @@ import { ExpenseModal } from "../../components/ExpenseModal";
 import { ViewExpensesModal } from "../../components/ViewExpensesModal";
 
 import { UserDataContext } from "../../context/UserDataContext";
+import { useAuth } from "../../context/AuthContext";
 
-import { addMonthBalanceAndExpense } from "../../firebase/firestore";
+import { addMonthBalanceAndExpense, ensureMonthHasCurrentDefaults } from "../../firebase/firestore";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import { ConfirmDeleteModal } from "../../components/ConfirmDeleteModal";
 
@@ -23,6 +24,7 @@ const Month = () => {
   const router = useRouter();
   const { month } = router.query;
   const { selectedYear, userData } = useContext(UserDataContext);
+  const { authUser } = useAuth();
 
   const [incomeModalIsOpen, setIncomeModalIsOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -37,6 +39,16 @@ const Month = () => {
   const [monthlyExpectation, setMonthlyExpectation] = useState(0);
 
   const selectedMonth = selectedYear?.months.find((m) => m.month === month);
+
+  useEffect(() => {
+    const ensureDefaults = async () => {
+      if (authUser?.uid && selectedYear?.year && month) {
+        await ensureMonthHasCurrentDefaults(authUser.uid, selectedYear.year, month);
+      }
+    };
+    
+    ensureDefaults();
+  }, [authUser?.uid, selectedYear?.year, month]);
 
   const handleAddExpense = (currentCategory, expenses) => {
     setSelectedCategory(currentCategory);

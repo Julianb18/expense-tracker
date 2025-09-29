@@ -1,8 +1,13 @@
 import { createContext, useEffect, useState } from "react";
 
 import { showCurrentYear } from "../helperFunctions/showCurrentYear";
-import { getUserExpenses } from "../firebase/firestore";
-import { addANewUserExpenseDoc } from "../firebase/firestore";
+import {
+  getUserExpenses,
+  addANewUserExpenseDoc,
+  setDefaultCategories,
+  getDefaultCategories,
+  applyDefaultCategoriesToFutureMonths,
+} from "../firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { onSnapshot } from "firebase/firestore";
 import { colRef } from "../firebase/firebase";
@@ -34,9 +39,54 @@ const UserDataProvider = ({ children }) => {
     userData && userData.years && userData.years[0]
   );
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
+  const [defaultCategories, setDefaultCategoriesState] = useState([]);
 
   const changeEvent = (e) => {
     setSelectedYear(e);
+  };
+
+  // Load default categories when user data changes
+  useEffect(() => {
+    if (userData && userData.defaultCategories) {
+      setDefaultCategoriesState(userData.defaultCategories);
+      console.log(
+        "Context: Default categories loaded from userData:",
+        userData.defaultCategories
+      );
+    }
+  }, [userData]);
+
+  // Load default categories when component mounts
+  useEffect(() => {
+    const loadDefaultCategories = async () => {
+      if (authUser?.uid) {
+        const defaults = await getDefaultCategories(authUser.uid);
+        setDefaultCategoriesState(defaults);
+      }
+    };
+    loadDefaultCategories();
+  }, [authUser?.uid]);
+
+  const handleSaveDefaultCategories = async (newDefaultCategories) => {
+    if (authUser?.uid) {
+      console.log(
+        "Context: Saving new default categories:",
+        newDefaultCategories
+      );
+      await setDefaultCategories(authUser.uid, newDefaultCategories);
+      setDefaultCategoriesState(newDefaultCategories);
+
+      // Apply to future months only
+      const currentDate = new Date();
+      const currentMonthName = getCurrentMonth();
+      const currentYear = currentDate.getFullYear();
+
+      await applyDefaultCategoriesToFutureMonths(
+        authUser.uid,
+        currentYear,
+        currentMonthName
+      );
+    }
   };
 
   useEffect(() => {
@@ -62,6 +112,8 @@ const UserDataProvider = ({ children }) => {
         selectedMonth,
         setSelectedMonth,
         changeEvent,
+        defaultCategories,
+        handleSaveDefaultCategories,
       }}
     >
       {children}

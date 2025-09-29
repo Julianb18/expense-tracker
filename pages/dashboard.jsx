@@ -6,12 +6,13 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 import { Dropdown } from "../components/Dropdown";
 import { MonthCard } from "../components/MonthCard";
 import { MonthDropdown } from "../components/MonthDropdown";
+import { DefaultCategoriesModal } from "../components/DefaultCategoriesModal";
+import { Button } from "../components/Button";
 
 import { UserDataContext } from "../context/UserDataContext";
 import { useAuth } from "../context/AuthContext";
 
 import { addYearBalance } from "../firebase/firestore";
-import { CircularArrowDown } from "../components/svg/CircularArrowDown";
 
 const Dashboard = () => {
   const {
@@ -20,9 +21,14 @@ const Dashboard = () => {
     changeEvent,
     selectedMonth,
     setSelectedMonth,
+    defaultCategories,
+    handleSaveDefaultCategories,
   } = useContext(UserDataContext);
   const { authUser, isLoading } = useAuth();
   const router = useRouter();
+
+  const [isDefaultCategoriesModalOpen, setIsDefaultCategoriesModalOpen] =
+    useState(false);
 
   console.log(selectedYear);
 
@@ -95,6 +101,24 @@ const Dashboard = () => {
           );
         })()}
       </div>
+
+      {/* Default Categories Button - Fixed at bottom right */}
+      <div className="fixed bottom-12 right-8 z-10">
+        <Button
+          onClick={() => setIsDefaultCategoriesModalOpen(true)}
+          customClassName="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 shadow-lg"
+        >
+          Default Categories
+        </Button>
+      </div>
+
+      {/* Default Categories Modal */}
+      <DefaultCategoriesModal
+        isOpen={isDefaultCategoriesModalOpen}
+        setIsOpen={setIsDefaultCategoriesModalOpen}
+        existingDefaults={defaultCategories}
+        onSave={handleSaveDefaultCategories}
+      />
     </div>
   ) : (
     <div className="h-[40vh] flex justify-center items-center">

@@ -25,13 +25,11 @@ export const MonthBudgetDisplay = ({
 
   return (
     <div
-      className={`flex flex-col items-center shadow-2xl shadow-primaryDark z-10 cursor-pointer w-full bg-white rounded-3xl ${
-        !fullView ? "p-2" : "p-4"
-      }`}
+      className={`flex flex-col items-center shadow-2xl shadow-primaryDark z-10 cursor-pointer w-full bg-white rounded-3xl p-4 pt-2`}
       onClick={handleClickEvent}
     >
       <span
-        className={`transition transform duration-500 ${
+        className={`transition transform duration-500 mb-2 ${
           fullView ? "rotate-180" : "rotate-0"
         }`}
       >
