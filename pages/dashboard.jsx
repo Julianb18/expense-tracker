@@ -36,7 +36,7 @@ const Dashboard = () => {
     if (!isLoading && !authUser) {
       router.push("/");
     }
-  }, [authUser, isLoading]);
+  }, [authUser, isLoading, router]);
 
   const accBalance = selectedYear?.months.reduce((acc, curr) => {
     return acc + curr.monthBalance;
@@ -46,7 +46,7 @@ const Dashboard = () => {
     if (authUser && selectedYear) {
       addYearBalance(authUser?.uid, selectedYear?.year, accBalance);
     }
-  }, [accBalance, authUser?.uid, selectedYear?.year]);
+  }, [accBalance,authUser, authUser?.uid, selectedYear?.year, selectedYear]);
 
   return authUser && userData && userData.years && selectedYear ? (
     <div className="h-full max-w-[900px] mx-auto">
@@ -69,7 +69,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-20 px-4">
+      <div className="flex flex-col items-center mt-10 pb-16 px-4">
         {(() => {
           // Find the selected month data
           const selectedMonthData = selectedYear.months.find(
@@ -87,7 +87,7 @@ const Dashboard = () => {
 
           return (
             <Link
-              className="w-full sm:w-fit flex justify-center last:mb-20"
+              className="w-full sm:w-fit flex justify-center"
               href={`/month/${selectedMonthData.month}`}
               key={selectedMonth}
             >
@@ -96,6 +96,7 @@ const Dashboard = () => {
                 income={selectedMonthData.income}
                 totalMonthlyExpenses={selectedMonthData.totalMonthlyExpenses}
                 customCss=""
+                categories={selectedMonthData.categories || []}
               />
             </Link>
           );
@@ -103,7 +104,7 @@ const Dashboard = () => {
       </div>
 
       {/* Default Categories Button - Fixed at bottom right */}
-      <div className="fixed bottom-12 right-8 z-10">
+      <div className="fixed bottom-8 right-8 z-10">
         <Button
           onClick={() => setIsDefaultCategoriesModalOpen(true)}
           customClassName="bg-buttonPrimary text-white px-6 py-3 shadow-lg"
