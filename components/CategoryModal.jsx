@@ -27,7 +27,7 @@ export const CategoryModal = ({
 }) => {
   const [category, setCategory] = useState({
     title: "",
-    maxSpending: 0,
+    maxSpending: "",
     expenses: [],
     categoryExpense: 0,
     totalCategoryExpenses: 0,
@@ -37,13 +37,16 @@ export const CategoryModal = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (category.title !== "" && category.maxSpending !== 0) {
+    if (category.title !== "" && category.maxSpending !== "" && Number(category.maxSpending) > 0) {
       console.log("submitted");
-      addCategory(uid, year, month, category);
+      addCategory(uid, year, month, {
+        ...category,
+        maxSpending: Number(category.maxSpending)
+      });
       setIsCategoryModalOpen(false);
       setCategory({
         title: "",
-        maxSpending: 0,
+        maxSpending: "",
         expenses: [],
         categoryExpense: 0,
         totalCategoryExpenses: 0,
@@ -55,7 +58,7 @@ export const CategoryModal = ({
     setIsCategoryModalOpen(false);
     setCategory({
       title: "",
-      maxSpending: 0,
+      maxSpending: "",
       expenses: [],
       categoryExpense: 0,
       totalCategoryExpenses: 0,
@@ -141,12 +144,13 @@ export const CategoryModal = ({
                   className="w-full px-3 py-1 text-base border border-black rounded-3xl focus:outline-none focus:ring-2 focus:ring-buttonSecondary"
                   style={{ fontSize: "16px" }}
                   type="number"
-                  placeholder="0"
+                  step="0.01"
+                  placeholder="Enter amount (e.g., 500.00)"
                   value={category.maxSpending}
                   onChange={(e) =>
                     setCategory({
                       ...category,
-                      maxSpending: parseFloat(e.target.value),
+                      maxSpending: e.target.value,
                     })
                   }
                 />
@@ -161,7 +165,7 @@ export const CategoryModal = ({
               >
                 Cancel
               </Button>
-              <Button onClick={handleSubmit} customClassName="px-3 py-1">
+              <Button filled onClick={handleSubmit} customClassName="px-3 py-1">
                 Submit
               </Button>
             </div>

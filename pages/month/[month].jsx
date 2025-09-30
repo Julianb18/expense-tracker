@@ -35,6 +35,7 @@ const Month = () => {
     useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedExpenses, setSelectedExpenses] = useState([]);
+  const [selectedCategoryData, setSelectedCategoryData] = useState(null);
 
   const [totalMonthlyExpenses, setTotalMonthlyExpenses] = useState(0);
   const [monthlyExpectation, setMonthlyExpectation] = useState(0);
@@ -55,6 +56,9 @@ const Month = () => {
     setSelectedCategory(currentCategory);
     setIsExpenseModalOpen(true);
     setSelectedExpenses(expenses);
+    // Find the full category data
+    const categoryData = selectedMonth?.categories.find(cat => cat.title === currentCategory);
+    setSelectedCategoryData(categoryData);
   };
 
   const handleViewExpense = (currentCategory, expenses) => {
@@ -124,6 +128,7 @@ const Month = () => {
         isExpenseModalOpen={isExpenseModalOpen}
         setIsExpenseModalOpen={setIsExpenseModalOpen}
         selectedExpenses={selectedExpenses}
+        selectedCategoryData={selectedCategoryData}
       />
       <ViewExpensesModal
         uid={userData?.uid}
@@ -148,6 +153,7 @@ const Month = () => {
       {incomeModalIsOpen ||
       isCategoryModalOpen ||
       isExpenseModalOpen ||
+      isViewExpensesModalOpen ||
       isConfirmDeleteModalOpen ? (
         <div className="absolute z-20 top-0 left-0 bg-black opacity-60 h-screen w-full"></div>
       ) : null}

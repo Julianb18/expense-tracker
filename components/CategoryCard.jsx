@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { deleteCategory, updateCategoryTitle, updateCategoryMaxSpending } from "../firebase/firestore";
+import {
+  deleteCategory,
+  updateCategoryTitle,
+  updateCategoryMaxSpending,
+} from "../firebase/firestore";
 import { expenseColor } from "../helperFunctions/expenseColor";
 import { Button } from "./Button";
 import { formatAmount } from "../helperFunctions/currencyFormatter";
@@ -58,18 +62,18 @@ export const CategoryCard = ({
   };
 
   const handleTitleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleTitleSave();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       setEditTitle(title);
       setIsEditingTitle(false);
     }
   };
 
   const handleMaxSpendingKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleMaxSpendingSave();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       setEditMaxSpending(maxSpending);
       setIsEditingMaxSpending(false);
     }
@@ -86,11 +90,11 @@ export const CategoryCard = ({
             onBlur={handleTitleSave}
             onKeyDown={handleTitleKeyPress}
             className="border border-gray-300 rounded px-2 py-1 text-base flex-1 mr-2"
-            style={{ fontSize: '16px' }}
+            style={{ fontSize: "16px" }}
             autoFocus
           />
         ) : (
-          <span 
+          <span
             className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
             onClick={() => setIsEditingTitle(true)}
           >
@@ -116,12 +120,12 @@ export const CategoryCard = ({
               onBlur={handleMaxSpendingSave}
               onKeyDown={handleMaxSpendingKeyPress}
               className="w-16 text-center border border-gray-300 rounded px-1 mx-1 text-base"
-              style={{ fontSize: '16px' }}
+              style={{ fontSize: "16px" }}
               autoFocus
             />
           </div>
         ) : (
-          <span 
+          <span
             className="text-gray-700 z-[1] cursor-pointer hover:bg-gray-400 hover:bg-opacity-30 px-2 rounded"
             onClick={() => setIsEditingMaxSpending(true)}
           >
@@ -138,15 +142,15 @@ export const CategoryCard = ({
         ></div>
       </div>
       <div className="flex justify-end">
+        <Button onClick={() => handleViewExpense(title, expenses)}>
+          View Expense
+        </Button>
         <Button
           onClick={() => handleAddExpense(title, expenses)}
           filled
-          customClassName="mr-1"
+          customClassName="ml-2"
         >
           Add Expense
-        </Button>
-        <Button onClick={() => handleViewExpense(title, expenses)}>
-          View Expense
         </Button>
       </div>
     </div>

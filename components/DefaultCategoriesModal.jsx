@@ -38,7 +38,7 @@ export const DefaultCategoriesModal = ({
   }, [existingDefaults, isOpen]);
 
   const handleAddCategory = () => {
-    if (newCategory.title.trim() && Number(newCategory.maxSpending) > 0) {
+    if (newCategory.title.trim() && newCategory.maxSpending !== "" && Number(newCategory.maxSpending) > 0) {
       const category = {
         title: newCategory.title.trim(),
         maxSpending: Number(newCategory.maxSpending),
@@ -161,6 +161,7 @@ export const DefaultCategoriesModal = ({
                 </label>
                 <input
                   type="number"
+                  step="0.01"
                   value={newCategory.maxSpending}
                   onChange={(e) =>
                     setNewCategory({
@@ -170,7 +171,7 @@ export const DefaultCategoriesModal = ({
                   }
                   className="w-full border border-gray-300 rounded-3xl px-3 py-2 text-base"
                   style={{ fontSize: "16px" }}
-                  placeholder="Enter amount"
+                  placeholder="Enter amount (e.g., 500.00)"
                 />
               </div>
 
