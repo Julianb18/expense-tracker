@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { deleteCategory, updateCategoryTitle, updateCategoryMaxSpending } from "../firebase/firestore";
 import { expenseColor } from "../helperFunctions/expenseColor";
 import { Button } from "./Button";
+import { formatAmount } from "../helperFunctions/currencyFormatter";
 
 export const CategoryCard = ({
   category,
@@ -106,9 +107,10 @@ export const CategoryCard = ({
       <div className="relative flex justify-center w-full bg-gray-300 h-6 rounded-3xl mb-7">
         {isEditingMaxSpending ? (
           <div className="flex items-center z-[1] text-gray-700">
-            <span>{totalExpenses}/</span>
+            <span>{formatAmount(totalExpenses)}/</span>
             <input
               type="number"
+              step="0.01"
               value={editMaxSpending}
               onChange={(e) => setEditMaxSpending(e.target.value)}
               onBlur={handleMaxSpendingSave}
@@ -123,7 +125,7 @@ export const CategoryCard = ({
             className="text-gray-700 z-[1] cursor-pointer hover:bg-gray-400 hover:bg-opacity-30 px-2 rounded"
             onClick={() => setIsEditingMaxSpending(true)}
           >
-            {totalExpenses}/{maxSpending}
+            {formatAmount(totalExpenses)}/{formatAmount(maxSpending)}
           </span>
         )}
         <div

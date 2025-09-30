@@ -2,6 +2,7 @@ import { Transition } from "@headlessui/react";
 import React, { useState } from "react";
 import { expenseColor } from "../helperFunctions/expenseColor";
 import { ChevronDoubleUpSvg } from "./svg/ChevronDoubleUpSvg";
+import { formatAmount } from "../helperFunctions/currencyFormatter";
 
 export const MonthBudgetDisplay = ({
   monthIncome,
@@ -57,7 +58,7 @@ export const MonthBudgetDisplay = ({
             }}
           ></div>
           <span className="z-10 text-gray-700">
-            {totalMonthlyExpenses}/{monthlyExpectation}
+            {formatAmount(totalMonthlyExpenses)}/{formatAmount(monthlyExpectation)}
           </span>
         </div>
       </Transition>
@@ -74,15 +75,11 @@ export const MonthBudgetDisplay = ({
               }}
             ></div>
             <span className="z-10 text-gray-700">
-              {totalMonthlyExpenses}/{monthIncome}
+              {formatAmount(totalMonthlyExpenses)}/{formatAmount(monthIncome)}
             </span>
           </div>
         </div>
       </div>
-
-      {/* <span>
-        <ChevronDoubleUpSvg />
-      </span> */}
     </div>
   );
 };

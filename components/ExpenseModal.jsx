@@ -74,6 +74,8 @@ export const ExpenseModal = ({
             <div>
               <label htmlFor="amount">Amount</label>
               <input
+                type="number"
+                step="0.01"
                 onChange={(e) =>
                   setExpense({
                     ...expense,
@@ -84,7 +86,7 @@ export const ExpenseModal = ({
                 className="w-full border border-black rounded-3xl pl-3 py-1 text-base"
                 style={{ fontSize: '16px' }}
                 name="amount"
-                placeholder="Enter amount"
+                placeholder="Enter amount (e.g., 12.50)"
               />
             </div>
           </div>

@@ -3,6 +3,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { ChevronDown } from "./svg/ChevronDown";
 import { generateChartColors, ensureContrast } from "../helperFunctions/chartColors";
+import { formatCurrency } from "../helperFunctions/currencyFormatter";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -46,7 +47,7 @@ export const MonthCard = ({
             const value = context.parsed || 0;
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
             const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-            return `${label}: €${value} (${percentage}%)`;
+            return `${label}: ${formatCurrency(value)} (${percentage}%)`;
           }
         }
       }
@@ -74,13 +75,13 @@ export const MonthCard = ({
       <div className={`flex flex-col bg-white ${isExpanded ? 'rounded-none' : 'rounded-b-3xl'} px-4 py-4`}>
         <div className="flex flex-col w-full">
           <div className="flex justify-between">
-            Income: <span>€{income}</span>
+            Income: <span>{formatCurrency(income)}</span>
           </div>
           <div className="flex justify-between">
-            Expense: <span>€{totalMonthlyExpenses}</span>
+            Expense: <span>{formatCurrency(totalMonthlyExpenses)}</span>
           </div>
           <div className="flex justify-between mt-3">
-            Saved: <span>€{income - totalMonthlyExpenses}</span>
+            Saved: <span>{formatCurrency(income - totalMonthlyExpenses)}</span>
           </div>
           
           {hasExpenses && (
@@ -128,7 +129,7 @@ export const MonthCard = ({
                   {/* Center Text */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <div className="text-sm text-gray-500">Total</div>
-                    <div className="text-lg font-semibold text-gray-700">€{total}</div>
+                    <div className="text-lg font-semibold text-gray-700">{formatCurrency(total)}</div>
                   </div>
                 </div>
               </div>
@@ -146,7 +147,7 @@ export const MonthCard = ({
                         <span className="text-sm text-gray-700 truncate">{item.title}</span>
                       </div>
                       <div className="flex items-center ml-2 text-right">
-                        <span className="text-sm font-medium text-gray-900 mr-2">€{item.value}</span>
+                        <span className="text-sm font-medium text-gray-900 mr-2">{formatCurrency(item.value)}</span>
                         <span className="text-xs text-gray-500 w-10">{item.percentage}%</span>
                       </div>
                     </div>
@@ -156,7 +157,7 @@ export const MonthCard = ({
                 {/* Summary Stats */}
                 <div className="mt-4 pt-3 border-t border-gray-200">
                   <div className="text-xs text-gray-500 text-center lg:text-left">
-                    {legendData.length} categories • Total: €{total}
+                    {legendData.length} categories • Total: {formatCurrency(total)}
                   </div>
                 </div>
               </div>

@@ -19,6 +19,7 @@ import { useAuth } from "../../context/AuthContext";
 import { addMonthBalanceAndExpense, ensureMonthHasCurrentDefaults } from "../../firebase/firestore";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import { ConfirmDeleteModal } from "../../components/ConfirmDeleteModal";
+import { formatCurrency } from "../../helperFunctions/currencyFormatter";
 
 const Month = () => {
   const router = useRouter();
@@ -156,7 +157,7 @@ const Month = () => {
         </Link>
         <h2 className="text-white text-xl">{selectedMonth.month}</h2>
         <div className="flex">
-          <span className="text-white">{selectedMonth.monthBalance}</span>
+          <span className="text-white">{formatCurrency(selectedMonth.monthBalance)}</span>
           {selectedMonth.monthBalance > 0 ? (
             <div className="text-green-400">
               <ArrowUpSvg />
