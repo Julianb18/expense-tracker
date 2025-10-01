@@ -19,7 +19,7 @@ export const ConfirmDeleteModal = ({
   };
   return (
     <Dialog
-      className="absolute z-30 min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl p-3"
+      className="absolute z-30 min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-2xl p-3"
       open={isConfirmDeleteModalOpen}
       onClose={() => setIsConfirmDeleteModalOpen(false)}
     >
@@ -28,14 +28,10 @@ export const ConfirmDeleteModal = ({
           Are you sure you want to delete - {selectedCategory}
         </Dialog.Title>
 
-        <div className="flex justify-end">
-          <button
-            className="flex mr-4 shadow-lg shadow-primaryDark justify-center items-center rounded-3xl px-2 py-1 cursor-pointer min-w-[65px]
-              bg-red-400 text-white"
-            onClick={handleDelete}
-          >
+        <div className="flex justify-end gap-2">
+          <Button filled customColor="red-400" onClick={handleDelete}>
             Delete
-          </button>
+          </Button>
           <Button onClick={() => setIsConfirmDeleteModalOpen(false)}>
             Cancel
           </Button>

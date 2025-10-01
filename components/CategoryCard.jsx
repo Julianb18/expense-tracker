@@ -102,7 +102,7 @@ export const CategoryCard = ({
           </span>
         )}
         <button
-          className="border border-red-200 rounded-lg text-red-500 px-3 py-1 text-sm font-medium hover:bg-red-50 hover:border-red-300 transition-colors"
+          className="border border-red-200 rounded-lg text-red-400 px-3 py-1 text-sm font-medium hover:bg-red-50 hover:border-red-300 transition-colors"
           onClick={() => handleCategoryDelete(title)}
         >
           Delete

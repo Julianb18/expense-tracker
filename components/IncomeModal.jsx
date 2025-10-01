@@ -58,7 +58,7 @@ export const IncomeModal = ({
             {/* Current Income Display */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 text-center border border-blue-200">
               <div className="text-sm text-gray-600 mb-2 font-medium">Current Income</div>
-              <div className="text-xl font-bold text-blue-700">
+              <div className="text-xl font-bold text-buttonSecondary">
                 {formatCurrency(currentIncome)}
               </div>
             </div>
