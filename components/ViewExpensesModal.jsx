@@ -35,7 +35,7 @@ export const ViewExpensesModal = ({
 
   return (
     <Dialog
-      className="absolute z-30 min-w-[90%] max-w-[500px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl h-[400px]"
+      className="absolute overflow-hidden z-30 min-w-[90%] max-w-[500px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl h-[400px]"
       open={isViewExpensesModalOpen}
       onClose={() => setIsViewExpensesModalOpen(false)}
     >
