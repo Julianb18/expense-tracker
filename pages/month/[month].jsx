@@ -113,7 +113,7 @@ const Month = () => {
   }, [totalMonthlyExpenses, selectedMonth, userData, selectedYear, month]);
 
   return selectedMonth ? (
-    <div className="relative py-3">
+    <div className="relative py-3 max-w-[900px] mx-auto">
       <IncomeModal
         incomeModalIsOpen={incomeModalIsOpen}
         setIncomeModalIsOpen={setIncomeModalIsOpen}
@@ -223,7 +223,7 @@ const Month = () => {
           />
         ))}
       </div>
-      <div className="fixed z-10 bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[374px] sm:max-w-[550px] px-4 rounded-3xl">
+      <div className="fixed z-10 bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[400px] sm:max-w-[550px] md:max-w-[900px] px-4 rounded-3xl">
         <MonthBudgetDisplay
           monthIncome={selectedMonth.income}
           totalMonthlyExpenses={totalMonthlyExpenses}
