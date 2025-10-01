@@ -27,10 +27,7 @@ const Dashboard = () => {
   const { authUser, isLoading } = useAuth();
   const router = useRouter();
 
-  const [isDefaultCategoriesModalOpen, setIsDefaultCategoriesModalOpen] =
-    useState(false);
-
-  console.log(selectedYear);
+  const [isDefaultCategoriesModalOpen, setIsDefaultCategoriesModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !authUser) {
@@ -38,15 +35,17 @@ const Dashboard = () => {
     }
   }, [authUser, isLoading, router]);
 
-  const accBalance = selectedYear?.months.reduce((acc, curr) => {
-    return acc + curr.monthBalance;
+  // Calculate accumulated balance from all months in the selected year
+  const accumulatedBalance = selectedYear?.months.reduce((total, month) => {
+    return total + month.monthBalance;
   }, 0);
 
+  // Update year balance in database when accumulated balance changes
   useEffect(() => {
     if (authUser && selectedYear) {
-      addYearBalance(authUser?.uid, selectedYear?.year, accBalance);
+      addYearBalance(authUser.uid, selectedYear.year, accumulatedBalance);
     }
-  }, [accBalance,authUser, authUser?.uid, selectedYear?.year, selectedYear]);
+  }, [accumulatedBalance, authUser, selectedYear]);
 
   return authUser && userData && userData.years && selectedYear ? (
     <div className="h-full max-w-[900px] mx-auto flex flex-col">
@@ -71,11 +70,9 @@ const Dashboard = () => {
 
       <div className="flex flex-col items-center flex-1 justify-center mt-6 px-4 pb-20">
         {(() => {
-          // Find the selected month data
           const selectedMonthData = selectedYear.months.find(
             (month) => month.month === selectedMonth
           );
-          console.log("selectedMonthData", selectedMonthData);
 
           if (!selectedMonthData) {
             return (
@@ -103,7 +100,6 @@ const Dashboard = () => {
         })()}
       </div>
 
-      {/* Default Categories Button - Fixed at bottom right */}
       <div className="fixed bottom-8 right-8 z-10">
         <Button
           onClick={() => setIsDefaultCategoriesModalOpen(true)}
@@ -113,7 +109,6 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      {/* Default Categories Modal */}
       <DefaultCategoriesModal
         isOpen={isDefaultCategoriesModalOpen}
         setIsOpen={setIsDefaultCategoriesModalOpen}

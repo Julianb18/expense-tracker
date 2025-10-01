@@ -1,5 +1,3 @@
-// Currency formatting utility functions
-
 /**
  * Formats a number as currency with decimal places only when needed
  * @param {number} amount - The amount to format
@@ -13,12 +11,9 @@ export const formatCurrency = (amount, currency = '€') => {
   
   const numericAmount = Number(amount);
   
-  // Check if the amount has decimal places
   if (numericAmount % 1 === 0) {
-    // No decimal places, show as integer
     return `${currency}${numericAmount.toFixed(0)}`;
   } else {
-    // Has decimal places, show with 2 decimal places
     return `${currency}${numericAmount.toFixed(2)}`;
   }
 };
@@ -35,12 +30,9 @@ export const formatAmount = (amount) => {
   
   const numericAmount = Number(amount);
   
-  // Check if the amount has decimal places
   if (numericAmount % 1 === 0) {
-    // No decimal places, show as integer
     return numericAmount.toFixed(0);
   } else {
-    // Has decimal places, show with 2 decimal places
     return numericAmount.toFixed(2);
   }
 };

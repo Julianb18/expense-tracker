@@ -56,7 +56,6 @@ const Month = () => {
     setSelectedCategory(currentCategory);
     setIsExpenseModalOpen(true);
     setSelectedExpenses(expenses);
-    // Find the full category data
     const categoryData = selectedMonth?.categories.find(cat => cat.title === currentCategory);
     setSelectedCategoryData(categoryData);
   };
@@ -112,6 +111,7 @@ const Month = () => {
         uid={userData?.uid}
         year={selectedYear?.year}
         month={month}
+        currentIncome={selectedMonth?.income || 0}
       />
       <CategoryModal
         isCategoryModalOpen={isCategoryModalOpen}

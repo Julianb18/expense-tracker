@@ -1,16 +1,15 @@
+/**
+ * Returns color based on spending percentage
+ * @param {number} spentPercentage - Percentage of budget spent (0-100+)
+ * @returns {string} Color code for the spending level
+ */
 export const expenseColor = (spentPercentage) => {
-  let color = "";
   const red = "#ee5552";
   const green = "rgb(34,197,94)";
-  // const orange = "rgb(251,146,60)";
 
   if (spentPercentage >= 100) {
-    color = red;
+    return red;
   } else {
-    color = green;
+    return green;
   }
-  // else if (spentPercentage >= 85) {
-  //   color = orange;
-  // }
-  return color;
 };

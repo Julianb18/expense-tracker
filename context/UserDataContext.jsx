@@ -49,10 +49,6 @@ const UserDataProvider = ({ children }) => {
   useEffect(() => {
     if (userData && userData.defaultCategories) {
       setDefaultCategoriesState(userData.defaultCategories);
-      console.log(
-        "Context: Default categories loaded from userData:",
-        userData.defaultCategories
-      );
     }
   }, [userData]);
 
@@ -69,10 +65,6 @@ const UserDataProvider = ({ children }) => {
 
   const handleSaveDefaultCategories = async (newDefaultCategories) => {
     if (authUser?.uid) {
-      console.log(
-        "Context: Saving new default categories:",
-        newDefaultCategories
-      );
       await setDefaultCategories(authUser.uid, newDefaultCategories);
       setDefaultCategoriesState(newDefaultCategories);
 
@@ -89,6 +81,7 @@ const UserDataProvider = ({ children }) => {
     }
   };
 
+  // Listen for real-time updates to user data
   useEffect(() => {
     if (authUser) {
       onSnapshot(colRef, (snapshot) => {
@@ -97,7 +90,6 @@ const UserDataProvider = ({ children }) => {
         );
 
         const data = querySnapShot?.data();
-        console.log("data", data);
         setUserData(data);
         setSelectedYear(showCurrentYear(data));
       });

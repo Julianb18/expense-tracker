@@ -36,7 +36,6 @@ export const ExpenseModal = ({
         amount: Number(tempExpense.amount)
       });
       setIsExpenseModalOpen(false);
-      console.log("submitted");
     }
 
     setExpense({
@@ -53,10 +52,9 @@ export const ExpenseModal = ({
       0
     ) || 0;
 
-  // Calculate available amount
+  // Calculate remaining budget for the selected category
   const getAvailableAmount = () => {
     if (!selectedCategoryData) return 0;
-
     return selectedCategoryData.maxSpending - totalSpent;
   };
 

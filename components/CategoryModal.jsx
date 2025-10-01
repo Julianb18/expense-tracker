@@ -38,7 +38,6 @@ export const CategoryModal = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (category.title !== "" && category.maxSpending !== "" && Number(category.maxSpending) > 0) {
-      console.log("submitted");
       addCategory(uid, year, month, {
         ...category,
         maxSpending: Number(category.maxSpending)
@@ -100,7 +99,6 @@ export const CategoryModal = ({
                       const inputValue = e.target.value;
                       setCategory({ ...category, title: inputValue });
 
-                      // Show dropdown if there are matching categories
                       const hasMatches = PREDEFINED_CATEGORIES.some((cat) =>
                         cat.toLowerCase().includes(inputValue.toLowerCase())
                       );

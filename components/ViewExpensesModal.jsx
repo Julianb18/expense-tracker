@@ -18,12 +18,11 @@ export const ViewExpensesModal = ({
 }) => {
   const handleDelete = (e, expenseId) => {
     e.preventDefault();
-    console.log(expenseId);
     deleteExpense(uid, year, month, selectedCategory, expenseId);
     setSelectedExpenses(selectedExpenses.filter((e) => e.id !== expenseId));
   };
 
-  // Format date for display
+  // Format date for display in a readable format
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);

@@ -62,12 +62,11 @@ export const addANewUserExpenseDoc = async (uid, displayName) => {
     return;
   }
 
-  console.log("Creating user doc");
   await addDoc(collection(db, "userExpenses"), {
     uid,
     displayName,
     years: initializeYears(),
-    defaultCategories: [], // Initialize with empty default categories
+    defaultCategories: [],
   });
 };
 
