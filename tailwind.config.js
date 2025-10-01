@@ -11,8 +11,8 @@ module.exports = {
       colors: {
         primaryDark: "#272e34",
         secondaryDark: "#1f2429",
-        buttonPrimary: "#36cfde",
-        buttonSecondary: "#2eb8aa",
+        buttonPrimary: "#0c464b",
+        buttonSecondary: "#248f84",
       },
       boxShadow: {
         innerTopShadow: "inset 0px 44px 5px 0px rgba(0,0,0,0.75)",
