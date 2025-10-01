@@ -37,7 +37,7 @@ export const IncomeModal = ({
 
   return (
     <Dialog
-      className="absolute z-30 min-w-[90%] max-w-[500px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
+      className="absolute z-30 min-w-[90%] max-w-[500px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100"
       open={incomeModalIsOpen}
       onClose={handleClose}
     >
@@ -56,9 +56,9 @@ export const IncomeModal = ({
 
           <div className="px-3 space-y-4">
             {/* Current Income Display */}
-            <div className="bg-gray-100 rounded-2xl p-3 text-center">
-              <div className="text-sm text-gray-600 mb-1">Current Income</div>
-              <div className="text-lg font-semibold text-gray-700">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 text-center border border-blue-200">
+              <div className="text-sm text-gray-600 mb-2 font-medium">Current Income</div>
+              <div className="text-xl font-bold text-blue-700">
                 {formatCurrency(currentIncome)}
               </div>
             </div>
@@ -91,7 +91,7 @@ export const IncomeModal = ({
 
             {/* Amount Input */}
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 {isAddMode ? 'Amount to Add' : 'Total Income Amount'}
               </label>
               <input
@@ -99,7 +99,7 @@ export const IncomeModal = ({
                 step="0.01"
                 onChange={(e) => setInputVal(e.target.value)}
                 value={inputVal}
-                className="w-full border border-black rounded-3xl pl-3 py-1 text-base"
+                className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 style={{ fontSize: '16px' }}
                 placeholder={isAddMode ? 'Enter amount to add (e.g., 500.00)' : 'Enter total income (e.g., 3000.00)'}
               />

@@ -80,8 +80,8 @@ export const CategoryCard = ({
   };
 
   return (
-    <div className="flex flex-col shadow-xl shadow-primaryDark w-full xs:max-w-[350px] bg-white rounded-3xl mb-6 md:mb-0 p-3">
-      <div className="flex justify-between mb-2">
+    <div className="flex flex-col shadow-2xl shadow-gray-900/10 w-full xs:max-w-[350px] bg-white rounded-2xl mb-6 md:mb-0 p-4 border border-gray-100 hover:shadow-3xl hover:shadow-gray-900/20 transition-all duration-300">
+      <div className="flex justify-between mb-3">
         {isEditingTitle ? (
           <input
             type="text"
@@ -89,28 +89,28 @@ export const CategoryCard = ({
             onChange={(e) => setEditTitle(e.target.value)}
             onBlur={handleTitleSave}
             onKeyDown={handleTitleKeyPress}
-            className="border border-gray-300 rounded px-2 py-1 text-base flex-1 mr-2"
+            className="border border-gray-200 rounded-lg px-2 py-2 text-base flex-1 mr-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             style={{ fontSize: "16px" }}
             autoFocus
           />
         ) : (
           <span
-            className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
+            className="cursor-pointer hover:bg-gray-50 px-2 py-2 rounded-lg font-medium text-gray-800 transition-colors"
             onClick={() => setIsEditingTitle(true)}
           >
             {title}
           </span>
         )}
         <button
-          className="border border-gray-400 rounded-3xl text-gray-400 px-2"
+          className="border border-red-200 rounded-lg text-red-500 px-3 py-1 text-sm font-medium hover:bg-red-50 hover:border-red-300 transition-colors"
           onClick={() => handleCategoryDelete(title)}
         >
-          delete
+          Delete
         </button>
       </div>
-      <div className="relative flex justify-center w-full bg-gray-300 h-6 rounded-3xl mb-7">
+      <div className="relative flex justify-center w-full bg-gray-100 h-8 rounded-xl mb-6 shadow-inner">
         {isEditingMaxSpending ? (
-          <div className="flex items-center z-[1] text-gray-700">
+          <div className="flex items-center z-[1] text-gray-700 font-medium">
             <span>{formatAmount(totalExpenses)}/</span>
             <input
               type="number"
@@ -119,24 +119,24 @@ export const CategoryCard = ({
               onChange={(e) => setEditMaxSpending(e.target.value)}
               onBlur={handleMaxSpendingSave}
               onKeyDown={handleMaxSpendingKeyPress}
-              className="w-16 text-center border border-gray-300 rounded px-1 mx-1 text-base"
+              className="w-16 text-center border border-gray-200 rounded-lg px-2 mx-1 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
               style={{ fontSize: "16px" }}
               autoFocus
             />
           </div>
         ) : (
           <span
-            className="text-gray-700 z-[1] cursor-pointer hover:bg-gray-400 hover:bg-opacity-30 px-2 rounded"
+            className="text-gray-700 z-[1] cursor-pointer hover:bg-white hover:bg-opacity-50 px-3 py-1 rounded-lg font-medium transition-colors"
             onClick={() => setIsEditingMaxSpending(true)}
           >
             {formatAmount(totalExpenses)}/{formatAmount(maxSpending)}
           </span>
         )}
         <div
-          className="absolute left-0 h-full rounded-3xl"
+          className="absolute left-0 h-full rounded-xl shadow-sm"
           style={{
             width: `${spentPercentage}%`,
-            transition: "width 1s",
+            transition: "width 1s ease-in-out",
             backgroundColor: expenseColor(spentPercentage),
           }}
         ></div>

@@ -4,8 +4,8 @@
  * @returns {string} Color code for the spending level
  */
 export const expenseColor = (spentPercentage) => {
-  const red = "#ee5552";
-  const green = "rgb(34,197,94)";
+  const red = "#f87171";
+  const green = "#4ade80";
 
   if (spentPercentage >= 100) {
     return red;

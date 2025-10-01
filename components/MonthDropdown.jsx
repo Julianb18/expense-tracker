@@ -26,7 +26,7 @@ export const MonthDropdown = ({ selectedMonth, onMonthChange }) => {
             Month
           </Listbox.Label>
           <div className="relative mt-1">
-            <Listbox.Button className="relative w-full cursor-default rounded-3xl border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-gray-800 shadow-lg">
+            <Listbox.Button className="relative w-full cursor-default rounded-xl border border-gray-300 bg-white py-3 pl-4 pr-10 text-left shadow-lg shadow-gray-900/10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
               <span className="flex items-center">
                 <span className="ml-3 block truncate">{selectedMonth}</span>
               </span>
@@ -45,7 +45,7 @@ export const MonthDropdown = ({ selectedMonth, onMonthChange }) => {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-3xl bg-white py-1 text-base focus:outline-none shadow-gray-800 shadow-lg">
+              <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-xl bg-white py-1 text-base focus:outline-none shadow-lg shadow-gray-900/20 border border-gray-100">
                 {MONTHS.map((month) => (
                   <Listbox.Option
                     key={month}

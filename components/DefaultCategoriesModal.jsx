@@ -82,29 +82,30 @@ export const DefaultCategoriesModal = ({
     >
       <div className="fixed inset-0 bg-black bg-opacity-50" />
 
-      <Dialog.Panel className="relative bg-white rounded-3xl w-full max-w-md max-h-[80vh] overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+      <Dialog.Panel className="relative bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100 w-full max-w-md max-h-[80vh] overflow-hidden">
+        <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2">
           <Dialog.Title className="text-xl font-semibold">
             Default Categories
           </Dialog.Title>
           <button className="cursor-pointer p-1" onClick={handleClose}>
             <XMarkSvg />
           </button>
+          <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-400"></span>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-96">
+        <div className="px-3 space-y-4 overflow-y-auto max-h-96">
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-4">Add Category</h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Category Name
                 </label>
                 <div className="relative">
                   <input
                     type="text"
-                    className="w-full px-3 py-2 text-base border border-gray-300 rounded-3xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     style={{ fontSize: "16px" }}
                     placeholder="Type category name"
                     value={newCategory.title}
@@ -130,7 +131,7 @@ export const DefaultCategoriesModal = ({
                   </button>
 
                   {showDropdown && (
-                    <div className="absolute mt-1 max-h-44 w-full overflow-auto rounded-3xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-10">
+                    <div className="absolute mt-1 max-h-44 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-10">
                       {PREDEFINED_CATEGORIES.filter((cat) =>
                         cat
                           .toLowerCase()
@@ -156,7 +157,7 @@ export const DefaultCategoriesModal = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Maximum Spending
                 </label>
                 <input
@@ -169,7 +170,7 @@ export const DefaultCategoriesModal = ({
                       maxSpending: e.target.value,
                     })
                   }
-                  className="w-full border border-gray-300 rounded-3xl px-3 py-2 text-base"
+                  className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   style={{ fontSize: "16px" }}
                   placeholder="Enter amount (e.g., 500.00)"
                 />
@@ -199,7 +200,7 @@ export const DefaultCategoriesModal = ({
                 {defaultCategories.map((category) => (
                   <div
                     key={category.title}
-                    className="flex items-center justify-between bg-gray-50 rounded-xl p-3"
+                    className="flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-3 border border-gray-200"
                   >
                     <div>
                       <span className="font-medium">{category.title}</span>
@@ -220,7 +221,7 @@ export const DefaultCategoriesModal = ({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 px-6 py-4 border-t">
+        <div className="flex justify-end gap-3 px-3 py-3">
           <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={handleSave} filled>
             Save Template

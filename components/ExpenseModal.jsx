@@ -62,13 +62,13 @@ export const ExpenseModal = ({
 
   return (
     <Dialog
-      className="absolute z-30 min-w-[90%] max-w-[500px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl"
+      className="absolute z-30 min-w-[90%] max-w-[500px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-h-[90vh] bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100"
       open={isExpenseModalOpen}
       onClose={() => setIsExpenseModalOpen(false)}
     >
       <form onSubmit={handleSubmit}>
-        <Dialog.Panel className="flex flex-col space-y-4">
-          <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2">
+        <Dialog.Panel className="flex flex-col h-full max-h-[90vh]">
+          <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2 flex-shrink-0">
             <Dialog.Title>New Expense</Dialog.Title>
             <button
               className="cursor-pointer p-1"
@@ -78,20 +78,20 @@ export const ExpenseModal = ({
             </button>
             <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-400"></span>
           </div>
-          <div className="space-y-4 px-3">
+          <div className="space-y-4 px-3 overflow-y-auto flex-1 min-h-0">
             {/* Available Amount Display */}
-            <div className="bg-gray-100 rounded-2xl p-3 text-center">
-              <div className="text-sm text-gray-600 mb-1">
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-4 text-center border border-gray-200">
+              <div className="text-sm text-gray-600 mb-2 font-medium">
                 Remaining budget in {selectedCategory}
               </div>
               <div
-                className={`text-lg font-semibold ${
+                className={`text-xl font-bold ${
                   availableAmount >= 0 ? "text-green-600" : "text-red-600"
                 }`}
               >
                 {formatCurrency(availableAmount)}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 mt-1">
                 {`${formatCurrency(totalSpent)} / ${formatCurrency(
                   selectedCategoryData?.maxSpending || 0
                 )}`}
@@ -99,14 +99,14 @@ export const ExpenseModal = ({
             </div>
 
             <div className="">
-              <label htmlFor="title">Title/Description</label>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">Title/Description</label>
               <input
                 onChange={(e) =>
                   setExpense({ ...expense, title: e.target.value })
                 }
                 value={expense.title}
                 onFocus={(e) => (e.target.value = "")}
-                className="w-full border border-black rounded-3xl pl-3 py-1 text-base"
+                className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 style={{ fontSize: "16px" }}
                 type="text"
                 name="title"
@@ -114,7 +114,7 @@ export const ExpenseModal = ({
               />
             </div>
             <div>
-              <label htmlFor="amount">Amount</label>
+              <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
               <input
                 type="number"
                 step="0.01"
@@ -125,14 +125,14 @@ export const ExpenseModal = ({
                   })
                 }
                 value={expense.amount}
-                className="w-full border border-black rounded-3xl pl-3 py-1 text-base"
+                className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 style={{ fontSize: "16px" }}
                 name="amount"
                 placeholder="Enter amount (e.g., 12.50)"
               />
             </div>
             <div>
-              <label htmlFor="date">Date</label>
+              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">Date</label>
               <input
                 type="date"
                 onChange={(e) =>
@@ -142,13 +142,13 @@ export const ExpenseModal = ({
                   })
                 }
                 value={expense.date}
-                className="w-full border border-black rounded-3xl pl-3 pr-4 py-1 text-base"
+                className="w-full border border-gray-300 rounded-xl pl-4 pr-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 style={{ fontSize: "16px" }}
                 name="date"
               />
             </div>
           </div>
-          <div className="flex justify-end px-3 pb-3">
+          <div className="flex justify-end px-3 py-3 flex-shrink-0">
             <Button filled customClassName="mr-1" onClick={handleSubmit}>
               Add
             </Button>

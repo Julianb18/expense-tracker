@@ -67,12 +67,12 @@ export const MonthCard = ({
 
   return (
     <div
-      className={`w-full max-w-[550px] sm:w-[350px] md:w-[450px] rounded-3xl shadow-gray-500 shadow-md mb-6 md:mb-0 ${customCss}`}
+      className={`w-full max-w-[550px] sm:w-[350px] md:w-[450px] rounded-2xl shadow-2xl shadow-gray-900/10 border border-gray-700 mb-6 md:mb-0 hover:shadow-3xl hover:shadow-gray-900/20 transition-all duration-300 ${customCss}`}
     >
-      <div className="text-center py-3 bg-primaryDark rounded-t-3xl">
+      <div className="text-center py-3 bg-primaryDark rounded-t-2xl">
         <h2 className="text-white">{month}</h2>
       </div>
-      <div className={`flex flex-col bg-white ${isExpanded ? 'rounded-none' : 'rounded-b-3xl'} px-4 py-4`}>
+      <div className={`flex flex-col bg-white ${isExpanded ? 'rounded-none' : 'rounded-b-2xl'} px-4 py-4`}>
         <div className="flex flex-col w-full">
           <div className="flex justify-between">
             Income: <span>{formatCurrency(income)}</span>
@@ -109,7 +109,7 @@ export const MonthCard = ({
       {/* Expandable Chart Section */}
       {isExpanded && hasExpenses && (
         <div 
-          className="bg-white rounded-b-3xl px-4 pb-4"
+          className="bg-white rounded-b-2xl px-4 pb-4"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -138,7 +138,7 @@ export const MonthCard = ({
               <div className="flex-1 lg:ml-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
                   {legendData.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                    <div key={index} className="flex items-center justify-between p-3 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 border border-gray-200 transition-all duration-200">
                       <div className="flex items-center flex-1 min-w-0">
                         <div 
                           className="w-3 h-3 rounded-full flex-shrink-0 mr-3"
