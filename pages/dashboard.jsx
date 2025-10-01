@@ -49,8 +49,8 @@ const Dashboard = () => {
   }, [accBalance,authUser, authUser?.uid, selectedYear?.year, selectedYear]);
 
   return authUser && userData && userData.years && selectedYear ? (
-    <div className="h-full max-w-[900px] mx-auto">
-      <div className={`py-4`}>
+    <div className="h-full max-w-[900px] mx-auto flex flex-col">
+      <div className="py-4 flex-shrink-0">
         <div className="text-white mb-4">
           <h2 className="text-center text-3xl">
             {selectedYear?.year} - Budget
@@ -69,7 +69,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center mt-10 pb-16 px-4">
+      <div className="flex flex-col items-center flex-1 justify-center mt-6 px-4 pb-20">
         {(() => {
           // Find the selected month data
           const selectedMonthData = selectedYear.months.find(
