@@ -74,7 +74,7 @@ export const CategoryModal = ({
 
       <div className="fixed inset-0 overflow-y-auto z-50">
         <div className="flex min-h-full items-center justify-center p-4 text-center">
-          <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl">
+          <Dialog.Panel className="w-full max-w-md transform overflow-visible rounded-2xl bg-white text-left align-middle shadow-xl">
             <Dialog.Title
               as="div"
               className="flex justify-between items-center text-lg font-medium leading-6 text-gray-900 p-3 relative"
@@ -85,10 +85,10 @@ export const CategoryModal = ({
               </button>
               <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-400"></span>
             </Dialog.Title>
-            <div className="space-y-4 px-3">
-              <div className="">
+            <div className="space-y-4 px-3 overflow-visible">
+              <div className="overflow-visible">
                 <label htmlFor="categoryName">Category Name</label>
-                <div className="relative">
+                <div className="relative overflow-visible">
                   <input
                     type="text"
                     className="w-full px-3 py-1 text-base border border-black rounded-3xl focus:outline-none focus:ring-2 focus:ring-buttonSecondary"
@@ -117,7 +117,7 @@ export const CategoryModal = ({
                   </button>
 
                   {showDropdown && (
-                    <div className="absolute mt-1 max-h-44 w-full overflow-auto rounded-3xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-10">
+                    <div className="absolute mt-1 max-h-44 w-full overflow-auto rounded-3xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-50">
                       {PREDEFINED_CATEGORIES.filter((cat) =>
                         cat.toLowerCase().includes(category.title.toLowerCase())
                       ).map((categoryName) => (
