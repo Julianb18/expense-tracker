@@ -37,10 +37,14 @@ export const CategoryModal = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (category.title !== "" && category.maxSpending !== "" && Number(category.maxSpending) > 0) {
+    if (
+      category.title !== "" &&
+      category.maxSpending !== "" &&
+      Number(category.maxSpending) > 0
+    ) {
       addCategory(uid, year, month, {
         ...category,
-        maxSpending: Number(category.maxSpending)
+        maxSpending: Number(category.maxSpending),
       });
       setIsCategoryModalOpen(false);
       setCategory({
@@ -87,11 +91,13 @@ export const CategoryModal = ({
             </Dialog.Title>
             <div className="space-y-4 px-3 overflow-visible">
               <div className="overflow-visible">
-                <label htmlFor="categoryName">Category Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category Name
+                </label>
                 <div className="relative overflow-visible">
                   <input
                     type="text"
-                    className="w-full px-3 py-1 text-base border border-black rounded-3xl focus:outline-none focus:ring-2 focus:ring-buttonSecondary"
+                    className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     style={{ fontSize: "16px" }}
                     placeholder="Type category name"
                     value={category.title}
@@ -137,9 +143,11 @@ export const CategoryModal = ({
                 </div>
               </div>
               <div>
-                <label htmlFor="maxSpending">Max Spending Amount</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Max Spending Amount
+                </label>
                 <input
-                  className="w-full px-3 py-1 text-base border border-black rounded-3xl focus:outline-none focus:ring-2 focus:ring-buttonSecondary"
+                  className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   style={{ fontSize: "16px" }}
                   type="number"
                   step="0.01"

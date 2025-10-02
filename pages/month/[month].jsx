@@ -113,7 +113,7 @@ const Month = () => {
   }, [totalMonthlyExpenses, selectedMonth, userData, selectedYear, month]);
 
   return selectedMonth ? (
-    <div className="relative py-3 max-w-[900px] mx-auto">
+    <div className="relative max-w-[900px] mx-auto h-full">
       <IncomeModal
         incomeModalIsOpen={incomeModalIsOpen}
         setIncomeModalIsOpen={setIncomeModalIsOpen}
@@ -166,69 +166,75 @@ const Month = () => {
       isConfirmDeleteModalOpen ? (
         <div className="absolute z-20 top-0 left-0 bg-black opacity-60 h-screen w-full"></div>
       ) : null}
-      <div className="flex justify-between items-center mb-8 px-4">
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="text-white py-1 px-2">
-            <BackSvg />
-          </Link>
-          <h2 className="text-white text-xl md:hidden">
-            {selectedMonth.month}
-          </h2>
-        </div>
-        <div className="hidden md:flex items-center justify-center flex-1">
-          <h2 className="text-white text-xl">{selectedMonth.month}</h2>
-        </div>
-        <div className="flex">
-          <span className="text-white">
-            {formatCurrency(selectedMonth.monthBalance)}
-          </span>
-          {selectedMonth.monthBalance > 0 ? (
-            <div className="text-green-400">
-              <ArrowUpSvg />
+      
+      {/* Fixed Header - Always Visible */}
+      <div className="fixed top-[56px] left-0 right-0 z-10 bg-primaryDark py-3 shadow-lg shadow-primaryDark">
+        <div className="max-w-[900px] mx-auto">
+          <div className="flex justify-between items-center mb-8 px-4">
+            <div className="flex items-center gap-3">
+              <Link href="/dashboard" className="text-white py-1 px-2">
+                <BackSvg />
+              </Link>
+              <h2 className="text-white text-xl md:hidden">
+                {selectedMonth.month}
+              </h2>
             </div>
-          ) : selectedMonth.monthBalance < 0 ? (
-            <div className="text-red-400">
-              <ArrowDownSvg />
+            <div className="hidden md:flex items-center justify-center flex-1">
+              <h2 className="text-white text-xl">{selectedMonth.month}</h2>
             </div>
-          ) : null}
+            <div className="flex">
+              <span className="text-white">
+                {formatCurrency(selectedMonth.monthBalance)}
+              </span>
+              {selectedMonth.monthBalance > 0 ? (
+                <div className="text-green-400">
+                  <ArrowUpSvg />
+                </div>
+              ) : selectedMonth.monthBalance < 0 ? (
+                <div className="text-red-400">
+                  <ArrowDownSvg />
+                </div>
+              ) : null}
+            </div>
+          </div>
+          <div className="flex justify-between mb-5 md:mb-10 px-4">
+            <Button filled onClick={() => setIncomeModalIsOpen(true)}>
+              Add Income
+            </Button>
+            <Button filled onClick={() => setIsCategoryModalOpen(true)}>
+              Add Category
+            </Button>
+          </div>
         </div>
-      </div>
-      <div className="flex justify-between mb-5 md:mb-10 px-4">
-        <Button filled onClick={() => setIncomeModalIsOpen(true)}>
-          Add Income
-        </Button>
-        <Button filled onClick={() => setIsCategoryModalOpen(true)}>
-          Add Category
-        </Button>
       </div>
 
-      <div
-        className="relative flex px-4 md:px-0 pb-20 md:pb-32 h-[calc(100vh-212px)] overflow-hidden 
-            scroll-smooth overflow-y-scroll flex-col md:overflow-visible md:h-full 
-            md:gap-6 md:space-y-0 items-center md:flex-wrap md:justify-center md:flex-row"
-      >
-        <div className="sticky md:hidden z-10 top-0 left-0 right-0 w-screen bg-gradient-to-b from-primaryDark to-transparent">
-          <div className="h-[40px]"></div>
-        </div>
-        {selectedMonth.categories.map((category) => (
-          <CategoryCard
-            key={category.title}
-            category={category}
-            handleAddExpense={handleAddExpense}
-            handleViewExpense={handleViewExpense}
-            handleCategoryDelete={handleCategoryDelete}
-            uid={userData?.uid}
-            year={selectedYear?.year}
-            month={month}
+      {/* Fixed Bottom Budget Display - Always Visible */}
+      <div className="fixed bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-primaryDark to-transparent pt-4 pb-4">
+        <div className="max-w-[900px] mx-auto px-4">
+          <MonthBudgetDisplay
+            monthIncome={selectedMonth.income}
+            totalMonthlyExpenses={totalMonthlyExpenses}
+            monthlyExpectation={monthlyExpectation}
           />
-        ))}
+        </div>
       </div>
-      <div className="fixed z-10 bottom-4 left-1/2 -translate-x-1/2 w-full max-w-[400px] sm:max-w-[550px] md:max-w-[900px] px-4 rounded-3xl">
-        <MonthBudgetDisplay
-          monthIncome={selectedMonth.income}
-          totalMonthlyExpenses={totalMonthlyExpenses}
-          monthlyExpectation={monthlyExpectation}
-        />
+
+      {/* Scrollable Category Cards Area */}
+      <div className="pt-36 pb-20 px-4 md:px-0">
+        <div className="flex flex-col md:flex-row md:flex-wrap md:justify-center md:gap-6 items-center py-4 md:py-0">
+          {selectedMonth.categories.map((category) => (
+            <CategoryCard
+              key={category.title}
+              category={category}
+              handleAddExpense={handleAddExpense}
+              handleViewExpense={handleViewExpense}
+              handleCategoryDelete={handleCategoryDelete}
+              uid={userData?.uid}
+              year={selectedYear?.year}
+              month={month}
+            />
+          ))}
+        </div>
       </div>
     </div>
   ) : (

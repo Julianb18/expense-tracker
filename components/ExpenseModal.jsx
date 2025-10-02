@@ -142,8 +142,8 @@ export const ExpenseModal = ({
                   })
                 }
                 value={expense.date}
-                className="w-full border border-gray-300 rounded-xl pl-4 pr-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                style={{ fontSize: "16px" }}
+                className="w-full border border-gray-300 rounded-xl pl-4 pr-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                style={{ fontSize: "16px", minWidth: "0", maxWidth: "100%" }}
                 name="date"
               />
             </div>
