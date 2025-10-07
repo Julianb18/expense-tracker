@@ -357,6 +357,7 @@ export const ensureMonthHasCurrentDefaults = async (uid, year, month) => {
   return false;
 };
 
+
 export const resetMonthToDefaults = async (uid, year, month) => {
   const userDoc = await getUserDocRef(uid);
   if (!userDoc) return false;
@@ -381,3 +382,25 @@ export const resetMonthToDefaults = async (uid, year, month) => {
 
   return false;
 };
+
+export const updateCategoryOrder = async (uid, year, month, newCategories) => {
+  const userDoc = await getUserDocRef(uid);
+  if (!userDoc) return false;
+
+  const userData = userDoc.data();
+  const updatedUserDoc = { ...userData };
+  const yearData = updatedUserDoc.years.find((y) => y.year === year);
+
+  if (yearData) {
+    const monthData = yearData.months.find((m) => m.month === month);
+
+    if (monthData) {
+      monthData.categories = newCategories;
+      await updateUserDoc(userDoc.id, updatedUserDoc);
+      return true;
+    }
+  }
+
+  return false;
+};
+
