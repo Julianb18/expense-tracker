@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
@@ -47,8 +47,19 @@ const Month = () => {
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [touchStartY, setTouchStartY] = useState(null);
   const [touchStartIndex, setTouchStartIndex] = useState(null);
+  const [touchCurrentY, setTouchCurrentY] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [autoScrollInterval, setAutoScrollInterval] = useState(null);
+  const [dropTargetIndex, setDropTargetIndex] = useState(null);
 
   const selectedMonth = selectedYear?.months.find((m) => m.month === month);
+
+  const stopAutoScroll = useCallback(() => {
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+      setAutoScrollInterval(null);
+    }
+  }, [autoScrollInterval]);
 
   useEffect(() => {
     const ensureDefaults = async () => {
@@ -63,6 +74,19 @@ const Month = () => {
 
     ensureDefaults();
   }, [authUser?.uid, selectedYear?.year, month]);
+
+  // Cleanup auto-scroll when component unmounts or edit mode changes
+  useEffect(() => {
+    return () => {
+      stopAutoScroll();
+    };
+  }, [stopAutoScroll]);
+
+  useEffect(() => {
+    if (!isEditMode) {
+      stopAutoScroll();
+    }
+  }, [isEditMode, stopAutoScroll]);
 
   const handleAddExpense = (currentCategory, expenses) => {
     setSelectedCategory(currentCategory);
@@ -90,9 +114,10 @@ const Month = () => {
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e, dropIndex) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+    setDropTargetIndex(dropIndex);
   };
 
   const handleDrop = (e, dropIndex) => {
@@ -107,53 +132,134 @@ const Month = () => {
     // Update the order in Firestore
     updateCategoryOrder(userData.uid, selectedYear.year, month, newCategories);
     setDraggedIndex(null);
+    setDropTargetIndex(null);
   };
 
   const handleDragEnd = () => {
     setDraggedIndex(null);
+    setDropTargetIndex(null);
+  };
+
+  const startAutoScroll = (direction) => {
+    if (autoScrollInterval) return;
+    
+    const scrollAmount = direction === 'up' ? -10 : 10;
+    const interval = setInterval(() => {
+      window.scrollBy(0, scrollAmount);
+    }, 16); // ~60fps
+    
+    setAutoScrollInterval(interval);
   };
 
   const handleTouchStart = (e, index) => {
     if (!isEditMode) return;
+    e.preventDefault();
     setTouchStartY(e.touches[0].clientY);
+    setTouchCurrentY(e.touches[0].clientY);
     setTouchStartIndex(index);
     setDraggedIndex(index);
+    setIsDragging(true);
   };
 
   const handleTouchMove = (e) => {
     if (!isEditMode || touchStartIndex === null) return;
     e.preventDefault();
+    
+    const currentY = e.touches[0].clientY;
+    setTouchCurrentY(currentY);
+    
+    // Calculate drop target based on current position
+    const categoryElements = document.querySelectorAll('[data-category-index]');
+    let newDropTarget = null;
+    
+    // Check each element to find the best drop target
+    for (let i = 0; i < categoryElements.length; i++) {
+      if (i === touchStartIndex) continue; // Skip the dragged element
+      
+      const element = categoryElements[i];
+      const rect = element.getBoundingClientRect();
+      const elementTop = rect.top;
+      const elementBottom = rect.bottom;
+      const elementCenter = elementTop + rect.height / 2;
+      
+      // If we're above the center of this element, this is our target
+      if (currentY < elementCenter) {
+        newDropTarget = i;
+        break;
+      }
+    }
+    
+    // If we didn't find a target above any element, check if we're below the last element
+    if (newDropTarget === null && categoryElements.length > 0) {
+      const lastElement = categoryElements[categoryElements.length - 1];
+      const lastRect = lastElement.getBoundingClientRect();
+      if (currentY > lastRect.bottom) {
+        newDropTarget = categoryElements.length - 1;
+      }
+    }
+    
+    // If we're above the first element, target position 0
+    if (newDropTarget === null && categoryElements.length > 0) {
+      const firstElement = categoryElements[0];
+      const firstRect = firstElement.getBoundingClientRect();
+      if (currentY < firstRect.top) {
+        newDropTarget = 0;
+      }
+    }
+    
+    setDropTargetIndex(newDropTarget);
+    
+    // Debug log (remove in production)
+    if (newDropTarget !== null) {
+      console.log(`Drop target: ${newDropTarget}, Start index: ${touchStartIndex}`);
+    }
+    
+    // Auto-scroll logic
+    const deltaY = currentY - touchStartY;
+    const scrollThreshold = 100;
+    
+    if (Math.abs(deltaY) > scrollThreshold) {
+      const direction = deltaY > 0 ? 'down' : 'up';
+      startAutoScroll(direction);
+    } else {
+      stopAutoScroll();
+    }
   };
 
   const handleTouchEnd = (e) => {
     if (!isEditMode || touchStartIndex === null) return;
+    e.preventDefault();
 
-    const touchEndY = e.changedTouches[0].clientY;
-    const deltaY = touchEndY - touchStartY;
+    stopAutoScroll();
 
-    // Only trigger reorder if there's significant vertical movement
-    if (Math.abs(deltaY) > 50) {
-      const direction = deltaY > 0 ? 1 : -1;
-      const newIndex = touchStartIndex + direction;
+    // Use drop target if available
+    let targetIndex = dropTargetIndex;
+    
+    console.log(`Touch end - Drop target: ${targetIndex}, Start index: ${touchStartIndex}`);
 
-      if (newIndex >= 0 && newIndex < selectedMonth.categories.length) {
-        const newCategories = [...selectedMonth.categories];
-        const draggedCategory = newCategories[touchStartIndex];
-        newCategories.splice(touchStartIndex, 1);
-        newCategories.splice(newIndex, 0, draggedCategory);
+    // Perform reorder if we have a valid target
+    if (targetIndex !== null && targetIndex !== touchStartIndex && 
+        targetIndex >= 0 && targetIndex < selectedMonth.categories.length) {
+      const newCategories = [...selectedMonth.categories];
+      const draggedCategory = newCategories[touchStartIndex];
+      newCategories.splice(touchStartIndex, 1);
+      newCategories.splice(targetIndex, 0, draggedCategory);
 
-        updateCategoryOrder(
-          userData.uid,
-          selectedYear.year,
-          month,
-          newCategories
-        );
-      }
+      console.log(`Reordering from ${touchStartIndex} to ${targetIndex}`);
+      updateCategoryOrder(
+        userData.uid,
+        selectedYear.year,
+        month,
+        newCategories
+      );
     }
 
     setTouchStartY(null);
+    setTouchCurrentY(null);
     setTouchStartIndex(null);
     setDraggedIndex(null);
+    setIsDragging(false);
+    setDropTargetIndex(null);
   };
 
   useEffect(() => {
@@ -304,25 +410,39 @@ const Month = () => {
         {isEditMode && (
           <div className="text-center mb-4 md:hidden">
             <p className="text-sm text-gray-600 bg-blue-50 px-4 py-2 rounded-lg mx-4">
-              📱 Touch and drag categories up or down to reorder
+              📱 Touch and drag categories to see them move in real-time
             </p>
           </div>
         )}
         <div className="flex flex-col md:flex-row md:flex-wrap md:justify-center md:gap-6 items-center py-4 md:py-0">
+          {/* Drop zone indicator for first position */}
+          {isDragging && dropTargetIndex === 0 && (
+            <div className="w-full xs:max-w-[400px] h-2 bg-blue-400 rounded-full mb-2 opacity-60"></div>
+          )}
           {selectedMonth.categories.map((category, index) => (
             <div
               key={category.title}
+              data-category-index={index}
               draggable={isEditMode}
               onDragStart={(e) => handleDragStart(e, index)}
-              onDragOver={handleDragOver}
+              onDragOver={(e) => handleDragOver(e, index)}
               onDrop={(e) => handleDrop(e, index)}
               onDragEnd={handleDragEnd}
               onTouchStart={(e) => handleTouchStart(e, index)}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              className={`w-full xs:max-w-[400px] ${
+              className={`w-full xs:max-w-[400px] transition-all duration-150 ${
                 isEditMode ? "cursor-move" : ""
-              } ${draggedIndex === index ? "opacity-50" : ""}`}
+              } ${draggedIndex === index ? "opacity-50" : ""} ${
+                dropTargetIndex === index ? "ring-2 ring-blue-400 ring-opacity-60 bg-blue-50" : ""
+              }`}
+              style={{
+                transform: isDragging && draggedIndex === index && touchCurrentY !== null
+                  ? `translateY(${touchCurrentY - touchStartY}px)`
+                  : 'translateY(0px)',
+                zIndex: isDragging && draggedIndex === index ? 1000 : 'auto',
+                touchAction: isEditMode ? 'none' : 'auto'
+              }}
             >
               <CategoryCard
                 category={category}
@@ -333,9 +453,14 @@ const Month = () => {
                 year={selectedYear?.year}
                 month={month}
                 isEditMode={isEditMode}
+                isDragging={isDragging && draggedIndex === index}
               />
             </div>
           ))}
+          {/* Drop zone indicator for last position */}
+          {isDragging && dropTargetIndex === selectedMonth.categories.length - 1 && (
+            <div className="w-full xs:max-w-[400px] h-2 bg-blue-400 rounded-full mt-2 opacity-60"></div>
+          )}
         </div>
       </div>
     </div>

@@ -18,6 +18,7 @@ export const CategoryCard = ({
   year,
   month,
   isEditMode = false,
+  isDragging = false,
 }) => {
   const { title, maxSpending, expenses } = category;
 
@@ -82,7 +83,7 @@ export const CategoryCard = ({
   };
 
   return (
-    <div className={`flex flex-col shadow-2xl shadow-gray-900/10 w-full xs:max-w-[400px] bg-white rounded-2xl mb-6 md:mb-0 p-4 border border-gray-100 hover:shadow-3xl hover:shadow-gray-900/20 transition-all duration-300 ${isEditMode ? 'ring-2 ring-blue-500 ring-opacity-50 active:scale-95' : ''}`}>
+    <div className={`flex flex-col shadow-2xl shadow-gray-900/10 w-full xs:max-w-[400px] bg-white rounded-2xl mb-6 md:mb-0 p-4 border border-gray-100 hover:shadow-3xl hover:shadow-gray-900/20 transition-all duration-300 ${isEditMode ? 'ring-2 ring-blue-500 ring-opacity-50 active:scale-95' : ''} ${isDragging ? 'shadow-3xl shadow-blue-500/30 scale-105' : ''}`}>
       <div className="flex justify-between items-center mb-3">
         {isEditMode && (
           <div className="text-gray-400 mr-2">
