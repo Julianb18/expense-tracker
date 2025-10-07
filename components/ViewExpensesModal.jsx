@@ -35,11 +35,13 @@ export const ViewExpensesModal = ({
 
   return (
     <Dialog
-      className="absolute overflow-hidden z-30 min-w-[90%] max-w-[500px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl h-[400px]"
+      className="fixed inset-0 z-30 flex items-center justify-center p-4"
       open={isViewExpensesModalOpen}
       onClose={() => setIsViewExpensesModalOpen(false)}
     >
-      <Dialog.Panel className="flex flex-col h-full">
+      <div className="fixed inset-0 bg-black bg-opacity-50" />
+      <Dialog.Panel className="relative bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100 w-full max-w-[500px] h-[400px] overflow-hidden">
+        <div className="flex flex-col h-full">
         <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2 flex-shrink-0">
           <Dialog.Title>{selectedCategory} - Expenses</Dialog.Title>
           <button
@@ -76,6 +78,7 @@ export const ViewExpensesModal = ({
               </div>
             </div>
           ))}
+        </div>
         </div>
       </Dialog.Panel>
     </Dialog>

@@ -37,12 +37,14 @@ export const IncomeModal = ({
 
   return (
     <Dialog
-      className="absolute z-30 min-w-[90%] max-w-[500px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100"
+      className="fixed inset-0 z-30 flex items-center justify-center p-4"
       open={incomeModalIsOpen}
       onClose={handleClose}
     >
-      <form onSubmit={handleSubmit}>
-        <Dialog.Panel className="flex flex-col space-y-4">
+      <div className="fixed inset-0 bg-black bg-opacity-50" />
+      <Dialog.Panel className="relative bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100 w-full max-w-[500px] max-h-[90vh] overflow-hidden">
+        <form onSubmit={handleSubmit}>
+          <div className="flex flex-col space-y-4">
           <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2">
             <Dialog.Title>Manage Income</Dialog.Title>
             <button
@@ -124,8 +126,9 @@ export const IncomeModal = ({
               {isAddMode ? 'Add Income' : 'Update Income'}
             </Button>
           </div>
-        </Dialog.Panel>
-      </form>
+          </div>
+        </form>
+      </Dialog.Panel>
     </Dialog>
   );
 };

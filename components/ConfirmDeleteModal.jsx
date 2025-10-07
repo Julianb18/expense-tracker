@@ -19,11 +19,13 @@ export const ConfirmDeleteModal = ({
   };
   return (
     <Dialog
-      className="absolute z-30 min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-2xl p-3"
+      className="fixed inset-0 z-30 flex items-center justify-center p-4"
       open={isConfirmDeleteModalOpen}
       onClose={() => setIsConfirmDeleteModalOpen(false)}
     >
-      <Dialog.Panel className="flex flex-col space-y-4">
+      <div className="fixed inset-0 bg-black bg-opacity-50" />
+      <Dialog.Panel className="relative bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100 w-full max-w-[300px] p-3">
+        <div className="flex flex-col space-y-4">
         <Dialog.Title>
           Are you sure you want to delete - {selectedCategory}
         </Dialog.Title>
@@ -35,6 +37,7 @@ export const ConfirmDeleteModal = ({
           <Button onClick={() => setIsConfirmDeleteModalOpen(false)}>
             Cancel
           </Button>
+        </div>
         </div>
       </Dialog.Panel>
     </Dialog>

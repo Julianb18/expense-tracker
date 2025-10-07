@@ -62,12 +62,14 @@ export const ExpenseModal = ({
 
   return (
     <Dialog
-      className="absolute z-30 min-w-[90%] max-w-[500px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-h-[90vh] bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100"
+      className="fixed inset-0 z-30 flex items-center justify-center p-4"
       open={isExpenseModalOpen}
       onClose={() => setIsExpenseModalOpen(false)}
     >
-      <form onSubmit={handleSubmit}>
-        <Dialog.Panel className="flex flex-col h-full max-h-[90vh]">
+      <div className="fixed inset-0 bg-black bg-opacity-50" />
+      <Dialog.Panel className="relative bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100 w-full max-w-[500px] max-h-[90vh] overflow-hidden">
+        <form onSubmit={handleSubmit}>
+          <div className="flex flex-col h-full max-h-[90vh]">
           <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2 flex-shrink-0">
             <Dialog.Title>New Expense</Dialog.Title>
             <button
@@ -153,8 +155,9 @@ export const ExpenseModal = ({
               Add
             </Button>
           </div>
-        </Dialog.Panel>
-      </form>
+          </div>
+        </form>
+      </Dialog.Panel>
     </Dialog>
   );
 };
