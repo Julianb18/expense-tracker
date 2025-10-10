@@ -142,17 +142,28 @@ const Month = () => {
 
   const startAutoScroll = (direction) => {
     if (autoScrollInterval) return;
-    
-    const scrollAmount = direction === 'up' ? -10 : 10;
+
+    const scrollAmount = direction === "up" ? -10 : 10;
     const interval = setInterval(() => {
       window.scrollBy(0, scrollAmount);
     }, 16); // ~60fps
-    
+
     setAutoScrollInterval(interval);
   };
 
   const handleTouchStart = (e, index) => {
     if (!isEditMode) return;
+
+    // Check if touch is in the safe scroll zone (right 64px on mobile)
+    const touchX = e.touches[0].clientX;
+    const screenWidth = window.innerWidth;
+    const safeZoneWidth = 64; // 16 * 4 (w-16 in Tailwind)
+
+    if (touchX > screenWidth - safeZoneWidth) {
+      // Touch is in safe zone, allow normal scrolling
+      return;
+    }
+
     e.preventDefault();
     setTouchStartY(e.touches[0].clientY);
     setTouchCurrentY(e.touches[0].clientY);
@@ -164,31 +175,31 @@ const Month = () => {
   const handleTouchMove = (e) => {
     if (!isEditMode || touchStartIndex === null) return;
     e.preventDefault();
-    
+
     const currentY = e.touches[0].clientY;
     setTouchCurrentY(currentY);
-    
+
     // Calculate drop target based on current position
-    const categoryElements = document.querySelectorAll('[data-category-index]');
+    const categoryElements = document.querySelectorAll("[data-category-index]");
     let newDropTarget = null;
-    
+
     // Check each element to find the best drop target
     for (let i = 0; i < categoryElements.length; i++) {
       if (i === touchStartIndex) continue; // Skip the dragged element
-      
+
       const element = categoryElements[i];
       const rect = element.getBoundingClientRect();
       const elementTop = rect.top;
       const elementBottom = rect.bottom;
       const elementCenter = elementTop + rect.height / 2;
-      
+
       // If we're above the center of this element, this is our target
       if (currentY < elementCenter) {
         newDropTarget = i;
         break;
       }
     }
-    
+
     // If we didn't find a target above any element, check if we're below the last element
     if (newDropTarget === null && categoryElements.length > 0) {
       const lastElement = categoryElements[categoryElements.length - 1];
@@ -197,7 +208,7 @@ const Month = () => {
         newDropTarget = categoryElements.length - 1;
       }
     }
-    
+
     // If we're above the first element, target position 0
     if (newDropTarget === null && categoryElements.length > 0) {
       const firstElement = categoryElements[0];
@@ -206,20 +217,22 @@ const Month = () => {
         newDropTarget = 0;
       }
     }
-    
+
     setDropTargetIndex(newDropTarget);
-    
+
     // Debug log (remove in production)
     if (newDropTarget !== null) {
-      console.log(`Drop target: ${newDropTarget}, Start index: ${touchStartIndex}`);
+      console.log(
+        `Drop target: ${newDropTarget}, Start index: ${touchStartIndex}`
+      );
     }
-    
+
     // Auto-scroll logic
     const deltaY = currentY - touchStartY;
     const scrollThreshold = 100;
-    
+
     if (Math.abs(deltaY) > scrollThreshold) {
-      const direction = deltaY > 0 ? 'down' : 'up';
+      const direction = deltaY > 0 ? "down" : "up";
       startAutoScroll(direction);
     } else {
       stopAutoScroll();
@@ -234,12 +247,18 @@ const Month = () => {
 
     // Use drop target if available
     let targetIndex = dropTargetIndex;
-    
-    console.log(`Touch end - Drop target: ${targetIndex}, Start index: ${touchStartIndex}`);
+
+    console.log(
+      `Touch end - Drop target: ${targetIndex}, Start index: ${touchStartIndex}`
+    );
 
     // Perform reorder if we have a valid target
-    if (targetIndex !== null && targetIndex !== touchStartIndex && 
-        targetIndex >= 0 && targetIndex < selectedMonth.categories.length) {
+    if (
+      targetIndex !== null &&
+      targetIndex !== touchStartIndex &&
+      targetIndex >= 0 &&
+      targetIndex < selectedMonth.categories.length
+    ) {
       const newCategories = [...selectedMonth.categories];
       const draggedCategory = newCategories[touchStartIndex];
       newCategories.splice(touchStartIndex, 1);
@@ -352,7 +371,7 @@ const Month = () => {
       {/* Fixed Header - Always Visible */}
       <div className="fixed top-[56px] left-0 right-0 z-10 bg-primaryDark py-3 shadow-lg shadow-primaryDark">
         <div className="max-w-[900px] mx-auto">
-          <div className="flex justify-between items-center mb-8 px-4">
+          <div className="flex justify-between items-center mb-3 px-4">
             <div className="flex items-center gap-3">
               <Link href="/dashboard" className="text-white py-1 px-2">
                 <BackSvg />
@@ -364,24 +383,53 @@ const Month = () => {
             <div className="hidden md:flex items-center justify-center flex-1">
               <h2 className="text-white text-xl">{selectedMonth.month}</h2>
             </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="text-white cursor-pointer hover:text-gray-200 transition-colors"
-                onClick={() => setIncomeModalIsOpen(true)}
-              >
-                {formatCurrency(selectedMonth.monthBalance)}
-              </span>
-              <button
-                className="w-6 h-6 bg-white rounded-full flex justify-center hover:bg-gray-100 transition-colors"
-                onClick={() => setIncomeModalIsOpen(true)}
-              >
-                <span className="text-primaryDark text-base font-bold">+</span>
-              </button>
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-white text-lg font-semibold">
+                  {formatCurrency(selectedMonth.monthBalance)}
+                </span>
+                {selectedMonth.monthBalance > 0 ? (
+                  <div className="text-green-400">
+                    <ArrowUpSvg />
+                  </div>
+                ) : selectedMonth.monthBalance < 0 ? (
+                  <div className="text-red-400">
+                    <ArrowDownSvg />
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
-          <div className="flex justify-between mb-5 md:mb-10 px-4">
+
+          {/* Compact Income Display */}
+          <div
+            className="mx-4 mb-4 px-3 py-2 bg-white/10 rounded-lg border border-white/20 cursor-pointer hover:bg-white/15 transition-all flex items-center justify-between"
+            onClick={() => setIncomeModalIsOpen(true)}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-white/70 text-xs">Income:</span>
+              <span className="text-white text-sm font-semibold">
+                {formatCurrency(selectedMonth.income)}
+              </span>
+            </div>
+            <svg
+              className="w-4 h-4 text-white/50"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
+            </svg>
+          </div>
+
+          <div className="flex justify-between mb-1 md:mb-10 px-4">
             <Button
-              filled={isEditMode}
+              filled
               onClick={() => setIsEditMode(!isEditMode)}
               customColor={isEditMode ? "blue-500" : "gray-500"}
             >
@@ -406,12 +454,15 @@ const Month = () => {
       </div>
 
       {/* Scrollable Category Cards Area */}
-      <div className="pt-36 pb-20 px-4 md:px-0 md:pt-48 md:pb-36">
+      <div
+        className={`pt-40 pb-20 md:pt-48 md:pb-36 ${
+          isEditMode ? "pr-16 pl-4" : "px-4"
+        } md:px-0`}
+      >
+        {/* Safe scroll zone indicator */}
         {isEditMode && (
-          <div className="text-center mb-4 md:hidden">
-            <p className="text-sm text-gray-600 bg-blue-50 px-4 py-2 rounded-lg mx-4">
-              📱 Touch and drag categories to see them move in real-time
-            </p>
+          <div className="fixed right-0 top-[56px] bottom-0 w-16 pointer-events-none md:hidden flex items-center justify-center">
+            <div className="transform rotate-90 whitespace-nowrap"></div>
           </div>
         )}
         <div className="flex flex-col md:flex-row md:flex-wrap md:justify-center md:gap-6 items-center py-4 md:py-0">
@@ -434,14 +485,17 @@ const Month = () => {
               className={`w-full xs:max-w-[400px] transition-all duration-150 ${
                 isEditMode ? "cursor-move" : ""
               } ${draggedIndex === index ? "opacity-50" : ""} ${
-                dropTargetIndex === index ? "ring-2 ring-blue-400 ring-opacity-60 bg-blue-50" : ""
+                dropTargetIndex === index
+                  ? "ring-2 ring-blue-400 ring-opacity-60 bg-blue-50"
+                  : ""
               }`}
               style={{
-                transform: isDragging && draggedIndex === index && touchCurrentY !== null
-                  ? `translateY(${touchCurrentY - touchStartY}px)`
-                  : 'translateY(0px)',
-                zIndex: isDragging && draggedIndex === index ? 1000 : 'auto',
-                touchAction: isEditMode ? 'none' : 'auto'
+                transform:
+                  isDragging && draggedIndex === index && touchCurrentY !== null
+                    ? `translateY(${touchCurrentY - touchStartY}px)`
+                    : "translateY(0px)",
+                zIndex: isDragging && draggedIndex === index ? 1000 : "auto",
+                touchAction: isEditMode ? "none" : "auto",
               }}
             >
               <CategoryCard
@@ -458,9 +512,10 @@ const Month = () => {
             </div>
           ))}
           {/* Drop zone indicator for last position */}
-          {isDragging && dropTargetIndex === selectedMonth.categories.length - 1 && (
-            <div className="w-full xs:max-w-[400px] h-2 bg-blue-400 rounded-full mt-2 opacity-60"></div>
-          )}
+          {isDragging &&
+            dropTargetIndex === selectedMonth.categories.length - 1 && (
+              <div className="w-full xs:max-w-[400px] h-2 bg-blue-400 rounded-full mt-2 opacity-60"></div>
+            )}
         </div>
       </div>
     </div>
