@@ -455,7 +455,7 @@ const Month = () => {
 
       {/* Scrollable Category Cards Area */}
       <div
-        className={`pt-40 pb-20 md:pt-48 md:pb-36 ${
+        className={`pt-40 pb-20 md:pt-56 md:pb-36 ${
           isEditMode ? "pr-16 pl-4" : "px-4"
         } md:px-0`}
       >

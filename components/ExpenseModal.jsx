@@ -60,6 +60,14 @@ export const ExpenseModal = ({
 
   const availableAmount = getAvailableAmount();
 
+  // Calculate what the remaining amount will be after adding this expense
+  const getRemainingAfterExpense = () => {
+    const currentExpenseAmount = parseFloat(expense.amount) || 0;
+    return availableAmount - currentExpenseAmount;
+  };
+
+  const remainingAfterExpense = getRemainingAfterExpense();
+
   return (
     <Dialog
       className="fixed inset-0 z-30 flex items-center justify-center p-4"
@@ -87,17 +95,22 @@ export const ExpenseModal = ({
                 Remaining budget in {selectedCategory}
               </div>
               <div
-                className={`text-xl font-bold ${
-                  availableAmount >= 0 ? "text-green-600" : "text-red-600"
+                className={`text-xl font-bold transition-colors duration-200 ${
+                  remainingAfterExpense >= 0 ? "text-green-600" : "text-red-600"
                 }`}
               >
-                {formatCurrency(availableAmount)}
+                {formatCurrency(remainingAfterExpense)}
               </div>
               <div className="text-xs text-gray-500 mt-1">
-                {`${formatCurrency(totalSpent)} / ${formatCurrency(
+                {`${formatCurrency(totalSpent + (parseFloat(expense.amount) || 0))} / ${formatCurrency(
                   selectedCategoryData?.maxSpending || 0
                 )}`}
               </div>
+              {expense.amount && parseFloat(expense.amount) > 0 && (
+                <div className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-300">
+                  Current remaining: {formatCurrency(availableAmount)}
+                </div>
+              )}
             </div>
 
             <div className="">

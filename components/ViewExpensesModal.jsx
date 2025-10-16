@@ -33,6 +33,13 @@ export const ViewExpensesModal = ({
     });
   };
 
+  // Sort expenses by date (most recent first)
+  const sortedExpenses = [...(selectedExpenses || [])].sort((a, b) => {
+    const dateA = new Date(a.date || 0);
+    const dateB = new Date(b.date || 0);
+    return dateB - dateA; // Descending order (newest first)
+  });
+
   return (
     <Dialog
       className="fixed inset-0 z-30 flex items-center justify-center p-4"
@@ -54,7 +61,7 @@ export const ViewExpensesModal = ({
         </div>
 
         <div className="flex flex-col pb-3 overflow-y-auto flex-1 min-h-0">
-          {selectedExpenses?.map((expense) => (
+          {sortedExpenses?.map((expense) => (
             <div
               key={expense.id}
               className="flex justify-between items-center py-3 px-3 even:bg-gray-100 last:rounded-b-xl flex-shrink-0"
