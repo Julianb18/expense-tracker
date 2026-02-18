@@ -6,7 +6,6 @@ import {
   setDoc,
   where,
   getDocs,
-  writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -25,9 +24,19 @@ const hardCodedArrayOfMonths = [
   "December",
 ];
 
-const hardCodedArrayOfYears = [
-  2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030,
-];
+const getYearRange = (startYear, yearsAhead = 5) => {
+  const currentYear = new Date().getFullYear();
+  const endYear = currentYear + yearsAhead;
+
+  const from = Math.min(startYear, currentYear);
+  const to = Math.max(endYear, currentYear);
+
+  const years = [];
+  for (let y = from; y <= to; y++) {
+    years.push(y);
+  }
+  return years;
+};
 
 const initializeMonths = () =>
   hardCodedArrayOfMonths.map((month) => ({
@@ -39,7 +48,7 @@ const initializeMonths = () =>
   }));
 
 const initializeYears = () =>
-  hardCodedArrayOfYears.map((year) => ({
+  getYearRange(2022, 5).map((year) => ({
     year,
     currentBalance: 0,
     months: initializeMonths(),
@@ -112,7 +121,7 @@ export const deleteCategory = async (uid, year, month, selectedCategory) => {
   const yearData = updatedUserDoc.years.find((y) => y.year === year);
   const monthData = yearData.months.find((m) => m.month === month);
   monthData.categories = monthData.categories.filter(
-    (c) => c.title !== selectedCategory
+    (c) => c.title !== selectedCategory,
   );
 
   await updateUserDoc(userDoc.id, updatedUserDoc);
@@ -140,7 +149,7 @@ export const deleteExpense = async (
   year,
   month,
   selectedCategory,
-  expenseId
+  expenseId,
 ) => {
   const userDoc = await getUserDocRef(uid);
   if (!userDoc) return;
@@ -151,11 +160,11 @@ export const deleteExpense = async (
   const yearData = updatedUserDoc.years.find((y) => y.year === year);
   const monthData = yearData.months.find((m) => m.month === month);
   const categoryData = monthData.categories.find(
-    (c) => c.title === selectedCategory
+    (c) => c.title === selectedCategory,
   );
 
   const expenseIndex = categoryData.expenses.findIndex(
-    (e) => e.id === expenseId
+    (e) => e.id === expenseId,
   );
   const deletedExpense = categoryData.expenses.splice(expenseIndex, 1)[0];
   categoryData.totalCategoryExpenses -= deletedExpense.amount;
@@ -168,7 +177,7 @@ export const addMonthBalanceAndExpense = async (
   year,
   month,
   monthBalance,
-  totalMonthlyExpenses
+  totalMonthlyExpenses,
 ) => {
   const userDoc = await getUserDocRef(uid);
   if (!userDoc) return;
@@ -202,7 +211,7 @@ export const updateCategoryTitle = async (
   year,
   month,
   oldTitle,
-  newTitle
+  newTitle,
 ) => {
   const userDoc = await getUserDocRef(uid);
   if (!userDoc) return;
@@ -225,7 +234,7 @@ export const updateCategoryMaxSpending = async (
   year,
   month,
   categoryTitle,
-  newMaxSpending
+  newMaxSpending,
 ) => {
   const userDoc = await getUserDocRef(uid);
   if (!userDoc) return;
@@ -236,7 +245,7 @@ export const updateCategoryMaxSpending = async (
   const yearData = updatedUserDoc.years.find((y) => y.year === year);
   const monthData = yearData.months.find((m) => m.month === month);
   const categoryData = monthData.categories.find(
-    (c) => c.title === categoryTitle
+    (c) => c.title === categoryTitle,
   );
 
   if (categoryData) {
@@ -271,7 +280,7 @@ export const getDefaultCategories = async (uid) => {
 export const applyDefaultCategoriesToFutureMonths = async (
   uid,
   currentYear,
-  currentMonth
+  currentMonth,
 ) => {
   const userDoc = await getUserDocRef(uid);
   if (!userDoc) return;
@@ -287,9 +296,8 @@ export const applyDefaultCategoriesToFutureMonths = async (
   const currentMonthIndex = hardCodedArrayOfMonths.indexOf(currentMonth);
   let updatedMonthsCount = 0;
 
-  // Apply to future months in current year (including months that already have categories)
   const currentYearData = updatedUserDoc.years.find(
-    (y) => y.year === currentYear
+    (y) => y.year === currentYear,
   );
   if (currentYearData) {
     for (
@@ -303,7 +311,6 @@ export const applyDefaultCategoriesToFutureMonths = async (
     }
   }
 
-  // Apply to all months in future years (overwrite existing categories)
   updatedUserDoc.years.forEach((yearData) => {
     if (yearData.year > currentYear) {
       yearData.months.forEach((monthData) => {
@@ -325,7 +332,6 @@ export const ensureMonthHasCurrentDefaults = async (uid, year, month) => {
 
   if (defaultCategories.length === 0) return false;
 
-  // Check if this is a future month
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonthIndex = currentDate.getMonth();
@@ -339,7 +345,6 @@ export const ensureMonthHasCurrentDefaults = async (uid, year, month) => {
     return false;
   }
 
-  // Check if month already has the current defaults
   const updatedUserDoc = { ...userData };
   const yearData = updatedUserDoc.years.find((y) => y.year === year);
 
@@ -347,7 +352,6 @@ export const ensureMonthHasCurrentDefaults = async (uid, year, month) => {
     const monthData = yearData.months.find((m) => m.month === month);
 
     if (monthData) {
-      // Always update future months to ensure they have current defaults
       monthData.categories = [...defaultCategories];
       await updateUserDoc(userDoc.id, updatedUserDoc);
       return true;
@@ -356,7 +360,6 @@ export const ensureMonthHasCurrentDefaults = async (uid, year, month) => {
 
   return false;
 };
-
 
 export const resetMonthToDefaults = async (uid, year, month) => {
   const userDoc = await getUserDocRef(uid);
@@ -403,4 +406,3 @@ export const updateCategoryOrder = async (uid, year, month, newCategories) => {
 
   return false;
 };
-

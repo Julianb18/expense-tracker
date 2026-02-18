@@ -18,7 +18,7 @@ export const MonthDropdown = ({ selectedMonth, onMonthChange }) => {
     <Listbox
       value={selectedMonth}
       onChange={onMonthChange}
-      className="outline-none border-none z-10"
+      className="outline-none border-none z-10 min-w-36"
     >
       {({ open }) => (
         <div className="flex flex-col">
@@ -26,7 +26,7 @@ export const MonthDropdown = ({ selectedMonth, onMonthChange }) => {
             Month
           </Listbox.Label>
           <div className="relative mt-1">
-            <Listbox.Button className="relative w-full cursor-default rounded-xl border border-gray-300 bg-white py-3 pl-4 pr-10 text-left shadow-lg shadow-gray-900/10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <Listbox.Button className="relative w-full cursor-default rounded-xl border border-gray-300 bg-white py-3 pr-10 text-left shadow-lg shadow-gray-900/10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
               <span className="flex items-center">
                 <span className="ml-3 block truncate">{selectedMonth}</span>
               </span>
