@@ -368,7 +368,6 @@ const Month = () => {
         <div className="absolute z-20 top-0 left-0 bg-black opacity-60 h-screen w-full"></div>
       ) : null}
 
-      {/* Fixed Header - Always Visible */}
       <div className="fixed top-[56px] left-0 right-0 z-10 bg-primaryDark py-3 shadow-lg shadow-primaryDark">
         <div className="max-w-[900px] mx-auto">
           <div className="flex justify-between items-center mb-3 px-4">
@@ -401,7 +400,6 @@ const Month = () => {
             </div>
           </div>
 
-          {/* Compact Income Display */}
           <div
             className="mx-4 mb-4 px-3 py-2 bg-white/10 rounded-lg border border-white/20 cursor-pointer hover:bg-white/15 transition-all flex items-center justify-between"
             onClick={() => setIncomeModalIsOpen(true)}
@@ -442,7 +440,6 @@ const Month = () => {
         </div>
       </div>
 
-      {/* Fixed Bottom Budget Display - Always Visible */}
       <div className="fixed bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-primaryDark to-transparent pt-4 pb-4">
         <div className="max-w-[900px] mx-auto px-4">
           <MonthBudgetDisplay
@@ -453,20 +450,17 @@ const Month = () => {
         </div>
       </div>
 
-      {/* Scrollable Category Cards Area */}
       <div
-        className={`pt-40 pb-20 md:pt-56 md:pb-36 ${
+        className={`pt-64 pb-20 md:pt-80 md:pb-36 ${
           isEditMode ? "pr-16 pl-4" : "px-4"
         } md:px-0`}
       >
-        {/* Safe scroll zone indicator */}
         {isEditMode && (
           <div className="fixed right-0 top-[56px] bottom-0 w-16 pointer-events-none md:hidden flex items-center justify-center">
             <div className="transform rotate-90 whitespace-nowrap"></div>
           </div>
         )}
         <div className="flex flex-col md:flex-row md:flex-wrap md:justify-center md:gap-6 items-center py-4 md:py-0">
-          {/* Drop zone indicator for first position */}
           {isDragging && dropTargetIndex === 0 && (
             <div className="w-full xs:max-w-[400px] h-2 bg-blue-400 rounded-full mb-2 opacity-60"></div>
           )}
@@ -511,7 +505,6 @@ const Month = () => {
               />
             </div>
           ))}
-          {/* Drop zone indicator for last position */}
           {isDragging &&
             dropTargetIndex === selectedMonth.categories.length - 1 && (
               <div className="w-full xs:max-w-[400px] h-2 bg-blue-400 rounded-full mt-2 opacity-60"></div>

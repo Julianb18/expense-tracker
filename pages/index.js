@@ -23,15 +23,10 @@ const Home = () => {
   return isLoading || (!isLoading && !!authUser) ? (
     <LoadingSpinner />
   ) : (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-cyan-950 to-indigo-900">
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
           <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-white bg-opacity-20 rounded-full mb-6">
-              <div className="w-12 h-12 text-white">
-                <MoneySvg />
-              </div>
-            </div>
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
               Take Control of Your
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400">

@@ -16,11 +16,11 @@ export const Navbar = () => {
   };
 
   return (
-    <div className="sticky shadow-lg shadow-primaryDark z-50 top-0 flex justify-between items-center px-3 py-3 bg-primaryDark text-white">
+    <header className="fixed top-0 w-full shadow-lg shadow-primaryDark z-50 flex justify-between items-center px-3 py-3 bg-primaryDark text-white">
       <Link href="/dashboard" className="text-buttonSecondary flex gap-4">
         <MoneySvg /> ExpenseTracker
       </Link>
-      
+
       {authUser ? (
         <Menu
           as="div"
@@ -53,8 +53,8 @@ export const Navbar = () => {
           Login / Register
         </Button>
       )}
-      
+
       <LoginModal ref={loginModalRef} />
-    </div>
+    </header>
   );
 };

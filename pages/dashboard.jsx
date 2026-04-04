@@ -48,8 +48,8 @@ const Dashboard = () => {
   }, [accumulatedBalance, authUser, selectedYear]);
 
   return authUser && userData && userData.years && selectedYear ? (
-    <div className="h-full max-w-[900px] mx-auto flex flex-col">
-      <div className="py-4 flex-shrink-0">
+    <div className="h-screen max-w-[900px] mx-auto flex flex-col justify-center">
+      <div className="mt-20 py-4 flex-shrink-0">
         <div className="text-white mb-4">
           <h2 className="text-center text-3xl">
             {selectedYear?.year} - Budget
@@ -68,7 +68,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center flex-1 justify-center mt-6 px-4 pb-20">
+      <div className="flex flex-col items-center flex-1 mt-6 px-4 pb-20">
         {(() => {
           const selectedMonthData = selectedYear.months.find(
             (month) => month.month === selectedMonth

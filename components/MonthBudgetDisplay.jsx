@@ -11,13 +11,18 @@ export const MonthBudgetDisplay = ({
 }) => {
   const [fullView, setFullView] = useState(false);
 
-  const expectedCalc = Math.round(
-    (totalMonthlyExpenses / monthlyExpectation) * 100
-  );
+  const expectedCalc =
+    monthlyExpectation && totalMonthlyExpenses
+      ? Math.round((totalMonthlyExpenses / monthlyExpectation) * 100)
+      : 0;
 
   const expectedPercentage = expectedCalc > 100 ? 100 : expectedCalc;
 
-  const budgetCalc = Math.round((totalMonthlyExpenses / monthIncome) * 100);
+  const budgetCalc =
+    monthIncome && totalMonthlyExpenses
+      ? Math.round((totalMonthlyExpenses / monthIncome) * 100)
+      : 0;
+
   const budgetPercentage = budgetCalc > 100 ? 100 : budgetCalc;
 
   const handleClickEvent = () => {
@@ -35,13 +40,17 @@ export const MonthBudgetDisplay = ({
         <div className="flex items-center w-full space-x-4">
           <div className="flex items-center space-x-6 md:space-x-8 flex-1">
             <div className="text-center">
-              <div className="text-xs text-gray-600 mb-1 font-medium">Spent</div>
+              <div className="text-xs text-gray-600 mb-1 font-medium">
+                Spent
+              </div>
               <div className="text-sm font-bold text-gray-900">
                 {formatAmount(totalMonthlyExpenses)}
               </div>
             </div>
             <div className="text-center">
-              <div className="text-xs text-gray-600 mb-1 font-medium">Budget</div>
+              <div className="text-xs text-gray-600 mb-1 font-medium">
+                Budget
+              </div>
               <div className="text-sm font-bold text-gray-900">
                 {formatAmount(monthIncome)}
               </div>
@@ -63,17 +72,13 @@ export const MonthBudgetDisplay = ({
                 }}
               ></div>
             </div>
-            <span
-              className={`transition transform duration-500 text-gray-700 hover:text-gray-900 flex-shrink-0 ${
-                fullView ? "rotate-180" : "rotate-0"
-              }`}
-            >
+            <span className={`text-gray-700 hover:text-gray-900 flex-shrink-0`}>
               <ChevronDoubleUpSvg />
             </span>
           </div>
         </div>
       )}
-      
+
       <Transition
         show={fullView}
         as="div"
@@ -85,21 +90,29 @@ export const MonthBudgetDisplay = ({
         leaveTo="translate-y-full opacity-0"
         className="w-full"
       >
-        <div className="space-y-4">
+        <div className="flex flex-col space-y-4">
+          <span
+            className={`mx-auto text-gray-700 hover:text-gray-900 rotate-180`}
+          >
+            <ChevronDoubleUpSvg />
+          </span>
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200">
             <div className="text-center">
-              <div className="text-sm text-gray-600 mb-2 font-medium">Expected Month Expenses</div>
-            <div className="relative flex justify-center w-full bg-gray-300 h-8 rounded-xl shadow-inner">
-              <div
-                className="absolute left-0 h-full rounded-xl shadow-sm"
-                style={{
-                  width: `${expectedPercentage}%`,
-                  transition: "width 1s ease-in-out",
-                  backgroundColor: expenseColor(expectedPercentage),
-                }}
-              ></div>
+              <div className="text-sm text-gray-600 mb-2 font-medium">
+                Expected Month Expenses
+              </div>
+              <div className="relative flex justify-center w-full bg-gray-300 h-8 rounded-xl shadow-inner">
+                <div
+                  className="absolute left-0 h-full rounded-xl shadow-sm"
+                  style={{
+                    width: `${expectedPercentage}%`,
+                    transition: "width 1s ease-in-out",
+                    backgroundColor: expenseColor(expectedPercentage),
+                  }}
+                ></div>
                 <span className="z-10 text-gray-700 font-medium flex items-center">
-                  {formatAmount(totalMonthlyExpenses)}/{formatAmount(monthlyExpectation)}
+                  {formatAmount(totalMonthlyExpenses)}/
+                  {formatAmount(monthlyExpectation)}
                 </span>
               </div>
               <div className="text-xs text-gray-500 mt-2">
@@ -107,21 +120,24 @@ export const MonthBudgetDisplay = ({
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-4 border border-gray-200">
             <div className="text-center">
-              <div className="text-sm text-gray-600 mb-2 font-medium">Total Monthly Spending</div>
-            <div className="relative flex justify-center w-full bg-gray-300 h-8 rounded-xl shadow-inner">
-              <div
-                className="absolute left-0 h-full rounded-xl shadow-sm"
-                style={{
-                  width: `${budgetPercentage}%`,
-                  transition: "width 1s ease-in-out",
-                  backgroundColor: expenseColor(budgetPercentage),
-                }}
-              ></div>
+              <div className="text-sm text-gray-600 mb-2 font-medium">
+                Total Monthly Spending
+              </div>
+              <div className="relative flex justify-center w-full bg-gray-300 h-8 rounded-xl shadow-inner">
+                <div
+                  className="absolute left-0 h-full rounded-xl shadow-sm"
+                  style={{
+                    width: `${budgetPercentage}%`,
+                    transition: "width 1s ease-in-out",
+                    backgroundColor: expenseColor(budgetPercentage),
+                  }}
+                ></div>
                 <span className="z-10 text-gray-700 font-medium flex items-center">
-                  {formatAmount(totalMonthlyExpenses)}/{formatAmount(monthIncome)}
+                  {formatAmount(totalMonthlyExpenses)}/
+                  {formatAmount(monthIncome)}
                 </span>
               </div>
               <div className="text-xs text-gray-500 mt-2">
