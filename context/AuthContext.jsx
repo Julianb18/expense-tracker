@@ -41,7 +41,9 @@ export default function useFirebaseAuth() {
       const displayLabel =
         user.displayName || user.email || "Guest";
 
-      addANewUserExpenseDoc(user.uid, displayLabel);
+      await addANewUserExpenseDoc(user.uid, displayLabel, {
+        isAnonymous: user.isAnonymous === true,
+      });
 
       setAuthUser({
         uid: user.uid,

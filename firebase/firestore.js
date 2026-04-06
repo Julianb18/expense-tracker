@@ -117,7 +117,135 @@ export const ensureUserYearsUpToDate = async (uid) => {
   });
 };
 
-export const addANewUserExpenseDoc = async (uid, displayName) => {
+/** Template categories (no expenses) for defaultCategories + future months */
+const guestDemoCategoryShell = (title, maxSpending) => ({
+  title,
+  maxSpending,
+  expenses: [],
+  categoryExpense: 0,
+  totalCategoryExpenses: 0,
+});
+
+/** Fresh category rows per month from defaultCategories (no shared object refs). */
+const cloneDefaultCategoryTemplates = (templates) =>
+  templates.map((t) => ({
+    title: t.title,
+    maxSpending: Number(t.maxSpending) || 0,
+    expenses: [],
+    categoryExpense: 0,
+    totalCategoryExpenses: 0,
+  }));
+
+const seedFutureMonthsInDraft = (draftUserData) => {
+  const templates = draftUserData.defaultCategories || [];
+  if (templates.length === 0) return;
+
+  const currentYear = getCurrentYear();
+  const currentMonthIndex = new Date().getMonth();
+  const currentYearData = getYearData(draftUserData, currentYear);
+
+  if (currentYearData) {
+    for (let i = currentMonthIndex + 1; i < MONTHS.length; i++) {
+      const monthData = currentYearData.months[i];
+      if (monthData) {
+        monthData.categories = cloneDefaultCategoryTemplates(templates);
+      }
+    }
+  }
+
+  draftUserData.years.forEach((yearData) => {
+    if (yearData.year > currentYear) {
+      yearData.months.forEach((monthData) => {
+        monthData.categories = cloneDefaultCategoryTemplates(templates);
+      });
+    }
+  });
+};
+
+const guestDemoExpense = (title, amount, daysAgo) => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  const day = d.toISOString().split("T")[0];
+  return {
+    title,
+    amount,
+    id: `guest-demo-${title}-${amount}-${day}`,
+    date: day,
+    createdAt: Date.now(),
+  };
+};
+
+/**
+ * Mutates a new user doc draft so anonymous portfolio visitors see realistic data.
+ */
+const applyGuestDemoSeed = (draftUserData) => {
+  const year = getCurrentYear();
+  const monthName = MONTHS[new Date().getMonth()];
+  const yearData = getYearData(draftUserData, year);
+  const monthData = yearData && getMonthData(yearData, monthName);
+  if (!monthData) return;
+
+  const categories = [
+    {
+      ...guestDemoCategoryShell("Rent", 1700),
+      expenses: [guestDemoExpense("Monthly rent", 1650, 3)],
+      totalCategoryExpenses: 1650,
+    },
+    {
+      ...guestDemoCategoryShell("Groceries", 600),
+      expenses: [
+        guestDemoExpense("Weekly shop", 94.5, 1),
+        guestDemoExpense("Fresh market", 62.2, 4),
+      ],
+      totalCategoryExpenses: 156.7,
+    },
+    {
+      ...guestDemoCategoryShell("Utilities", 280),
+      expenses: [guestDemoExpense("Electric + internet", 198.4, 6)],
+      totalCategoryExpenses: 198.4,
+    },
+    {
+      ...guestDemoCategoryShell("Transportation", 350),
+      expenses: [
+        guestDemoExpense("Fuel", 48.0, 2),
+        guestDemoExpense("Transit pass", 79.0, 10),
+      ],
+      totalCategoryExpenses: 127.0,
+    },
+    {
+      ...guestDemoCategoryShell("Entertainment", 200),
+      expenses: [guestDemoExpense("Concert tickets", 85.0, 8)],
+      totalCategoryExpenses: 85.0,
+    },
+  ];
+
+  const income = 4800;
+  const totalSpent = categories.reduce(
+    (sum, c) => sum + c.totalCategoryExpenses,
+    0,
+  );
+
+  monthData.income = income;
+  monthData.categories = categories;
+  monthData.totalMonthlyExpenses = Math.round(totalSpent * 100) / 100;
+  monthData.monthBalance = Math.round((income - totalSpent) * 100) / 100;
+
+  draftUserData.defaultCategories = categories.map((c) =>
+    guestDemoCategoryShell(c.title, c.maxSpending),
+  );
+
+  if (yearData) {
+    yearData.currentBalance = monthData.monthBalance;
+  }
+
+  seedFutureMonthsInDraft(draftUserData);
+};
+
+export const addANewUserExpenseDoc = async (
+  uid,
+  displayName,
+  options = {},
+) => {
   const userDoc = await getUserDocRef(uid);
 
   if (userDoc) {
@@ -128,13 +256,19 @@ export const addANewUserExpenseDoc = async (uid, displayName) => {
 
   const startYear = getCurrentYear();
 
-  await addDoc(collection(db, "userExpenses"), {
+  const newUserDraft = {
     uid,
     displayName,
     startYear,
     years: initializeYears(startYear),
     defaultCategories: [],
-  });
+  };
+
+  if (options.isAnonymous) {
+    applyGuestDemoSeed(newUserDraft);
+  }
+
+  await addDoc(collection(db, "userExpenses"), newUserDraft);
 };
 
 export const addMonthIncome = async (uid, year, month, income) => {
@@ -328,7 +462,8 @@ export const applyDefaultCategoriesToFutureMonths = async (
       for (let i = currentMonthIndex + 1; i < MONTHS.length; i++) {
         const monthData = currentYearData.months[i];
         if (monthData) {
-          monthData.categories = [...defaultCategories];
+          monthData.categories =
+            cloneDefaultCategoryTemplates(defaultCategories);
         }
       }
     }
@@ -336,7 +471,8 @@ export const applyDefaultCategoriesToFutureMonths = async (
     nextUserData.years.forEach((yearData) => {
       if (yearData.year > currentYear) {
         yearData.months.forEach((monthData) => {
-          monthData.categories = [...defaultCategories];
+          monthData.categories =
+            cloneDefaultCategoryTemplates(defaultCategories);
         });
       }
     });
@@ -352,6 +488,7 @@ export const ensureMonthHasCurrentDefaults = async (uid, year, month) => {
     const currentYear = currentDate.getFullYear();
     const currentMonthIndex = currentDate.getMonth();
     const targetMonthIndex = MONTHS.indexOf(month);
+    if (targetMonthIndex === -1) return false;
 
     const isFutureMonth =
       year > currentYear ||
@@ -365,7 +502,9 @@ export const ensureMonthHasCurrentDefaults = async (uid, year, month) => {
     const monthData = getMonthData(yearData, month);
     if (!monthData) return false;
 
-    monthData.categories = [...defaultCategories];
+    if (monthData.categories?.length > 0) return false;
+
+    monthData.categories = cloneDefaultCategoryTemplates(defaultCategories);
   });
 
   return !!result;
@@ -382,7 +521,7 @@ export const resetMonthToDefaults = async (uid, year, month) => {
     const monthData = getMonthData(yearData, month);
     if (!monthData) return false;
 
-    monthData.categories = [...defaultCategories];
+    monthData.categories = cloneDefaultCategoryTemplates(defaultCategories);
   });
 
   return !!result;

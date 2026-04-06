@@ -67,6 +67,7 @@ const UserDataProvider = ({ children }) => {
       await addANewUserExpenseDoc(
         authUser.uid,
         authUser.displayName || authUser.email || "User",
+        { isAnonymous: authUser.isAnonymous === true },
       );
 
       await ensureUserYearsUpToDate(authUser.uid);

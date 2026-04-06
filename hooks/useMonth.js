@@ -18,7 +18,8 @@ import {
 
 export function useMonth() {
   const { query } = useRouter();
-  const month = query.month;
+  const monthParam = query.month;
+  const month = Array.isArray(monthParam) ? monthParam[0] : monthParam;
   const { selectedYear, userData } = useContext(UserDataContext);
   const { authUser } = useAuth();
 
