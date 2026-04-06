@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  deleteCategory,
   updateCategoryTitle,
   updateCategoryMaxSpending,
 } from "../firebase/firestore";
-import { expenseColor } from "../helperFunctions/expenseColor";
+import { getBudgetProgressStyles } from "../helperFunctions/getBudgetProgressStyles";
 import { Button } from "./Button";
 import { formatAmount } from "../helperFunctions/currencyFormatter";
 import { DragHandleSvg } from "./svg/DragHandleSvg";
@@ -22,7 +21,7 @@ export const CategoryCard = ({
 }) => {
   const { title, maxSpending, expenses } = category;
 
-  const [spentPercentage, setSpentPercentage] = useState("");
+  const [spentPercentage, setSpentPercentage] = useState(0);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingMaxSpending, setIsEditingMaxSpending] = useState(false);
@@ -30,20 +29,16 @@ export const CategoryCard = ({
   const [editMaxSpending, setEditMaxSpending] = useState(maxSpending);
 
   useEffect(() => {
-    const total = expenses.reduce((acc, curr) => {
-      return acc + curr.amount;
-    }, 0);
-
-    let percentage = (total / maxSpending) * 100;
-    if (percentage > 100) {
-      percentage = 100;
-    }
-    setSpentPercentage(Math.round(percentage));
+    const total = expenses.reduce((acc, curr) => acc + curr.amount, 0);
+    const percentage =
+      maxSpending > 0
+        ? Math.min(Math.round((total / maxSpending) * 100), 100)
+        : 0;
 
     setTotalExpenses(total);
+    setSpentPercentage(percentage);
   }, [expenses, maxSpending]);
 
-  // Update local state when props change
   useEffect(() => {
     setEditTitle(title);
     setEditMaxSpending(maxSpending);
@@ -65,100 +60,120 @@ export const CategoryCard = ({
   };
 
   const handleTitleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleTitleSave();
-    } else if (e.key === "Escape") {
+    if (e.key === "Enter") handleTitleSave();
+    if (e.key === "Escape") {
       setEditTitle(title);
       setIsEditingTitle(false);
     }
   };
 
   const handleMaxSpendingKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleMaxSpendingSave();
-    } else if (e.key === "Escape") {
+    if (e.key === "Enter") handleMaxSpendingSave();
+    if (e.key === "Escape") {
       setEditMaxSpending(maxSpending);
       setIsEditingMaxSpending(false);
     }
   };
 
+  const progress = useMemo(
+    () => getBudgetProgressStyles(spentPercentage),
+    [spentPercentage],
+  );
+
   return (
     <div
-      className={`flex flex-col shadow-2xl shadow-gray-900/10 w-full xs:max-w-[400px] bg-slate-800/60 border border-slate-700 rounded-2xl mb-6 md:mb-0 p-4 hover:shadow-3xl hover:shadow-gray-900/20 transition-all duration-300 ${isEditMode ? "ring-2 ring-blue-500 ring-opacity-50 active:scale-95" : ""} ${isDragging ? "shadow-3xl shadow-blue-500/30 scale-105" : ""}`}
+      className={`flex w-full flex-col rounded-2xl border border-slate-700 bg-slate-800/90 p-4 shadow-2xl shadow-black/20 transition-all duration-300 xs:max-w-[400px] md:mb-0 ${
+        isEditMode ? "ring-2 ring-indigo-500/50 active:scale-95" : ""
+      } ${isDragging ? "scale-105 shadow-indigo-500/20" : ""}`}
     >
-      <div className="flex justify-between items-center mb-3">
-        {isEditMode && (
-          <div className="text-gray-400 mr-2">
-            <DragHandleSvg />
-          </div>
-        )}
-        {isEditingTitle ? (
-          <input
-            type="text"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            onBlur={handleTitleSave}
-            onKeyDown={handleTitleKeyPress}
-            className="border border-gray-200 rounded-lg px-2 py-2 text-base flex-1 mr-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            style={{ fontSize: "16px" }}
-            autoFocus
-          />
-        ) : (
-          <span
-            className="cursor-pointer hover:bg-gray-50 px-2 py-2 rounded-lg font-medium text-slate-200 transition-colors"
-            onClick={() => setIsEditingTitle(true)}
-          >
-            {title}
-          </span>
-        )}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center">
+          {isEditMode && (
+            <div className="mr-2 text-slate-400">
+              <DragHandleSvg />
+            </div>
+          )}
+
+          {isEditingTitle ? (
+            <input
+              type="text"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onBlur={handleTitleSave}
+              onKeyDown={handleTitleKeyPress}
+              className="mr-3 flex-1 rounded-lg border border-slate-600 bg-slate-900/80 px-3 py-2 text-base text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              style={{ fontSize: "16px" }}
+              autoFocus
+            />
+          ) : (
+            <span
+              className="cursor-pointer rounded-lg px-2 py-2 font-semibold text-white transition hover:bg-white/5"
+              onClick={() => setIsEditingTitle(true)}
+            >
+              {title}
+            </span>
+          )}
+        </div>
+
         <button
-          className="rounded-lg text-slate-400 px-3 py-1 text-sm font-medium hover:underline"
+          className="rounded-lg px-3 py-1 text-sm font-medium text-slate-400 transition hover:bg-red-500/10 hover:text-red-300"
           onClick={() => handleCategoryDelete(title)}
         >
           Delete
         </button>
       </div>
-      <div className="relative flex justify-center w-full bg-gray-100 h-8 rounded-xl mb-6 shadow-inner">
-        {isEditingMaxSpending ? (
-          <div className="flex items-center z-[1] text-gray-700 font-medium">
-            <span>{formatAmount(totalExpenses)}/</span>
-            <input
-              type="number"
-              step="0.01"
-              value={editMaxSpending}
-              onChange={(e) => setEditMaxSpending(e.target.value)}
-              onBlur={handleMaxSpendingSave}
-              onKeyDown={handleMaxSpendingKeyPress}
-              className="w-16 text-center border border-gray-200 rounded-lg px-2 mx-1 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-              style={{ fontSize: "16px" }}
-              autoFocus
-            />
-          </div>
-        ) : (
-          <span
-            className="text-gray-700 z-[1] cursor-pointer hover:bg-white hover:bg-opacity-50 px-3 py-1 rounded-lg font-medium transition-colors"
-            onClick={() => setIsEditingMaxSpending(true)}
-          >
-            {formatAmount(totalExpenses)}/{formatAmount(maxSpending)}
-          </span>
-        )}
+
+      <div
+        className="relative mb-6 h-6 w-full rounded-2xl overflow-hidden"
+        style={progress.trackStyle}
+      >
         <div
-          className="absolute left-0 h-full rounded-xl shadow-sm"
+          className="absolute left-0 top-0 h-full rounded-2xl transition-all duration-700"
           style={{
-            width: `${spentPercentage}%`,
-            transition: "width 1s ease-in-out",
-            backgroundColor: expenseColor(spentPercentage),
+            width: progress.width,
+            ...progress.fillStyle,
           }}
-        ></div>
+        />
+
+        <div className="relative z-[1] flex h-full items-center justify-center">
+          {isEditingMaxSpending ? (
+            <div className="flex items-center font-medium text-white">
+              <span>{formatAmount(totalExpenses)}/</span>
+              <input
+                type="number"
+                step="0.01"
+                value={editMaxSpending}
+                onChange={(e) => setEditMaxSpending(e.target.value)}
+                onBlur={handleMaxSpendingSave}
+                onKeyDown={handleMaxSpendingKeyPress}
+                className="mx-1 w-20 rounded-lg border border-slate-600 bg-slate-900/80 px-2 py-1 text-center text-base text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                style={{ fontSize: "16px" }}
+                autoFocus
+              />
+            </div>
+          ) : (
+            <span
+              className="cursor-pointer rounded-lg px-3 py-1 font-medium text-slate-100 transition hover:bg-white/5"
+              onClick={() => setIsEditingMaxSpending(true)}
+            >
+              {formatAmount(totalExpenses)}/{formatAmount(maxSpending)}
+            </span>
+          )}
+        </div>
       </div>
-      <div className="flex justify-end">
-        <Button onClick={() => handleViewExpense(title, expenses)}>
+
+      <div className="flex justify-end gap-3">
+        <Button
+          onClick={() => handleViewExpense(title, expenses)}
+          customClassName="rounded-xl border border-indigo-500/40 bg-transparent px-4 py-2 text-indigo-300 hover:bg-indigo-500/10 hover:text-white"
+        >
           View Expense
         </Button>
+
         <Button
           onClick={() => handleAddExpense(title, expenses)}
           filled
-          customClassName="ml-2"
+          customClassName="rounded-xl bg-gradient-to-r from-buttonSecondary to-buttonPrimary px-4 py-2 text-white shadow-[0_8px_24px_rgba(79,70,229,0.25)] hover:shadow-[0_10px_30px_rgba(79,70,229,0.35)]"
         >
           Add Expense
         </Button>

@@ -1,6 +1,5 @@
-import { Transition } from "@headlessui/react";
-import React, { useState } from "react";
-import { expenseColor } from "../helperFunctions/expenseColor";
+import React, { useMemo, useState } from "react";
+import { getBudgetProgressStyles } from "../helperFunctions/getBudgetProgressStyles";
 import { ChevronDoubleUpSvg } from "./svg/ChevronDoubleUpSvg";
 import { formatAmount } from "../helperFunctions/currencyFormatter";
 
@@ -16,14 +15,24 @@ export const MonthBudgetDisplay = ({
       ? Math.round((totalMonthlyExpenses / monthlyExpectation) * 100)
       : 0;
 
-  const expectedPercentage = expectedCalc > 100 ? 100 : expectedCalc;
+  const expectedPercentage = Math.min(expectedCalc, 100);
 
   const budgetCalc =
     monthIncome && totalMonthlyExpenses
       ? Math.round((totalMonthlyExpenses / monthIncome) * 100)
       : 0;
 
-  const budgetPercentage = budgetCalc > 100 ? 100 : budgetCalc;
+  const budgetPercentage = Math.min(budgetCalc, 100);
+
+  const expectedProgress = useMemo(
+    () => getBudgetProgressStyles(expectedPercentage),
+    [expectedPercentage],
+  );
+
+  const budgetProgress = useMemo(
+    () => getBudgetProgressStyles(budgetPercentage),
+    [budgetPercentage],
+  );
 
   const handleClickEvent = () => {
     setFullView(!fullView);
@@ -31,133 +40,160 @@ export const MonthBudgetDisplay = ({
 
   return (
     <div
-      className={`z-10 flex w-full cursor-pointer flex-col items-center rounded-2xl border border-slate-700 bg-slate-800/60 shadow-2xl shadow-black/20 backdrop-blur-sm transition-all duration-300 hover:border-slate-600 hover:shadow-black/30 ${
+      className={`z-10 flex w-full cursor-pointer flex-col items-center rounded-2xl border border-slate-700 bg-slate-800/90 shadow-2xl shadow-black/20 transition-[padding,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-slate-600 hover:shadow-black/30 ${
         fullView ? "p-4 pt-3" : "p-3"
       }`}
       onClick={handleClickEvent}
     >
-      {!fullView && (
-        <div className="flex w-full items-center space-x-4">
-          <div className="flex flex-1 items-center space-x-6 md:space-x-8">
-            <div className="text-center">
-              <div className="mb-1 text-xs font-medium text-slate-400">
-                Spent
-              </div>
-              <div className="text-sm font-bold text-white">
-                {formatAmount(totalMonthlyExpenses)}
-              </div>
-            </div>
-
-            <div className="text-center">
-              <div className="mb-1 text-xs font-medium text-slate-400">
-                Budget
-              </div>
-              <div className="text-sm font-bold text-white">
-                {formatAmount(monthIncome)}
-              </div>
-            </div>
-
-            <div className="text-center">
-              <div className="mb-1 text-xs font-medium text-slate-400">
-                Used
-              </div>
-              <div className="text-sm font-bold text-white">
-                {budgetPercentage}%
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-1 items-center">
-            <div className="mr-3 h-2 flex-1 rounded-full bg-slate-700 shadow-inner">
-              <div
-                className="h-full rounded-full transition-all duration-500 shadow-sm"
-                style={{
-                  width: `${budgetPercentage}%`,
-                  backgroundColor: expenseColor(budgetPercentage),
-                }}
-              />
-            </div>
-
-            <span className="flex-shrink-0 text-slate-400 transition hover:text-white">
-              <ChevronDoubleUpSvg />
-            </span>
-          </div>
-        </div>
-      )}
-
-      <Transition
-        show={fullView}
-        as="div"
-        enter="transition-all transform duration-300"
-        enterFrom="translate-y-full opacity-0"
-        enterTo="translate-y-0 opacity-100"
-        leave="transition ease-in-out duration-300 transform"
-        leaveFrom="translate-y-0 opacity-100"
-        leaveTo="translate-y-full opacity-0"
-        className="w-full"
+      <div
+        className={`grid w-full transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          fullView ? "grid-rows-[0fr]" : "grid-rows-[1fr]"
+        }`}
       >
-        <div className="flex flex-col space-y-4">
-          <span className="mx-auto rotate-180 text-slate-400 transition hover:text-white">
-            <ChevronDoubleUpSvg />
-          </span>
-
-          <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/30 p-4">
-            <div className="text-center">
-              <div className="mb-2 text-sm font-medium text-slate-300">
-                Expected Month Expenses
-              </div>
-
-              <div className="relative flex h-8 w-full justify-center rounded-xl bg-slate-700 shadow-inner">
-                <div
-                  className="absolute left-0 h-full rounded-xl shadow-sm"
-                  style={{
-                    width: `${expectedPercentage}%`,
-                    transition: "width 1s ease-in-out",
-                    backgroundColor: expenseColor(expectedPercentage),
-                  }}
-                />
-
-                <span className="z-10 flex items-center font-medium text-white">
-                  {formatAmount(totalMonthlyExpenses)}/
-                  {formatAmount(monthlyExpectation)}
+        <div className="min-h-0 overflow-hidden">
+          <div
+            className={`flex w-full items-center space-x-4 transition duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              fullView
+                ? "-translate-y-1 opacity-0"
+                : "translate-y-0 opacity-100"
+            }`}
+          >
+            <div className="flex flex-1 items-center space-x-6 md:space-x-8">
+              <div className="flex flex-col items-center">
+                <span className="mb-1 text-xs font-medium text-slate-400">
+                  Spent
+                </span>
+                <span className="text-sm font-bold text-white">
+                  {formatAmount(totalMonthlyExpenses)}
                 </span>
               </div>
 
-              <div className="mt-2 text-xs text-slate-400">
-                {expectedPercentage}% of expected budget
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-slate-700 bg-slate-900/40 p-4">
-            <div className="text-center">
-              <div className="mb-2 text-sm font-medium text-slate-300">
-                Total Monthly Spending
-              </div>
-
-              <div className="relative flex h-8 w-full justify-center rounded-xl bg-slate-700 shadow-inner">
-                <div
-                  className="absolute left-0 h-full rounded-xl shadow-sm"
-                  style={{
-                    width: `${budgetPercentage}%`,
-                    transition: "width 1s ease-in-out",
-                    backgroundColor: expenseColor(budgetPercentage),
-                  }}
-                />
-
-                <span className="z-10 flex items-center font-medium text-white">
-                  {formatAmount(totalMonthlyExpenses)}/
+              <div className="flex flex-col items-center">
+                <span className="mb-1 text-xs font-medium text-slate-400">
+                  Budget
+                </span>
+                <span className="text-sm font-bold text-white">
                   {formatAmount(monthIncome)}
                 </span>
               </div>
 
-              <div className="mt-2 text-xs text-slate-400">
-                {budgetPercentage}% of total income
+              <div className="flex flex-col items-center">
+                <span className="mb-1 text-xs font-medium text-slate-400">
+                  Used
+                </span>
+                <span
+                  className={`text-sm font-bold text-white ${budgetProgress.labelClassName}`}
+                >
+                  {budgetPercentage}%
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-1 items-center">
+              <div
+                className="mr-3 h-2 flex-1 rounded-full shadow-inner overflow-hidden"
+                style={budgetProgress.trackStyle}
+              >
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: budgetProgress.width,
+                    ...budgetProgress.fillStyle,
+                  }}
+                />
+              </div>
+
+              <span className="flex-shrink-0 text-slate-400 transition hover:text-white">
+                <ChevronDoubleUpSvg />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`grid w-full transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+          fullView ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div
+            className={`flex flex-col space-y-4 transition duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              fullView
+                ? "translate-y-0 opacity-100"
+                : "pointer-events-none translate-y-2 scale-[0.99] opacity-0"
+            }`}
+          >
+            <span className="mx-auto rotate-180 text-slate-400 transition hover:text-white">
+              <ChevronDoubleUpSvg />
+            </span>
+
+            <div className="rounded-2xl border border-indigo-500/25 bg-indigo-500/20 p-4 shadow-[0_0_20px_rgba(99,102,241,0.08)]">
+              <div className="text-center">
+                <div className="mb-2 text-sm font-medium text-slate-300">
+                  Expected Month Expenses
+                </div>
+
+                <div
+                  className="relative flex h-8 w-full justify-center rounded-xl shadow-inner overflow-hidden"
+                  style={expectedProgress.trackStyle}
+                >
+                  <div
+                    className="absolute left-0 h-full rounded-xl transition-all duration-700"
+                    style={{
+                      width: expectedProgress.width,
+                      ...expectedProgress.fillStyle,
+                    }}
+                  />
+
+                  <span className="z-10 flex items-center font-medium text-white">
+                    {formatAmount(totalMonthlyExpenses)}/
+                    {formatAmount(monthlyExpectation)}
+                  </span>
+                </div>
+
+                <span
+                  className={`mt-2 text-xs text-slate-300 ${expectedProgress.labelClassName}`}
+                >
+                  {expectedPercentage}% of expected budget
+                </span>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">
+              <div className="text-center">
+                <div className="mb-2 text-sm font-medium text-slate-300">
+                  Total Monthly Spending
+                </div>
+
+                <div
+                  className="relative flex h-8 w-full justify-center rounded-xl shadow-inner overflow-hidden"
+                  style={budgetProgress.trackStyle}
+                >
+                  <div
+                    className="absolute left-0 h-full rounded-xl transition-all duration-700"
+                    style={{
+                      width: budgetProgress.width,
+                      ...budgetProgress.fillStyle,
+                    }}
+                  />
+
+                  <span className="z-10 flex items-center font-medium text-white">
+                    {formatAmount(totalMonthlyExpenses)}/
+                    {formatAmount(monthIncome)}
+                  </span>
+                </div>
+
+                <span
+                  className={`mt-2 text-xs text-slate-300 ${budgetProgress.labelClassName}`}
+                >
+                  {budgetPercentage}% of total income
+                </span>
               </div>
             </div>
           </div>
         </div>
-      </Transition>
+      </div>
     </div>
   );
 };

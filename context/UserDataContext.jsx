@@ -1,7 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { onSnapshot } from "firebase/firestore";
 
-import { showCurrentYear } from "../helperFunctions/showCurrentYear";
 import {
   addANewUserExpenseDoc,
   setDefaultCategories,
@@ -17,6 +16,14 @@ const UserDataContext = createContext();
 
 const getCurrentMonth = () => {
   return MONTHS[new Date().getMonth()];
+};
+
+const showCurrentYear = (data) => {
+  if (data && data.years) {
+    const currentYear = new Date().getFullYear();
+    return data.years.find((year) => year.year === currentYear) || {};
+  }
+  return {};
 };
 
 const UserDataProvider = ({ children }) => {
