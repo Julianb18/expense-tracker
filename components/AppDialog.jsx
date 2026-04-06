@@ -9,6 +9,7 @@ export const AppDialog = ({
   children,
   footer,
   maxWidthClassName = "max-w-[500px]",
+  bodyClassName = "flex-1 overflow-y-auto px-4 py-4 min-h-0",
 }) => {
   return (
     <Dialog
@@ -19,7 +20,7 @@ export const AppDialog = ({
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
 
       <Dialog.Panel
-        className={`relative z-10 flex w-full ${maxWidthClassName} max-h-[90vh] flex-col rounded-2xl border border-slate-700 bg-slate-800/95 text-slate-200 shadow-2xl`}
+        className={`relative z-10 flex w-full ${maxWidthClassName} max-h-[90vh] flex-col overflow-y-auto rounded-2xl border border-slate-700 bg-slate-800/95 text-slate-200 shadow-2xl`}
       >
         <Dialog.Title
           as="div"
@@ -36,7 +37,7 @@ export const AppDialog = ({
           </button>
         </Dialog.Title>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4">{children}</div>
+        <div className={bodyClassName}>{children}</div>
 
         {footer ? (
           <div className="shrink-0 flex justify-end gap-3 border-t border-slate-700 px-4 py-3">

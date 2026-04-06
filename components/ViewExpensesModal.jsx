@@ -2,8 +2,19 @@ import React from "react";
 import { AppDialog } from "./AppDialog";
 import { DeleteSvg } from "./svg/DeleteSvg";
 import { formatCurrency } from "../helperFunctions/currencyFormatter";
+import { useViewExpensesModal } from "../hooks/useViewExpensesModal";
 
-import { deleteExpense } from "../firebase/firestore";
+function formatDate(dateString) {
+  if (!dateString) return "";
+
+  const date = new Date(dateString);
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 export const ViewExpensesModal = ({
   uid,
@@ -15,39 +26,14 @@ export const ViewExpensesModal = ({
   selectedExpenses,
   setSelectedExpenses,
 }) => {
-  const handleDelete = (e, expenseId) => {
-    e.preventDefault();
-
-    deleteExpense(uid, year, month, selectedCategory, expenseId);
-
-    setSelectedExpenses(selectedExpenses.filter((e) => e.id !== expenseId));
-  };
-
-  const handleClose = () => {
-    setIsViewExpensesModalOpen(false);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-
-    const date = new Date(dateString);
-
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
-  const sortedExpenses = [...(selectedExpenses || [])].sort((a, b) => {
-    const expenseDateA = new Date(a.date || 0).getTime();
-    const expenseDateB = new Date(b.date || 0).getTime();
-
-    if (expenseDateB !== expenseDateA) {
-      return expenseDateB - expenseDateA;
-    }
-
-    return (b.createdAt || 0) - (a.createdAt || 0);
+  const { handleClose, handleDelete, sortedExpenses } = useViewExpensesModal({
+    uid,
+    year,
+    month,
+    selectedCategory,
+    setIsViewExpensesModalOpen,
+    selectedExpenses,
+    setSelectedExpenses,
   });
 
   return (

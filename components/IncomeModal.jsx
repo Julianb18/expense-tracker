@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { AppDialog } from "./AppDialog";
 import { Button } from "./Button";
 import { formatCurrency } from "../helperFunctions/currencyFormatter";
-
-import { addMonthIncome } from "../firebase/firestore";
+import { useIncomeModal } from "../hooks/useIncomeModal";
 
 export const IncomeModal = ({
   incomeModalIsOpen,
@@ -13,31 +12,21 @@ export const IncomeModal = ({
   month,
   currentIncome = 0,
 }) => {
-  const [inputVal, setInputVal] = useState("");
-  const [isAddMode, setIsAddMode] = useState(true);
-
-  const resetState = () => {
-    setInputVal("");
-    setIsAddMode(true);
-  };
-
-  const handleClose = () => {
-    setIncomeModalIsOpen(false);
-    resetState();
-  };
-
-  const handleSubmit = (e) => {
-    if (e) e.preventDefault();
-
-    if (inputVal !== "" && Number(inputVal) > 0) {
-      const amount = Number(inputVal);
-      const newIncome = isAddMode ? currentIncome + amount : amount;
-
-      addMonthIncome(uid, year, month, newIncome);
-      setIncomeModalIsOpen(false);
-      resetState();
-    }
-  };
+  const {
+    inputVal,
+    setInputVal,
+    isAddMode,
+    setIsAddMode,
+    handleClose,
+    handleSubmit,
+    previewTotal,
+  } = useIncomeModal({
+    setIncomeModalIsOpen,
+    uid,
+    year,
+    month,
+    currentIncome,
+  });
 
   return (
     <AppDialog
@@ -112,15 +101,13 @@ export const IncomeModal = ({
           />
         </div>
 
-        {inputVal !== "" && Number(inputVal) > 0 && (
+        {previewTotal != null && (
           <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-3 text-center">
             <div className="mb-1 text-sm text-slate-300">
               {isAddMode ? "New Total Income" : "New Income Amount"}
             </div>
             <div className="text-lg font-semibold text-indigo-300">
-              {formatCurrency(
-                isAddMode ? currentIncome + Number(inputVal) : Number(inputVal),
-              )}
+              {formatCurrency(previewTotal)}
             </div>
           </div>
         )}

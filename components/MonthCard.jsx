@@ -1,12 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import { ChevronDown } from "./svg/ChevronDown";
-import {
-  generateChartColors,
-  ensureContrast,
-} from "../helperFunctions/chartColors";
 import { formatCurrency } from "../helperFunctions/currencyFormatter";
+import { useMonthCard } from "../hooks/useMonthCard";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -17,69 +14,18 @@ export const MonthCard = ({
   customCss,
   categories = [],
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const dynamicColors = ensureContrast(generateChartColors(categories.length));
-
-  const chartData = {
-    labels: categories.map((cat) => cat.title),
-    datasets: [
-      {
-        data: categories.map((cat) => cat.totalCategoryExpenses || 0),
-        backgroundColor: dynamicColors,
-        borderWidth: 2,
-        borderColor: "#0f172a",
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: "60%",
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            const label = context.label || "";
-            const value = context.parsed || 0;
-            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-            const percentage =
-              total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-            return `${label}: ${formatCurrency(value)} (${percentage}%)`;
-          },
-        },
-      },
-    },
-  };
-
-  const total = categories.reduce(
-    (sum, cat) => sum + (cat.totalCategoryExpenses || 0),
-    0,
-  );
-
-  const legendData = categories
-    .map((cat, index) => ({
-      title: cat.title,
-      value: cat.totalCategoryExpenses || 0,
-      percentage:
-        total > 0
-          ? (((cat.totalCategoryExpenses || 0) / total) * 100).toFixed(1)
-          : 0,
-      color: dynamicColors[index],
-    }))
-    .filter((item) => item.value > 0);
-
-  const hasExpenses =
-    categories.length > 0 &&
-    categories.some((cat) => (cat.totalCategoryExpenses || 0) > 0);
-
-  const savedAmount = income - totalMonthlyExpenses;
-  const savedAmountClass =
-    savedAmount >= 0 ? "text-emerald-400" : "text-red-400";
+  const {
+    isExpanded,
+    chartData,
+    chartOptions,
+    total,
+    legendData,
+    hasExpenses,
+    savedAmount,
+    savedAmountClass,
+    toggleExpanded,
+    stopPropagation,
+  } = useMonthCard({ income, totalMonthlyExpenses, categories });
 
   return (
     <div
@@ -118,11 +64,7 @@ export const MonthCard = ({
 
           {hasExpenses && (
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
-              }}
+              onClick={toggleExpanded}
               className="mt-4 flex items-center justify-center rounded-xl border border-slate-700 bg-slate-900/40 p-2 text-sm text-slate-400 transition hover:border-slate-600 hover:text-white"
             >
               <span className="mr-2">
@@ -141,10 +83,7 @@ export const MonthCard = ({
       {isExpanded && hasExpenses && (
         <div
           className="rounded-b-2xl border-t border-slate-700 bg-slate-900/70 px-4 pb-4 pt-4"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
+          onClick={stopPropagation}
         >
           <h3 className="mb-4 text-center text-lg font-semibold text-white">
             Spending by Category

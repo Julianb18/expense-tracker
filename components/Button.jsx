@@ -9,7 +9,7 @@ export const Button = ({
   disabled = false,
 }) => {
   const variantClasses = filled
-    ? "bg-buttonPrimary/90 text-white hover:bg-buttonPrimary shadow-[0_8px_18px_rgba(79,70,229,0.25)]"
+    ? "bg-buttonPrimary/90 text-white hover:bg-buttonPrimary shadow-[0_4px_18px_rgba(79,70,229,0.25)]"
     : "border border-buttonPrimary bg-buttonPrimary/10 text-indigo-300 hover:bg-buttonPrimary/20 hover:border-buttonPrimary";
 
   return (

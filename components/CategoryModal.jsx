@@ -1,19 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { AppDialog } from "./AppDialog";
 import { Button } from "./Button";
 import { ChevronDown } from "./svg/ChevronDown";
-import { addCategory } from "../firebase/firestore";
-
-const PREDEFINED_CATEGORIES = [
-  "Rent",
-  "Groceries",
-  "Car",
-  "Utilities",
-  "Loans",
-  "Insurance",
-  "Kita",
-  "Miscellaneous",
-];
+import { useCategoryModal } from "../hooks/useCategoryModal";
 
 export const CategoryModal = ({
   isCategoryModalOpen,
@@ -22,55 +11,29 @@ export const CategoryModal = ({
   year,
   month,
 }) => {
-  const [category, setCategory] = useState({
-    title: "",
-    maxSpending: "",
-    expenses: [],
-    categoryExpense: 0,
-    totalCategoryExpenses: 0,
+  const {
+    category,
+    showDropdown,
+    setShowDropdown,
+    filteredPredefined,
+    handleSubmit,
+    handleCancel,
+    onTitleChange,
+    selectPredefinedTitle,
+    onMaxSpendingChange,
+  } = useCategoryModal({
+    uid,
+    year,
+    month,
+    setIsCategoryModalOpen,
   });
-
-  const [showDropdown, setShowDropdown] = useState(false);
-
-  const resetForm = () => {
-    setCategory({
-      title: "",
-      maxSpending: "",
-      expenses: [],
-      categoryExpense: 0,
-      totalCategoryExpenses: 0,
-    });
-    setShowDropdown(false);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (
-      category.title !== "" &&
-      category.maxSpending !== "" &&
-      Number(category.maxSpending) > 0
-    ) {
-      addCategory(uid, year, month, {
-        ...category,
-        maxSpending: Number(category.maxSpending),
-      });
-
-      setIsCategoryModalOpen(false);
-      resetForm();
-    }
-  };
-
-  const handleCancel = () => {
-    setIsCategoryModalOpen(false);
-    resetForm();
-  };
 
   return (
     <AppDialog
       open={isCategoryModalOpen}
       onClose={handleCancel}
       title="Add Category"
+      bodyClassName="shrink-0 overflow-visible px-4 py-4"
       footer={
         <>
           <Button
@@ -92,44 +55,34 @@ export const CategoryModal = ({
             Category Name
           </label>
 
-          <div className="relative overflow-visible">
-            <input
-              type="text"
-              className="w-full rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              style={{ fontSize: "16px" }}
-              placeholder="Type category name"
-              value={category.title}
-              onChange={(e) => {
-                const inputValue = e.target.value;
-                setCategory({ ...category, title: inputValue });
+          <div className="overflow-visible">
+            <div className="flex gap-0 rounded-xl border border-slate-600 bg-slate-900/70 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500">
+              <input
+                type="text"
+                className="min-w-0 flex-1 rounded-l-xl border-0 bg-transparent px-4 py-3 text-base text-white placeholder:text-slate-400 focus:outline-none focus:ring-0"
+                style={{ fontSize: "16px" }}
+                placeholder="Type category name"
+                value={category.title}
+                onChange={(e) => onTitleChange(e.target.value)}
+              />
 
-                const hasMatches = PREDEFINED_CATEGORIES.some((cat) =>
-                  cat.toLowerCase().includes(inputValue.toLowerCase()),
-                );
-                setShowDropdown(inputValue.length > 0 && hasMatches);
-              }}
-            />
+              <button
+                type="button"
+                className="flex shrink-0 items-center px-3 text-slate-400 transition hover:text-white"
+                onClick={() => setShowDropdown(!showDropdown)}
+                aria-expanded={showDropdown}
+              >
+                <ChevronDown className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
 
-            <button
-              type="button"
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400"
-              onClick={() => setShowDropdown(!showDropdown)}
-            >
-              <ChevronDown className="h-5 w-5" aria-hidden="true" />
-            </button>
-
-            {showDropdown && (
-              <div className="absolute z-50 mt-1 max-h-44 w-full overflow-auto rounded-2xl border border-slate-700 bg-slate-900 py-1 shadow-xl">
-                {PREDEFINED_CATEGORIES.filter((cat) =>
-                  cat.toLowerCase().includes(category.title.toLowerCase()),
-                ).map((categoryName) => (
+            {showDropdown && filteredPredefined.length > 0 && (
+              <div className="mt-2 w-full max-h-72 overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 shadow-xl">
+                {filteredPredefined.map((categoryName, index) => (
                   <div
                     key={categoryName}
-                    className="cursor-pointer px-3 py-2 text-sm text-slate-200 transition hover:bg-buttonSecondary hover:text-white"
-                    onClick={() => {
-                      setCategory({ ...category, title: categoryName });
-                      setShowDropdown(false);
-                    }}
+                    className={`cursor-pointer px-3 py-2 text-sm text-slate-200 transition hover:bg-buttonPrimary hover:text-white ${index === 0 ? "rounded-t-lg" : ""} ${index === filteredPredefined.length - 1 ? "rounded-b-2xl" : ""}`}
+                    onClick={() => selectPredefinedTitle(categoryName)}
                   >
                     {categoryName}
                   </div>
@@ -150,12 +103,7 @@ export const CategoryModal = ({
             step="0.01"
             placeholder="Enter amount (e.g. 500.00)"
             value={category.maxSpending}
-            onChange={(e) =>
-              setCategory({
-                ...category,
-                maxSpending: e.target.value,
-              })
-            }
+            onChange={(e) => onMaxSpendingChange(e.target.value)}
           />
         </div>
       </div>

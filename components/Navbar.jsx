@@ -17,7 +17,7 @@ export const Navbar = () => {
 
   return (
     <header className="fixed top-0 w-full shadow-lg shadow-primaryDark z-50 flex justify-between items-center px-3 py-3 bg-primaryDark text-white">
-      <Link href="/dashboard" className="text-buttonSecondary flex gap-4">
+      <Link href="/dashboard" className="text-buttonPrimary flex gap-4">
         <MoneySvg /> ExpenseTracker
       </Link>
 
@@ -46,10 +46,7 @@ export const Navbar = () => {
           </Menu.Items>
         </Menu>
       ) : (
-        <Button
-          onClick={handleLoginClick}
-          customClassName="bg-buttonSecondary hover:bg-buttonPrimary text-white px-4 py-2 text-sm font-medium"
-        >
+        <Button filled onClick={handleLoginClick}>
           Login / Register
         </Button>
       )}

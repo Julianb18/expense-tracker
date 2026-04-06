@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { getBudgetProgressStyles } from "../helperFunctions/getBudgetProgressStyles";
+import React from "react";
+import { useMonthBudgetDisplay } from "../hooks/useMonthBudgetDisplay";
 import { ChevronDoubleUpSvg } from "./svg/ChevronDoubleUpSvg";
 import { formatAmount } from "../helperFunctions/currencyFormatter";
 
@@ -8,42 +8,25 @@ export const MonthBudgetDisplay = ({
   totalMonthlyExpenses,
   monthlyExpectation,
 }) => {
-  const [fullView, setFullView] = useState(false);
-
-  const expectedCalc =
-    monthlyExpectation && totalMonthlyExpenses
-      ? Math.round((totalMonthlyExpenses / monthlyExpectation) * 100)
-      : 0;
-
-  const expectedPercentage = Math.min(expectedCalc, 100);
-
-  const budgetCalc =
-    monthIncome && totalMonthlyExpenses
-      ? Math.round((totalMonthlyExpenses / monthIncome) * 100)
-      : 0;
-
-  const budgetPercentage = Math.min(budgetCalc, 100);
-
-  const expectedProgress = useMemo(
-    () => getBudgetProgressStyles(expectedPercentage),
-    [expectedPercentage],
-  );
-
-  const budgetProgress = useMemo(
-    () => getBudgetProgressStyles(budgetPercentage),
-    [budgetPercentage],
-  );
-
-  const handleClickEvent = () => {
-    setFullView(!fullView);
-  };
+  const {
+    fullView,
+    toggleFullView,
+    expectedPercentage,
+    budgetPercentage,
+    expectedProgress,
+    budgetProgress,
+  } = useMonthBudgetDisplay({
+    monthIncome,
+    totalMonthlyExpenses,
+    monthlyExpectation,
+  });
 
   return (
     <div
       className={`z-10 flex w-full cursor-pointer flex-col items-center rounded-2xl border border-slate-700 bg-slate-800/90 shadow-2xl shadow-black/20 transition-[padding,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-slate-600 hover:shadow-black/30 ${
         fullView ? "p-4 pt-3" : "p-3"
       }`}
-      onClick={handleClickEvent}
+      onClick={toggleFullView}
     >
       <div
         className={`grid w-full transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${

@@ -9,6 +9,12 @@ export const PREDEFINED_CATEGORIES = [
   "Insurance",
   "Kita",
   "Miscellaneous",
+  "Savings",
+  "Entertainment",
+  "Travel",
+  "Education",
+  "Health",
+  "Clothing",
 ];
 
 export const MONTHS = [

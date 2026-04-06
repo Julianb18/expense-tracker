@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { AppDialog } from "./AppDialog";
-import { v4 as uuid } from "uuid";
-
 import { Button } from "./Button";
-
-import { addExpense } from "../firebase/firestore";
 import { formatCurrency } from "../helperFunctions/currencyFormatter";
+import { useExpenseModal } from "../hooks/useExpenseModal";
 
 export const ExpenseModal = ({
   uid,
@@ -16,71 +13,24 @@ export const ExpenseModal = ({
   setIsExpenseModalOpen,
   selectedCategoryData,
 }) => {
-  const [expense, setExpense] = useState({
-    title: "",
-    amount: "",
-    id: uuid(),
-    date: new Date().toISOString().split("T")[0],
+  const {
+    expense,
+    handleClose,
+    handleSubmit,
+    totalSpent,
+    availableAmount,
+    remainingAfterExpense,
+    setTitle,
+    setAmount,
+    setDate,
+  } = useExpenseModal({
+    uid,
+    year,
+    month,
+    selectedCategory,
+    setIsExpenseModalOpen,
+    selectedCategoryData,
   });
-
-  const resetExpense = () => {
-    setExpense({
-      title: "",
-      amount: "",
-      id: uuid(),
-      date: new Date().toISOString().split("T")[0],
-      createdAt: Date.now(),
-    });
-  };
-
-  const handleClose = () => {
-    setIsExpenseModalOpen(false);
-    resetExpense();
-  };
-
-  const handleSubmit = (e) => {
-    if (e) e.preventDefault();
-
-    const tempExpense = {
-      ...expense,
-      id: uuid(),
-      createdAt: Date.now(),
-    };
-
-    if (
-      tempExpense.title !== "" &&
-      tempExpense.amount !== "" &&
-      Number(tempExpense.amount) > 0
-    ) {
-      addExpense(uid, year, month, selectedCategory, {
-        ...tempExpense,
-        amount: Number(tempExpense.amount),
-      });
-
-      setIsExpenseModalOpen(false);
-      resetExpense();
-    }
-  };
-
-  const totalSpent =
-    selectedCategoryData?.expenses?.reduce(
-      (acc, curr) => acc + curr.amount,
-      0,
-    ) || 0;
-
-  const getAvailableAmount = () => {
-    if (!selectedCategoryData) return 0;
-    return selectedCategoryData.maxSpending - totalSpent;
-  };
-
-  const availableAmount = getAvailableAmount();
-
-  const getRemainingAfterExpense = () => {
-    const currentExpenseAmount = parseFloat(expense.amount) || 0;
-    return availableAmount - currentExpenseAmount;
-  };
-
-  const remainingAfterExpense = getRemainingAfterExpense();
 
   return (
     <AppDialog
@@ -137,7 +87,7 @@ export const ExpenseModal = ({
             type="text"
             name="title"
             value={expense.title}
-            onChange={(e) => setExpense({ ...expense, title: e.target.value })}
+            onChange={(e) => setTitle(e.target.value)}
             className="w-full rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             style={{ fontSize: "16px" }}
             placeholder="Enter expense description"
@@ -158,12 +108,7 @@ export const ExpenseModal = ({
             step="0.01"
             name="amount"
             value={expense.amount}
-            onChange={(e) =>
-              setExpense({
-                ...expense,
-                amount: e.target.value,
-              })
-            }
+            onChange={(e) => setAmount(e.target.value)}
             className="w-full rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             style={{ fontSize: "16px" }}
             placeholder="Enter amount (e.g. 12.50)"
@@ -183,12 +128,7 @@ export const ExpenseModal = ({
             type="date"
             name="date"
             value={expense.date}
-            onChange={(e) =>
-              setExpense({
-                ...expense,
-                date: e.target.value,
-              })
-            }
+            onChange={(e) => setDate(e.target.value)}
             className="w-full appearance-none rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             style={{ fontSize: "16px", minWidth: "0", maxWidth: "100%" }}
           />

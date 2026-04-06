@@ -1,9 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  updateCategoryTitle,
-  updateCategoryMaxSpending,
-} from "../firebase/firestore";
-import { getBudgetProgressStyles } from "../helperFunctions/getBudgetProgressStyles";
+import React from "react";
+import { useCategoryCard } from "../hooks/useCategoryCard";
 import { Button } from "./Button";
 import { formatAmount } from "../helperFunctions/currencyFormatter";
 import { DragHandleSvg } from "./svg/DragHandleSvg";
@@ -19,66 +15,25 @@ export const CategoryCard = ({
   isEditMode = false,
   isDragging = false,
 }) => {
-  const { title, maxSpending, expenses } = category;
-
-  const [spentPercentage, setSpentPercentage] = useState(0);
-  const [totalExpenses, setTotalExpenses] = useState(0);
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [isEditingMaxSpending, setIsEditingMaxSpending] = useState(false);
-  const [editTitle, setEditTitle] = useState(title);
-  const [editMaxSpending, setEditMaxSpending] = useState(maxSpending);
-
-  useEffect(() => {
-    const total = expenses.reduce((acc, curr) => acc + curr.amount, 0);
-    const percentage =
-      maxSpending > 0
-        ? Math.min(Math.round((total / maxSpending) * 100), 100)
-        : 0;
-
-    setTotalExpenses(total);
-    setSpentPercentage(percentage);
-  }, [expenses, maxSpending]);
-
-  useEffect(() => {
-    setEditTitle(title);
-    setEditMaxSpending(maxSpending);
-  }, [title, maxSpending]);
-
-  const handleTitleSave = async () => {
-    if (editTitle.trim() && editTitle !== title) {
-      await updateCategoryTitle(uid, year, month, title, editTitle.trim());
-    }
-    setIsEditingTitle(false);
-  };
-
-  const handleMaxSpendingSave = async () => {
-    const newAmount = Number(editMaxSpending);
-    if (newAmount > 0 && newAmount !== maxSpending) {
-      await updateCategoryMaxSpending(uid, year, month, title, newAmount);
-    }
-    setIsEditingMaxSpending(false);
-  };
-
-  const handleTitleKeyPress = (e) => {
-    if (e.key === "Enter") handleTitleSave();
-    if (e.key === "Escape") {
-      setEditTitle(title);
-      setIsEditingTitle(false);
-    }
-  };
-
-  const handleMaxSpendingKeyPress = (e) => {
-    if (e.key === "Enter") handleMaxSpendingSave();
-    if (e.key === "Escape") {
-      setEditMaxSpending(maxSpending);
-      setIsEditingMaxSpending(false);
-    }
-  };
-
-  const progress = useMemo(
-    () => getBudgetProgressStyles(spentPercentage),
-    [spentPercentage],
-  );
+  const {
+    title,
+    maxSpending,
+    expenses,
+    totalExpenses,
+    isEditingTitle,
+    setIsEditingTitle,
+    isEditingMaxSpending,
+    setIsEditingMaxSpending,
+    editTitle,
+    setEditTitle,
+    editMaxSpending,
+    setEditMaxSpending,
+    handleTitleSave,
+    handleMaxSpendingSave,
+    handleTitleKeyPress,
+    handleMaxSpendingKeyPress,
+    progress,
+  } = useCategoryCard({ category, uid, year, month });
 
   return (
     <div
@@ -163,16 +118,11 @@ export const CategoryCard = ({
       </div>
 
       <div className="flex justify-end gap-3">
-        <Button
-          onClick={() => handleViewExpense(title, expenses)}
-        >
+        <Button onClick={() => handleViewExpense(title, expenses)}>
           View Expense
         </Button>
 
-        <Button
-          onClick={() => handleAddExpense(title, expenses)}
-          filled
-        >
+        <Button onClick={() => handleAddExpense(title, expenses)} filled>
           Add Expense
         </Button>
       </div>

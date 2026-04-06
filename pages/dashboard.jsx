@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import React from "react";
 import Link from "next/link";
 
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -8,11 +7,7 @@ import { MonthCard } from "../components/MonthCard";
 import { MonthDropdown } from "../components/MonthDropdown";
 import { DefaultCategoriesModal } from "../components/DefaultCategoriesModal";
 import { Button } from "../components/Button";
-
-import { UserDataContext } from "../context/UserDataContext";
-import { useAuth } from "../context/AuthContext";
-
-import { addYearBalance } from "../firebase/firestore";
+import { useDashboard } from "../hooks/useDashboard";
 
 const Dashboard = () => {
   const {
@@ -23,30 +18,22 @@ const Dashboard = () => {
     setSelectedMonth,
     defaultCategories,
     handleSaveDefaultCategories,
-  } = useContext(UserDataContext);
-  const { authUser, isLoading } = useAuth();
-  const router = useRouter();
+    isDefaultCategoriesModalOpen,
+    setIsDefaultCategoriesModalOpen,
+    selectedMonthData,
+    openDefaultCategoriesModal,
+    isReady,
+  } = useDashboard();
 
-  const [isDefaultCategoriesModalOpen, setIsDefaultCategoriesModalOpen] =
-    useState(false);
+  if (!isReady) {
+    return (
+      <div className="h-[40vh] flex justify-center items-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    if (!isLoading && !authUser) {
-      router.push("/");
-    }
-  }, [authUser, isLoading, router]);
-
-  const accumulatedBalance = selectedYear?.months.reduce((total, month) => {
-    return total + month.monthBalance;
-  }, 0);
-
-  useEffect(() => {
-    if (authUser && selectedYear) {
-      addYearBalance(authUser.uid, selectedYear.year, accumulatedBalance);
-    }
-  }, [accumulatedBalance, authUser, selectedYear]);
-
-  return authUser && userData && userData.years && selectedYear ? (
+  return (
     <div className="h-screen max-w-[900px] mx-auto flex flex-col justify-center">
       <div className="mt-20 py-4 flex-shrink-0">
         <div className="text-white mb-4">
@@ -68,40 +55,30 @@ const Dashboard = () => {
       </div>
 
       <div className="flex flex-col items-center flex-1 mt-6 px-4 pb-20">
-        {(() => {
-          const selectedMonthData = selectedYear.months.find(
-            (month) => month.month === selectedMonth,
-          );
-
-          if (!selectedMonthData) {
-            return (
-              <div className="text-white text-center">
-                No data available for {selectedMonth}
-              </div>
-            );
-          }
-
-          return (
-            <Link
-              className="w-full sm:w-fit flex justify-center"
-              href={`/month/${selectedMonthData.month}`}
-              key={selectedMonth}
-            >
-              <MonthCard
-                month={selectedMonthData.month}
-                income={selectedMonthData.income}
-                totalMonthlyExpenses={selectedMonthData.totalMonthlyExpenses}
-                customCss=""
-                categories={selectedMonthData.categories || []}
-              />
-            </Link>
-          );
-        })()}
+        {!selectedMonthData ? (
+          <div className="text-white text-center">
+            No data available for {selectedMonth}
+          </div>
+        ) : (
+          <Link
+            className="w-full sm:w-fit flex justify-center"
+            href={`/month/${selectedMonthData.month}`}
+            key={selectedMonth}
+          >
+            <MonthCard
+              month={selectedMonthData.month}
+              income={selectedMonthData.income}
+              totalMonthlyExpenses={selectedMonthData.totalMonthlyExpenses}
+              customCss=""
+              categories={selectedMonthData.categories || []}
+            />
+          </Link>
+        )}
       </div>
 
       <div className="fixed bottom-8 right-8 z-10">
         <Button
-          onClick={() => setIsDefaultCategoriesModalOpen(true)}
+          onClick={openDefaultCategoriesModal}
           filled
           customClassName="text-white px-6 py-3 shadow-lg"
         >
@@ -115,10 +92,6 @@ const Dashboard = () => {
         existingDefaults={defaultCategories}
         onSave={handleSaveDefaultCategories}
       />
-    </div>
-  ) : (
-    <div className="h-[40vh] flex justify-center items-center">
-      <LoadingSpinner />
     </div>
   );
 };
