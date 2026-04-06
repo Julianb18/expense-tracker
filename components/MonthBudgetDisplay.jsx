@@ -23,7 +23,7 @@ export const MonthBudgetDisplay = ({
 
   return (
     <div
-      className={`z-10 flex w-full cursor-pointer flex-col items-center rounded-2xl border border-slate-700 bg-slate-800/90 shadow-2xl shadow-black/20 transition-[padding,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-slate-600 hover:shadow-black/30 ${
+      className={`z-10 flex w-full cursor-pointer flex-col items-center rounded-2xl border border-slate-700 bg-slate-800 shadow-2xl shadow-black/20 transition-[padding,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-slate-600 hover:shadow-black/30 ${
         fullView ? "p-4 pt-3" : "p-3"
       }`}
       onClick={toggleFullView}

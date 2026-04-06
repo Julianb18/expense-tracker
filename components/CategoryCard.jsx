@@ -79,7 +79,7 @@ export const CategoryCard = ({
       </div>
 
       <div
-        className="relative mb-6 h-6 w-full rounded-2xl overflow-hidden"
+        className="relative mb-6 h-5 w-full rounded-2xl overflow-hidden"
         style={progress.trackStyle}
       >
         <div
