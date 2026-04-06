@@ -1,33 +1,31 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useRouter } from "next/router";
-import Link from "next/link";
 
-import { BackSvg } from "../../components/svg/BackSvg";
-import { ArrowUpSvg } from "../../components/svg/ArrowUpSvg";
-import { ArrowDownSvg } from "../../components/svg/ArrowDownSvg";
-import { CategoryCard } from "../../components/CategoryCard";
-import { Button } from "../../components/Button";
 import { MonthBudgetDisplay } from "../../components/MonthBudgetDisplay";
-import { IncomeModal } from "../../components/IncomeModal";
-import { CategoryModal } from "../../components/CategoryModal";
-import { ExpenseModal } from "../../components/ExpenseModal";
-import { ViewExpensesModal } from "../../components/ViewExpensesModal";
+import { MonthCategoryList } from "../../components/MonthCategoryList";
+import { MonthPageHeader } from "../../components/MonthPageHeader";
+import { MonthPageModals } from "../../components/MonthPageModals";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
 
 import { UserDataContext } from "../../context/UserDataContext";
 import { useAuth } from "../../context/AuthContext";
+import { useCategoryReorder } from "../../hooks/useCategoryReorder";
 
 import {
   addMonthBalanceAndExpense,
   ensureMonthHasCurrentDefaults,
   updateCategoryOrder,
 } from "../../firebase/firestore";
-import { LoadingSpinner } from "../../components/LoadingSpinner";
-import { ConfirmDeleteModal } from "../../components/ConfirmDeleteModal";
-import { formatCurrency } from "../../helperFunctions/currencyFormatter";
 
 const Month = () => {
-  const router = useRouter();
-  const { month } = router.query;
+  const { query } = useRouter();
+  const month = query.month;
   const { selectedYear, userData } = useContext(UserDataContext);
   const { authUser } = useAuth();
 
@@ -41,25 +39,57 @@ const Month = () => {
   const [selectedExpenses, setSelectedExpenses] = useState([]);
   const [selectedCategoryData, setSelectedCategoryData] = useState(null);
 
-  const [totalMonthlyExpenses, setTotalMonthlyExpenses] = useState(0);
-  const [monthlyExpectation, setMonthlyExpectation] = useState(0);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [draggedIndex, setDraggedIndex] = useState(null);
-  const [touchStartY, setTouchStartY] = useState(null);
-  const [touchStartIndex, setTouchStartIndex] = useState(null);
-  const [touchCurrentY, setTouchCurrentY] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [autoScrollInterval, setAutoScrollInterval] = useState(null);
-  const [dropTargetIndex, setDropTargetIndex] = useState(null);
 
   const selectedMonth = selectedYear?.months.find((m) => m.month === month);
+  const categories = selectedMonth?.categories ?? [];
 
-  const stopAutoScroll = useCallback(() => {
-    if (autoScrollInterval) {
-      clearInterval(autoScrollInterval);
-      setAutoScrollInterval(null);
+  const { totalMonthlyExpenses, monthlyExpectation } = useMemo(() => {
+    if (!selectedMonth?.categories?.length) {
+      return { totalMonthlyExpenses: 0, monthlyExpectation: 0 };
     }
-  }, [autoScrollInterval]);
+    return selectedMonth.categories.reduce(
+      (acc, curr) => ({
+        totalMonthlyExpenses:
+          acc.totalMonthlyExpenses + curr.totalCategoryExpenses,
+        monthlyExpectation: acc.monthlyExpectation + curr.maxSpending,
+      }),
+      { totalMonthlyExpenses: 0, monthlyExpectation: 0 },
+    );
+  }, [selectedMonth]);
+
+  const persistCategoryOrder = useCallback(
+    (nextCategories) => {
+      if (userData?.uid && selectedYear?.year && month) {
+        updateCategoryOrder(
+          userData.uid,
+          selectedYear.year,
+          month,
+          nextCategories,
+        );
+      }
+    },
+    [userData?.uid, selectedYear?.year, month],
+  );
+
+  const {
+    draggedIndex,
+    dropTargetIndex,
+    isDragging,
+    touchCurrentY,
+    touchStartY,
+    handleDragStart,
+    handleDragOver,
+    handleDrop,
+    handleDragEnd,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  } = useCategoryReorder({
+    categories,
+    isEditMode,
+    onPersistOrder: persistCategoryOrder,
+  });
 
   useEffect(() => {
     const ensureDefaults = async () => {
@@ -67,238 +97,12 @@ const Month = () => {
         await ensureMonthHasCurrentDefaults(
           authUser.uid,
           selectedYear.year,
-          month
+          month,
         );
       }
     };
-
     ensureDefaults();
   }, [authUser?.uid, selectedYear?.year, month]);
-
-  // Cleanup auto-scroll when component unmounts or edit mode changes
-  useEffect(() => {
-    return () => {
-      stopAutoScroll();
-    };
-  }, [stopAutoScroll]);
-
-  useEffect(() => {
-    if (!isEditMode) {
-      stopAutoScroll();
-    }
-  }, [isEditMode, stopAutoScroll]);
-
-  const handleAddExpense = (currentCategory, expenses) => {
-    setSelectedCategory(currentCategory);
-    setIsExpenseModalOpen(true);
-    setSelectedExpenses(expenses);
-    const categoryData = selectedMonth?.categories.find(
-      (cat) => cat.title === currentCategory
-    );
-    setSelectedCategoryData(categoryData);
-  };
-
-  const handleViewExpense = (currentCategory, expenses) => {
-    setSelectedCategory(currentCategory);
-    setIsViewExpensesModalOpen(true);
-    setSelectedExpenses(expenses);
-  };
-
-  const handleCategoryDelete = (currentCategory) => {
-    setSelectedCategory(currentCategory);
-    setIsConfirmDeleteModalOpen(true);
-  };
-
-  const handleDragStart = (e, index) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDragOver = (e, dropIndex) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    setDropTargetIndex(dropIndex);
-  };
-
-  const handleDrop = (e, dropIndex) => {
-    e.preventDefault();
-    if (draggedIndex === null || draggedIndex === dropIndex) return;
-
-    const newCategories = [...selectedMonth.categories];
-    const draggedCategory = newCategories[draggedIndex];
-    newCategories.splice(draggedIndex, 1);
-    newCategories.splice(dropIndex, 0, draggedCategory);
-
-    // Update the order in Firestore
-    updateCategoryOrder(userData.uid, selectedYear.year, month, newCategories);
-    setDraggedIndex(null);
-    setDropTargetIndex(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-    setDropTargetIndex(null);
-  };
-
-  const startAutoScroll = (direction) => {
-    if (autoScrollInterval) return;
-
-    const scrollAmount = direction === "up" ? -10 : 10;
-    const interval = setInterval(() => {
-      window.scrollBy(0, scrollAmount);
-    }, 16); // ~60fps
-
-    setAutoScrollInterval(interval);
-  };
-
-  const handleTouchStart = (e, index) => {
-    if (!isEditMode) return;
-
-    // Check if touch is in the safe scroll zone (right 64px on mobile)
-    const touchX = e.touches[0].clientX;
-    const screenWidth = window.innerWidth;
-    const safeZoneWidth = 64; // 16 * 4 (w-16 in Tailwind)
-
-    if (touchX > screenWidth - safeZoneWidth) {
-      // Touch is in safe zone, allow normal scrolling
-      return;
-    }
-
-    e.preventDefault();
-    setTouchStartY(e.touches[0].clientY);
-    setTouchCurrentY(e.touches[0].clientY);
-    setTouchStartIndex(index);
-    setDraggedIndex(index);
-    setIsDragging(true);
-  };
-
-  const handleTouchMove = (e) => {
-    if (!isEditMode || touchStartIndex === null) return;
-    e.preventDefault();
-
-    const currentY = e.touches[0].clientY;
-    setTouchCurrentY(currentY);
-
-    // Calculate drop target based on current position
-    const categoryElements = document.querySelectorAll("[data-category-index]");
-    let newDropTarget = null;
-
-    // Check each element to find the best drop target
-    for (let i = 0; i < categoryElements.length; i++) {
-      if (i === touchStartIndex) continue; // Skip the dragged element
-
-      const element = categoryElements[i];
-      const rect = element.getBoundingClientRect();
-      const elementTop = rect.top;
-      const elementBottom = rect.bottom;
-      const elementCenter = elementTop + rect.height / 2;
-
-      // If we're above the center of this element, this is our target
-      if (currentY < elementCenter) {
-        newDropTarget = i;
-        break;
-      }
-    }
-
-    // If we didn't find a target above any element, check if we're below the last element
-    if (newDropTarget === null && categoryElements.length > 0) {
-      const lastElement = categoryElements[categoryElements.length - 1];
-      const lastRect = lastElement.getBoundingClientRect();
-      if (currentY > lastRect.bottom) {
-        newDropTarget = categoryElements.length - 1;
-      }
-    }
-
-    // If we're above the first element, target position 0
-    if (newDropTarget === null && categoryElements.length > 0) {
-      const firstElement = categoryElements[0];
-      const firstRect = firstElement.getBoundingClientRect();
-      if (currentY < firstRect.top) {
-        newDropTarget = 0;
-      }
-    }
-
-    setDropTargetIndex(newDropTarget);
-
-    // Debug log (remove in production)
-    if (newDropTarget !== null) {
-      console.log(
-        `Drop target: ${newDropTarget}, Start index: ${touchStartIndex}`
-      );
-    }
-
-    // Auto-scroll logic
-    const deltaY = currentY - touchStartY;
-    const scrollThreshold = 100;
-
-    if (Math.abs(deltaY) > scrollThreshold) {
-      const direction = deltaY > 0 ? "down" : "up";
-      startAutoScroll(direction);
-    } else {
-      stopAutoScroll();
-    }
-  };
-
-  const handleTouchEnd = (e) => {
-    if (!isEditMode || touchStartIndex === null) return;
-    e.preventDefault();
-
-    stopAutoScroll();
-
-    // Use drop target if available
-    let targetIndex = dropTargetIndex;
-
-    console.log(
-      `Touch end - Drop target: ${targetIndex}, Start index: ${touchStartIndex}`
-    );
-
-    // Perform reorder if we have a valid target
-    if (
-      targetIndex !== null &&
-      targetIndex !== touchStartIndex &&
-      targetIndex >= 0 &&
-      targetIndex < selectedMonth.categories.length
-    ) {
-      const newCategories = [...selectedMonth.categories];
-      const draggedCategory = newCategories[touchStartIndex];
-      newCategories.splice(touchStartIndex, 1);
-      newCategories.splice(targetIndex, 0, draggedCategory);
-
-      console.log(`Reordering from ${touchStartIndex} to ${targetIndex}`);
-      updateCategoryOrder(
-        userData.uid,
-        selectedYear.year,
-        month,
-        newCategories
-      );
-    }
-
-    setTouchStartY(null);
-    setTouchCurrentY(null);
-    setTouchStartIndex(null);
-    setDraggedIndex(null);
-    setIsDragging(false);
-    setDropTargetIndex(null);
-  };
-
-  useEffect(() => {
-    if (selectedMonth) {
-      const tempMonthlyExpense = selectedMonth.categories.reduce(
-        (acc, curr) => {
-          return acc + curr.totalCategoryExpenses;
-        },
-        0
-      );
-      const tempMonthlyExpectation = selectedMonth.categories.reduce(
-        (acc, curr) => {
-          return acc + curr.maxSpending;
-        },
-        0
-      );
-      setTotalMonthlyExpenses(tempMonthlyExpense);
-      setMonthlyExpectation(tempMonthlyExpectation);
-    }
-  }, [selectedMonth]);
 
   useEffect(() => {
     const mBalance = selectedMonth?.income - totalMonthlyExpenses;
@@ -308,137 +112,83 @@ const Month = () => {
         selectedYear.year,
         month,
         mBalance,
-        totalMonthlyExpenses
+        totalMonthlyExpenses,
       );
     }
   }, [totalMonthlyExpenses, selectedMonth, userData, selectedYear, month]);
 
-  return selectedMonth ? (
+  const handleAddExpense = useCallback(
+    (currentCategory, expenses) => {
+      setSelectedCategory(currentCategory);
+      setIsExpenseModalOpen(true);
+      setSelectedExpenses(expenses);
+      const categoryData = selectedMonth?.categories.find(
+        (cat) => cat.title === currentCategory,
+      );
+      setSelectedCategoryData(categoryData);
+    },
+    [selectedMonth?.categories],
+  );
+
+  const handleViewExpense = useCallback((currentCategory, expenses) => {
+    setSelectedCategory(currentCategory);
+    setIsViewExpensesModalOpen(true);
+    setSelectedExpenses(expenses);
+  }, []);
+
+  const handleCategoryDelete = useCallback((currentCategory) => {
+    setSelectedCategory(currentCategory);
+    setIsConfirmDeleteModalOpen(true);
+  }, []);
+
+  const anyModalOpen =
+    incomeModalIsOpen ||
+    isCategoryModalOpen ||
+    isExpenseModalOpen ||
+    isViewExpensesModalOpen ||
+    isConfirmDeleteModalOpen;
+
+  if (!selectedMonth) {
+    return (
+      <div className="h-[40vh] flex justify-center items-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  return (
     <div className="relative max-w-[900px] mx-auto h-full">
-      <IncomeModal
+      <MonthPageModals
         incomeModalIsOpen={incomeModalIsOpen}
         setIncomeModalIsOpen={setIncomeModalIsOpen}
-        uid={userData?.uid}
-        year={selectedYear?.year}
-        month={month}
-        currentIncome={selectedMonth?.income || 0}
-      />
-      <CategoryModal
         isCategoryModalOpen={isCategoryModalOpen}
         setIsCategoryModalOpen={setIsCategoryModalOpen}
-        uid={userData?.uid}
-        year={selectedYear?.year}
-        month={month}
-      />
-      <ExpenseModal
-        uid={userData?.uid}
-        year={selectedYear?.year}
-        month={month}
-        selectedCategory={selectedCategory}
         isExpenseModalOpen={isExpenseModalOpen}
         setIsExpenseModalOpen={setIsExpenseModalOpen}
-        selectedExpenses={selectedExpenses}
-        selectedCategoryData={selectedCategoryData}
-      />
-      <ViewExpensesModal
-        uid={userData?.uid}
-        year={selectedYear?.year}
-        month={month}
-        selectedCategory={selectedCategory}
         isViewExpensesModalOpen={isViewExpensesModalOpen}
         setIsViewExpensesModalOpen={setIsViewExpensesModalOpen}
-        selectedExpenses={selectedExpenses}
-        setSelectedExpenses={setSelectedExpenses}
-      />
-
-      <ConfirmDeleteModal
         isConfirmDeleteModalOpen={isConfirmDeleteModalOpen}
         setIsConfirmDeleteModalOpen={setIsConfirmDeleteModalOpen}
-        selectedCategory={selectedCategory}
+        anyModalOpen={anyModalOpen}
         uid={userData?.uid}
         year={selectedYear?.year}
         month={month}
+        currentIncome={selectedMonth.income || 0}
+        selectedCategory={selectedCategory}
+        selectedExpenses={selectedExpenses}
+        setSelectedExpenses={setSelectedExpenses}
+        selectedCategoryData={selectedCategoryData}
       />
 
-      {incomeModalIsOpen ||
-      isCategoryModalOpen ||
-      isExpenseModalOpen ||
-      isViewExpensesModalOpen ||
-      isConfirmDeleteModalOpen ? (
-        <div className="absolute z-20 top-0 left-0 bg-black opacity-60 h-screen w-full"></div>
-      ) : null}
-
-      <div className="fixed top-[56px] left-0 right-0 z-10 bg-primaryDark py-3 shadow-lg shadow-primaryDark">
-        <div className="max-w-[900px] mx-auto">
-          <div className="flex justify-between items-center mb-3 px-4">
-            <div className="flex items-center gap-3">
-              <Link href="/dashboard" className="text-white py-1 px-2">
-                <BackSvg />
-              </Link>
-              <h2 className="text-white text-xl md:hidden">
-                {selectedMonth.month}
-              </h2>
-            </div>
-            <div className="hidden md:flex items-center justify-center flex-1">
-              <h2 className="text-white text-xl">{selectedMonth.month}</h2>
-            </div>
-            <div className="flex flex-col items-end gap-1">
-              <div className="flex items-center gap-2">
-                <span className="text-white text-lg font-semibold">
-                  {formatCurrency(selectedMonth.monthBalance)}
-                </span>
-                {selectedMonth.monthBalance > 0 ? (
-                  <div className="text-green-400">
-                    <ArrowUpSvg />
-                  </div>
-                ) : selectedMonth.monthBalance < 0 ? (
-                  <div className="text-red-400">
-                    <ArrowDownSvg />
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="mx-4 mb-4 px-3 py-2 bg-white/10 rounded-lg border border-white/20 cursor-pointer hover:bg-white/15 transition-all flex items-center justify-between"
-            onClick={() => setIncomeModalIsOpen(true)}
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-white/70 text-xs">Income:</span>
-              <span className="text-white text-sm font-semibold">
-                {formatCurrency(selectedMonth.income)}
-              </span>
-            </div>
-            <svg
-              className="w-4 h-4 text-white/50"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-              />
-            </svg>
-          </div>
-
-          <div className="flex justify-between mb-1 md:mb-10 px-4">
-            <Button
-              filled
-              onClick={() => setIsEditMode(!isEditMode)}
-              customColor={!isEditMode ? "gray-500" : ""}
-            >
-              {isEditMode ? "Done" : "Edit Layout"}
-            </Button>
-            <Button filled onClick={() => setIsCategoryModalOpen(true)}>
-              Add Category
-            </Button>
-          </div>
-        </div>
-      </div>
+      <MonthPageHeader
+        monthLabel={selectedMonth.month}
+        monthBalance={selectedMonth.monthBalance}
+        income={selectedMonth.income}
+        isEditMode={isEditMode}
+        onToggleEditMode={() => setIsEditMode((v) => !v)}
+        onOpenIncomeModal={() => setIncomeModalIsOpen(true)}
+        onOpenCategoryModal={() => setIsCategoryModalOpen(true)}
+      />
 
       <div className="fixed bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-primaryDark to-transparent pt-4 pb-4">
         <div className="max-w-[900px] mx-auto px-4">
@@ -455,66 +205,29 @@ const Month = () => {
           isEditMode ? "pr-16 pl-4" : "px-4"
         } md:px-0`}
       >
-        {isEditMode && (
-          <div className="fixed right-0 top-[56px] bottom-0 w-16 pointer-events-none md:hidden flex items-center justify-center">
-            <div className="transform rotate-90 whitespace-nowrap"></div>
-          </div>
-        )}
-        <div className="flex flex-col md:flex-row md:flex-wrap md:justify-center md:gap-6 items-center py-4 md:py-0">
-          {isDragging && dropTargetIndex === 0 && (
-            <div className="w-full xs:max-w-[400px] h-2 bg-blue-400 rounded-full mb-2 opacity-60"></div>
-          )}
-          {selectedMonth.categories.map((category, index) => (
-            <div
-              key={category.title}
-              data-category-index={index}
-              draggable={isEditMode}
-              onDragStart={(e) => handleDragStart(e, index)}
-              onDragOver={(e) => handleDragOver(e, index)}
-              onDrop={(e) => handleDrop(e, index)}
-              onDragEnd={handleDragEnd}
-              onTouchStart={(e) => handleTouchStart(e, index)}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              className={`w-full xs:max-w-[400px] transition-all duration-150 ${
-                isEditMode ? "cursor-move" : ""
-              } ${draggedIndex === index ? "opacity-50" : ""} ${
-                dropTargetIndex === index
-                  ? "ring-2 ring-blue-400 ring-opacity-60 bg-blue-50"
-                  : ""
-              }`}
-              style={{
-                transform:
-                  isDragging && draggedIndex === index && touchCurrentY !== null
-                    ? `translateY(${touchCurrentY - touchStartY}px)`
-                    : "translateY(0px)",
-                zIndex: isDragging && draggedIndex === index ? 1000 : "auto",
-                touchAction: isEditMode ? "none" : "auto",
-              }}
-            >
-              <CategoryCard
-                category={category}
-                handleAddExpense={handleAddExpense}
-                handleViewExpense={handleViewExpense}
-                handleCategoryDelete={handleCategoryDelete}
-                uid={userData?.uid}
-                year={selectedYear?.year}
-                month={month}
-                isEditMode={isEditMode}
-                isDragging={isDragging && draggedIndex === index}
-              />
-            </div>
-          ))}
-          {isDragging &&
-            dropTargetIndex === selectedMonth.categories.length - 1 && (
-              <div className="w-full xs:max-w-[400px] h-2 bg-blue-400 rounded-full mt-2 opacity-60"></div>
-            )}
-        </div>
+        <MonthCategoryList
+          categories={categories}
+          isEditMode={isEditMode}
+          draggedIndex={draggedIndex}
+          dropTargetIndex={dropTargetIndex}
+          isDragging={isDragging}
+          touchCurrentY={touchCurrentY}
+          touchStartY={touchStartY}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onDragEnd={handleDragEnd}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onAddExpense={handleAddExpense}
+          onViewExpense={handleViewExpense}
+          onCategoryDelete={handleCategoryDelete}
+          uid={userData?.uid}
+          year={selectedYear?.year}
+          month={month}
+        />
       </div>
-    </div>
-  ) : (
-    <div className="h-[40vh] flex justify-center items-center">
-      <LoadingSpinner />
     </div>
   );
 };

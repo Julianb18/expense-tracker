@@ -165,7 +165,6 @@ export const CategoryCard = ({
       <div className="flex justify-end gap-3">
         <Button
           onClick={() => handleViewExpense(title, expenses)}
-          customClassName="rounded-xl border border-indigo-500/40 bg-transparent px-4 py-2 text-indigo-300 hover:bg-indigo-500/10 hover:text-white"
         >
           View Expense
         </Button>
@@ -173,7 +172,6 @@ export const CategoryCard = ({
         <Button
           onClick={() => handleAddExpense(title, expenses)}
           filled
-          customClassName="rounded-xl bg-gradient-to-r from-buttonSecondary to-buttonPrimary px-4 py-2 text-white shadow-[0_8px_24px_rgba(79,70,229,0.25)] hover:shadow-[0_10px_30px_rgba(79,70,229,0.35)]"
         >
           Add Expense
         </Button>

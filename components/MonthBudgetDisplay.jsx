@@ -130,9 +130,9 @@ export const MonthBudgetDisplay = ({
 
             <div className="rounded-2xl border border-indigo-500/25 bg-indigo-500/20 p-4 shadow-[0_0_20px_rgba(99,102,241,0.08)]">
               <div className="text-center">
-                <div className="mb-2 text-sm font-medium text-slate-300">
+                <p className="mb-2 text-sm font-medium text-slate-300">
                   Expected Month Expenses
-                </div>
+                </p>
 
                 <div
                   className="relative flex h-8 w-full justify-center rounded-xl shadow-inner overflow-hidden"
@@ -162,9 +162,9 @@ export const MonthBudgetDisplay = ({
 
             <div className="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">
               <div className="text-center">
-                <div className="mb-2 text-sm font-medium text-slate-300">
+                <p className="mb-2 text-sm font-medium text-slate-300">
                   Total Monthly Spending
-                </div>
+                </p>
 
                 <div
                   className="relative flex h-8 w-full justify-center rounded-xl shadow-inner overflow-hidden"
