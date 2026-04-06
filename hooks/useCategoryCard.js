@@ -3,19 +3,20 @@ import {
   updateCategoryTitle,
   updateCategoryMaxSpending,
 } from "../firebase/firestore";
-import { getBudgetProgressStyles } from "../helperFunctions/getBudgetProgressStyles";
+import { getBudgetProgressData } from "../helperFunctions/getBudgetProgressData";
 
 export function useCategoryCard({ category, uid, year, month }) {
   const { title, maxSpending, expenses } = category;
 
-  const { totalExpenses, spentPercentage } = useMemo(() => {
-    const total = expenses.reduce((acc, curr) => acc + curr.amount, 0);
-    const percentage =
-      maxSpending > 0
-        ? Math.min(Math.round((total / maxSpending) * 100), 100)
-        : 0;
-    return { totalExpenses: total, spentPercentage: percentage };
-  }, [expenses, maxSpending]);
+  const totalExpenses = useMemo(
+    () => expenses.reduce((acc, curr) => acc + curr.amount, 0),
+    [expenses],
+  );
+
+  const { percentage: spentPercentage, progressStyles } = useMemo(
+    () => getBudgetProgressData(totalExpenses, maxSpending),
+    [totalExpenses, maxSpending],
+  );
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingMaxSpending, setIsEditingMaxSpending] = useState(false);
@@ -64,11 +65,6 @@ export function useCategoryCard({ category, uid, year, month }) {
     [handleMaxSpendingSave, maxSpending],
   );
 
-  const progress = useMemo(
-    () => getBudgetProgressStyles(spentPercentage),
-    [spentPercentage],
-  );
-
   return {
     title,
     maxSpending,
@@ -86,6 +82,7 @@ export function useCategoryCard({ category, uid, year, month }) {
     handleMaxSpendingSave,
     handleTitleKeyPress,
     handleMaxSpendingKeyPress,
-    progress,
+    progressStyles,
+    spentPercentage,
   };
 }

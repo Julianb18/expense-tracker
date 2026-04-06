@@ -74,14 +74,15 @@ export const MonthBudgetDisplay = ({
 
             <div className="flex flex-1 items-center">
               <div
-                className="mr-3 h-2 flex-1 rounded-full shadow-inner overflow-hidden"
-                style={budgetProgress.trackStyle}
+                className="relative h-6 w-full rounded-2xl p-[4px] overflow-hidden"
+                style={budgetProgress.progressStyles.trackStyle}
               >
                 <div
-                  className="h-full rounded-full transition-all duration-700"
+                  className="h-full rounded-2xl transition-all duration-700"
                   style={{
-                    width: budgetProgress.width,
-                    ...budgetProgress.fillStyle,
+                    width: `${budgetProgress.percentage}%`,
+                    minWidth: budgetProgress.percentage > 0 ? "1px" : "0px",
+                    ...budgetProgress.progressStyles.fillStyle,
                   }}
                 />
               </div>
@@ -118,14 +119,15 @@ export const MonthBudgetDisplay = ({
                 </p>
 
                 <div
-                  className="relative flex h-8 w-full justify-center rounded-xl shadow-inner overflow-hidden"
-                  style={expectedProgress.trackStyle}
+                  className="relative h-6 w-full rounded-2xl p-[4px] overflow-hidden"
+                  style={budgetProgress.progressStyles.trackStyle}
                 >
                   <div
-                    className="absolute left-0 h-full rounded-xl transition-all duration-700"
+                    className="h-full rounded-2xl transition-all duration-700"
                     style={{
-                      width: expectedProgress.width,
-                      ...expectedProgress.fillStyle,
+                      width: `${budgetProgress.percentage}%`,
+                      minWidth: budgetProgress.percentage > 0 ? "1px" : "0px",
+                      ...budgetProgress.progressStyles.fillStyle,
                     }}
                   />
 
@@ -150,14 +152,15 @@ export const MonthBudgetDisplay = ({
                 </p>
 
                 <div
-                  className="relative flex h-8 w-full justify-center rounded-xl shadow-inner overflow-hidden"
-                  style={budgetProgress.trackStyle}
+                  className="relative h-6 w-full rounded-2xl p-[4px] overflow-hidden"
+                  style={budgetProgress.progressStyles.trackStyle}
                 >
                   <div
-                    className="absolute left-0 h-full rounded-xl transition-all duration-700"
+                    className="h-full rounded-2xl transition-all duration-700"
                     style={{
-                      width: budgetProgress.width,
-                      ...budgetProgress.fillStyle,
+                      width: `${budgetProgress.percentage}%`,
+                      minWidth: budgetProgress.percentage > 0 ? "1px" : "0px",
+                      ...budgetProgress.progressStyles.fillStyle,
                     }}
                   />
 

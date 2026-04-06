@@ -32,7 +32,8 @@ export const CategoryCard = ({
     handleMaxSpendingSave,
     handleTitleKeyPress,
     handleMaxSpendingKeyPress,
-    progress,
+    progressStyles,
+    spentPercentage,
   } = useCategoryCard({ category, uid, year, month });
 
   return (
@@ -79,18 +80,19 @@ export const CategoryCard = ({
       </div>
 
       <div
-        className="relative mb-6 h-5 w-full rounded-2xl overflow-hidden"
-        style={progress.trackStyle}
+        className="relative mb-6 h-6 w-full rounded-2xl p-[4px] overflow-hidden"
+        style={progressStyles.trackStyle}
       >
         <div
-          className="absolute left-0 top-0 h-full rounded-2xl transition-all duration-700"
+          className="h-full rounded-2xl transition-all duration-700"
           style={{
-            width: progress.width,
-            ...progress.fillStyle,
+            width: `${spentPercentage}%`,
+            minWidth: spentPercentage > 0 ? "1px" : "0px",
+            ...progressStyles.fillStyle,
           }}
         />
 
-        <div className="relative z-[1] flex h-full items-center justify-center">
+        <div className="absolute inset-0 z-[1] flex items-center justify-center">
           {isEditingMaxSpending ? (
             <div className="flex items-center font-medium text-white">
               <span>{formatAmount(totalExpenses)}/</span>

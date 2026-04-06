@@ -1,46 +1,52 @@
 export const getBudgetProgressStyles = (spentPercentage = 0) => {
   const safePercentage = Math.max(0, Math.min(spentPercentage, 100));
 
+  const baseTrackStyle = {
+    background:
+      "linear-gradient(180deg, rgba(51,65,85,0.95) 0%, rgba(37,49,66,0.98) 100%)",
+    boxShadow:
+      "inset 0 1px 1px rgba(255,255,255,0.04), inset 0 -2px 6px rgba(0,0,0,0.35)",
+  };
+
+  const fillBase = {
+    boxShadow:
+      "inset 0 1px 1px rgba(255,255,255,0.10), inset 0 -1px 2px rgba(0,0,0,0.15)",
+  };
+
   if (spentPercentage >= 100) {
     return {
-      width: `${safePercentage}%`,
+      percentage: safePercentage,
       fillStyle: {
         background:
-          "linear-gradient(90deg, #f87171 0%, #ef4444 55%, #e11d48 100%)",
-        boxShadow: "0 0 18px rgba(248, 113, 113, 0.35)",
+          "linear-gradient(90deg, #d96a6a 0%, #cf5b5b 55%, #c94f4f 100%)",
+        ...fillBase,
       },
-      trackStyle: {
-        background: "rgba(51, 65, 85, 0.95)",
-      },
-      labelClassName: "text-red-300",
+      trackStyle: baseTrackStyle,
+      labelClassName: "text-red-200",
     };
   }
 
   if (spentPercentage >= 75) {
     return {
-      width: `${safePercentage}%`,
+      percentage: safePercentage,
       fillStyle: {
         background:
-          "linear-gradient(90deg, #fbbf24 0%, #f59e0b 55%, #fb923c 100%)",
-        boxShadow: "0 0 18px rgba(251, 191, 36, 0.3)",
+          "linear-gradient(90deg, #cfa56a 0%, #c29257 55%, #b98547 100%)",
+        ...fillBase,
       },
-      trackStyle: {
-        background: "rgba(51, 65, 85, 0.95)",
-      },
+      trackStyle: baseTrackStyle,
       labelClassName: "text-amber-200",
     };
   }
 
   return {
-    width: `${safePercentage}%`,
+    percentage: safePercentage,
     fillStyle: {
       background:
-        "linear-gradient(90deg, #4ade80 0%, #22c55e 55%, #2dd4bf 100%)",
-      boxShadow: "0 0 18px rgba(74, 222, 128, 0.28)",
+        "linear-gradient(90deg, #43c792 0%, #35b889 55%, #2fa27f 100%)",
+      ...fillBase,
     },
-    trackStyle: {
-      background: "rgba(51, 65, 85, 0.95)",
-    },
+    trackStyle: baseTrackStyle,
     labelClassName: "text-emerald-200",
   };
 };
