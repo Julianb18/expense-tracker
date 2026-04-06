@@ -1,15 +1,11 @@
 import React, { useState } from "react";
-import { Dialog } from "@headlessui/react";
+import { AppDialog } from "./AppDialog";
 import { v4 as uuid } from "uuid";
 
 import { Button } from "./Button";
-import { XMarkSvg } from "./svg/XMarkSvg";
 
 import { addExpense } from "../firebase/firestore";
-import {
-  formatAmount,
-  formatCurrency,
-} from "../helperFunctions/currencyFormatter";
+import { formatCurrency } from "../helperFunctions/currencyFormatter";
 
 export const ExpenseModal = ({
   uid,
@@ -24,35 +20,54 @@ export const ExpenseModal = ({
     title: "",
     amount: "",
     id: uuid(),
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split("T")[0],
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    let tempExpense = { ...expense, id: uuid() };
-    if (tempExpense.title !== "" && tempExpense.amount !== "" && tempExpense.amount > 0) {
-      addExpense(uid, year, month, selectedCategory, {
-        ...tempExpense,
-        amount: Number(tempExpense.amount)
-      });
-      setIsExpenseModalOpen(false);
-    }
-
+  const resetExpense = () => {
     setExpense({
       title: "",
       amount: "",
       id: uuid(),
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split("T")[0],
+      createdAt: Date.now(),
     });
+  };
+
+  const handleClose = () => {
+    setIsExpenseModalOpen(false);
+    resetExpense();
+  };
+
+  const handleSubmit = (e) => {
+    if (e) e.preventDefault();
+
+    const tempExpense = {
+      ...expense,
+      id: uuid(),
+      createdAt: Date.now(),
+    };
+
+    if (
+      tempExpense.title !== "" &&
+      tempExpense.amount !== "" &&
+      Number(tempExpense.amount) > 0
+    ) {
+      addExpense(uid, year, month, selectedCategory, {
+        ...tempExpense,
+        amount: Number(tempExpense.amount),
+      });
+
+      setIsExpenseModalOpen(false);
+      resetExpense();
+    }
   };
 
   const totalSpent =
     selectedCategoryData?.expenses?.reduce(
       (acc, curr) => acc + curr.amount,
-      0
+      0,
     ) || 0;
 
-  // Calculate remaining budget for the selected category
   const getAvailableAmount = () => {
     if (!selectedCategoryData) return 0;
     return selectedCategoryData.maxSpending - totalSpent;
@@ -60,7 +75,6 @@ export const ExpenseModal = ({
 
   const availableAmount = getAvailableAmount();
 
-  // Calculate what the remaining amount will be after adding this expense
   const getRemainingAfterExpense = () => {
     const currentExpenseAmount = parseFloat(expense.amount) || 0;
     return availableAmount - currentExpenseAmount;
@@ -69,108 +83,117 @@ export const ExpenseModal = ({
   const remainingAfterExpense = getRemainingAfterExpense();
 
   return (
-    <Dialog
-      className="fixed inset-0 z-30 flex items-center justify-center p-4"
+    <AppDialog
       open={isExpenseModalOpen}
-      onClose={() => setIsExpenseModalOpen(false)}
+      onClose={handleClose}
+      title="New Expense"
+      maxWidthClassName="max-w-[500px]"
+      footer={
+        <>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button filled onClick={handleSubmit}>
+            Add
+          </Button>
+        </>
+      }
     >
-      <div className="fixed inset-0 bg-black bg-opacity-50" />
-      <Dialog.Panel className="relative bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100 w-full max-w-[500px] max-h-[90vh] overflow-hidden">
-        <form onSubmit={handleSubmit}>
-          <div className="flex flex-col h-full max-h-[90vh]">
-          <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2 flex-shrink-0">
-            <Dialog.Title>New Expense</Dialog.Title>
-            <button
-              className="cursor-pointer p-1"
-              onClick={() => setIsExpenseModalOpen(false)}
-            >
-              <XMarkSvg />
-            </button>
-            <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-400"></span>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="rounded-2xl border border-slate-700 bg-slate-900/40 p-4 text-center">
+          <div className="mb-2 text-sm font-medium text-slate-300">
+            Remaining budget in {selectedCategory}
           </div>
-          <div className="space-y-4 px-3 overflow-y-auto flex-1 min-h-0">
-            {/* Available Amount Display */}
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-4 text-center border border-gray-200">
-              <div className="text-sm text-gray-600 mb-2 font-medium">
-                Remaining budget in {selectedCategory}
-              </div>
-              <div
-                className={`text-xl font-bold transition-colors duration-200 ${
-                  remainingAfterExpense >= 0 ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {formatCurrency(remainingAfterExpense)}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                {`${formatCurrency(totalSpent + (parseFloat(expense.amount) || 0))} / ${formatCurrency(
-                  selectedCategoryData?.maxSpending || 0
-                )}`}
-              </div>
-              {expense.amount && parseFloat(expense.amount) > 0 && (
-                <div className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-300">
-                  Current remaining: {formatCurrency(availableAmount)}
-                </div>
-              )}
-            </div>
 
-            <div className="">
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">Title/Description</label>
-              <input
-                onChange={(e) =>
-                  setExpense({ ...expense, title: e.target.value })
-                }
-                value={expense.title}
-                onFocus={(e) => (e.target.value = "")}
-                className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                style={{ fontSize: "16px" }}
-                type="text"
-                name="title"
-                placeholder="Enter expense description"
-              />
-            </div>
-            <div>
-              <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">Amount</label>
-              <input
-                type="number"
-                step="0.01"
-                onChange={(e) =>
-                  setExpense({
-                    ...expense,
-                    amount: e.target.value,
-                  })
-                }
-                value={expense.amount}
-                className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                style={{ fontSize: "16px" }}
-                name="amount"
-                placeholder="Enter amount (e.g., 12.50)"
-              />
-            </div>
-            <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-              <input
-                type="date"
-                onChange={(e) =>
-                  setExpense({
-                    ...expense,
-                    date: e.target.value,
-                  })
-                }
-                value={expense.date}
-                className="w-full border border-gray-300 rounded-xl pl-4 pr-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-                style={{ fontSize: "16px", minWidth: "0", maxWidth: "100%" }}
-                name="date"
-              />
-            </div>
+          <div
+            className={`text-xl font-bold transition-colors duration-200 ${
+              remainingAfterExpense >= 0 ? "text-emerald-400" : "text-red-400"
+            }`}
+          >
+            {formatCurrency(remainingAfterExpense)}
           </div>
-          <div className="flex justify-end px-3 py-3 flex-shrink-0">
-            <Button filled customClassName="mr-1" onClick={handleSubmit}>
-              Add
-            </Button>
+
+          <div className="mt-1 text-xs text-slate-400">
+            {`${formatCurrency(
+              totalSpent + (parseFloat(expense.amount) || 0),
+            )} / ${formatCurrency(selectedCategoryData?.maxSpending || 0)}`}
           </div>
-          </div>
-        </form>
-      </Dialog.Panel>
-    </Dialog>
+
+          {expense.amount && parseFloat(expense.amount) > 0 && (
+            <div className="mt-2 border-t border-slate-700 pt-2 text-xs text-slate-400">
+              Current remaining: {formatCurrency(availableAmount)}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor="title"
+            className="mb-2 block text-sm font-medium text-slate-300"
+          >
+            Title/Description
+          </label>
+
+          <input
+            id="title"
+            type="text"
+            name="title"
+            value={expense.title}
+            onChange={(e) => setExpense({ ...expense, title: e.target.value })}
+            className="w-full rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            style={{ fontSize: "16px" }}
+            placeholder="Enter expense description"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="amount"
+            className="mb-2 block text-sm font-medium text-slate-300"
+          >
+            Amount
+          </label>
+
+          <input
+            id="amount"
+            type="number"
+            step="0.01"
+            name="amount"
+            value={expense.amount}
+            onChange={(e) =>
+              setExpense({
+                ...expense,
+                amount: e.target.value,
+              })
+            }
+            className="w-full rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            style={{ fontSize: "16px" }}
+            placeholder="Enter amount (e.g. 12.50)"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="date"
+            className="mb-2 block text-sm font-medium text-slate-300"
+          >
+            Date
+          </label>
+
+          <input
+            id="date"
+            type="date"
+            name="date"
+            value={expense.date}
+            onChange={(e) =>
+              setExpense({
+                ...expense,
+                date: e.target.value,
+              })
+            }
+            className="w-full appearance-none rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            style={{ fontSize: "16px", minWidth: "0", maxWidth: "100%" }}
+          />
+        </div>
+      </form>
+    </AppDialog>
   );
 };

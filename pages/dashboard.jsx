@@ -103,7 +103,8 @@ const Dashboard = () => {
       <div className="fixed bottom-8 right-8 z-10">
         <Button
           onClick={() => setIsDefaultCategoriesModalOpen(true)}
-          customClassName="bg-buttonPrimary text-white px-6 py-3 shadow-lg"
+          filled
+          customClassName="text-white px-6 py-3 shadow-lg"
         >
           Default Categories
         </Button>

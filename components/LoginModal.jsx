@@ -1,9 +1,8 @@
 import { useState, forwardRef, useImperativeHandle } from "react";
 import { EmailAuthProvider, GoogleAuthProvider } from "firebase/auth";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
-import { Dialog } from "@headlessui/react";
 
-import { XMarkSvg } from "./svg/XMarkSvg";
+import { AppDialog } from "./AppDialog";
 import { auth } from "../firebase/firebase";
 
 const REDIRECT_PAGE = "/dashboard";
@@ -30,29 +29,24 @@ export const LoginModal = forwardRef((props, ref) => {
   };
 
   return (
-    <Dialog
+    <AppDialog
       open={isOpen}
       onClose={handleClose}
-      className="absolute z-30 min-w-[300px] top-1/4 left-1/2 -translate-x-1/2 bg-white rounded-3xl p-3"
+      title="Sign In / Register"
+      maxWidthClassName="max-w-[420px]"
     >
-      <div className="flex justify-between items-center mb-8">
-        <Dialog.Title className="text-lg text-center flex-1">
-          Sign In / Register
-        </Dialog.Title>
-        <button className="cursor-pointer p-1" onClick={handleClose}>
-          <XMarkSvg />
-        </button>
-      </div>
-      <div>
-        <div className="mb-6">
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-slate-700 bg-slate-900/40 p-4">
           <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth} />
         </div>
-        <Dialog.Description className="text-xs text-gray-500">
-          You can Sign Up / Login from here. Even if you do not have an account
-          yet, click Sign and the Sign Up process will be started
-        </Dialog.Description>
+
+        <p className="text-xs leading-5 text-slate-400">
+          You can sign up or log in from here. Even if you do not have an
+          account yet, start the sign-in flow and the sign-up process will
+          begin.
+        </p>
       </div>
-    </Dialog>
+    </AppDialog>
   );
 });
 

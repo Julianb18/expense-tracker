@@ -429,7 +429,7 @@ const Month = () => {
             <Button
               filled
               onClick={() => setIsEditMode(!isEditMode)}
-              customColor={isEditMode ? "blue-500" : "gray-500"}
+              customColor={!isEditMode ? "gray-500" : ""}
             >
               {isEditMode ? "Done" : "Edit Layout"}
             </Button>

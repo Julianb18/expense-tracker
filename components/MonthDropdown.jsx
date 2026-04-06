@@ -9,30 +9,40 @@ const classNames = (...classes) => {
 };
 
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 export const MonthDropdown = ({ selectedMonth, onMonthChange }) => {
   return (
-    <Listbox
-      value={selectedMonth}
-      onChange={onMonthChange}
-      className="outline-none border-none z-10 min-w-36"
-    >
+    <Listbox value={selectedMonth} onChange={onMonthChange}>
       {({ open }) => (
-        <div className="flex flex-col">
-          <Listbox.Label className="block text-white ml-3 font-medium">
+        <div className="flex min-w-36 flex-col">
+          <Listbox.Label className="ml-1 block text-sm font-medium text-slate-300">
             Month
           </Listbox.Label>
+
           <div className="relative mt-1">
-            <Listbox.Button className="relative w-full cursor-default rounded-xl border border-gray-300 bg-white py-3 pr-10 text-left shadow-lg shadow-gray-900/10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <Listbox.Button className="relative w-full rounded-xl border border-slate-600 bg-slate-900/80 py-3 pr-10 text-left text-white shadow-lg shadow-black/20 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <span className="flex items-center">
                 <span className="ml-3 block truncate">{selectedMonth}</span>
               </span>
-              <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
+
+              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
                 <ChevronDown
-                  className="h-5 w-5 text-gray-400"
+                  className={`h-5 w-5 transition-transform duration-200 ${
+                    open ? "rotate-180" : ""
+                  }`}
                   aria-hidden="true"
                 />
               </span>
@@ -42,22 +52,25 @@ export const MonthDropdown = ({ selectedMonth, onMonthChange }) => {
               show={open}
               as={Fragment}
               leave="transition ease-in duration-100"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
+              leaveFrom="opacity-100 translate-y-0"
+              leaveTo="opacity-0 -translate-y-1"
+              enter="transition ease-out duration-150"
+              enterFrom="opacity-0 -translate-y-1"
+              enterTo="opacity-100 translate-y-0"
             >
-              <Listbox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-xl bg-white py-1 text-base focus:outline-none shadow-lg shadow-gray-900/20 border border-gray-100">
+              <Listbox.Options className="absolute z-20 mt-2 max-h-56 w-full overflow-auto rounded-2xl border border-slate-700 bg-slate-900/95 py-1 text-base shadow-2xl shadow-black/30 backdrop-blur-sm focus:outline-none">
                 {MONTHS.map((month) => (
                   <Listbox.Option
                     key={month}
+                    value={month}
                     className={({ active }) =>
                       classNames(
                         active
-                          ? "text-white bg-buttonSecondary"
-                          : "text-gray-900",
-                        "relative cursor-default select-none py-2 pl-3 pr-9"
+                          ? "bg-buttonSecondary text-white"
+                          : "text-slate-200",
+                        "relative cursor-default select-none py-2 pl-3 pr-9 transition",
                       )
                     }
-                    value={month}
                   >
                     {({ selected, active }) => (
                       <>
@@ -65,7 +78,7 @@ export const MonthDropdown = ({ selectedMonth, onMonthChange }) => {
                           <span
                             className={classNames(
                               selected ? "font-semibold" : "font-normal",
-                              "ml-3 block truncate"
+                              "ml-3 block truncate",
                             )}
                           >
                             {month}
@@ -76,7 +89,7 @@ export const MonthDropdown = ({ selectedMonth, onMonthChange }) => {
                           <span
                             className={classNames(
                               active ? "text-white" : "text-buttonSecondary",
-                              "absolute inset-y-0 right-0 flex items-center pr-4"
+                              "absolute inset-y-0 right-0 flex items-center pr-4",
                             )}
                           >
                             <Check className="h-5 w-5" aria-hidden="true" />

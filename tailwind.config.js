@@ -9,10 +9,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primaryDark: "#272e34",
-        secondaryDark: "#1f2429",
-        buttonPrimary: "#0c464b",
-        buttonSecondary: "#248f84",
+        primaryDark: "#020617",
+        secondaryDark: "#0f172a",
+        accentDark: "#1e293b",
+        buttonPrimary: "#4338ca",
+        buttonSecondary: "#0d9488",
       },
       boxShadow: {
         innerTopShadow: "inset 0px 44px 5px 0px rgba(0,0,0,0.75)",

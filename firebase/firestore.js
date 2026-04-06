@@ -24,17 +24,14 @@ const hardCodedArrayOfMonths = [
   "December",
 ];
 
-const getYearRange = (startYear, yearsAhead = 5) => {
+const getYearRange = (startYear) => {
   const currentYear = new Date().getFullYear();
-  const endYear = currentYear + yearsAhead;
-
-  const from = Math.min(startYear, currentYear);
-  const to = Math.max(endYear, currentYear);
-
   const years = [];
-  for (let y = from; y <= to; y++) {
+
+  for (let y = startYear; y <= currentYear; y++) {
     years.push(y);
   }
+
   return years;
 };
 
@@ -47,20 +44,64 @@ const initializeMonths = () =>
     totalMonthlyExpenses: 0,
   }));
 
-const initializeYears = () =>
-  getYearRange(2022, 5).map((year) => ({
-    year,
-    currentBalance: 0,
-    months: initializeMonths(),
-  }));
+const createYearObject = (year) => ({
+  year,
+  currentBalance: 0,
+  months: initializeMonths(),
+});
+
+const initializeYears = (startYear) =>
+  getYearRange(startYear).map((year) => createYearObject(year));
 
 const getUserDocRef = async (uid) => {
   const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
   const querySnapshot = await getDocs(q);
+
   if (!querySnapshot.empty) {
     return querySnapshot.docs[0];
   }
+
   return null;
+};
+
+const updateUserDoc = async (docId, updatedUserDoc) => {
+  await setDoc(doc(db, "userExpenses", docId), updatedUserDoc);
+};
+
+export const ensureUserYearsUpToDate = async (uid) => {
+  const userDoc = await getUserDocRef(uid);
+  if (!userDoc) return null;
+
+  const userData = userDoc.data();
+  const updatedUserDoc = { ...userData };
+
+  const currentYear = new Date().getFullYear();
+
+  const existingYearsArray = updatedUserDoc.years || [];
+  const derivedStartYear =
+    updatedUserDoc.startYear ||
+    (existingYearsArray.length > 0
+      ? Math.min(...existingYearsArray.map((y) => y.year))
+      : currentYear);
+
+  updatedUserDoc.startYear = derivedStartYear;
+
+  if (!updatedUserDoc.years) {
+    updatedUserDoc.years = [];
+  }
+
+  const existingYears = new Set(updatedUserDoc.years.map((y) => y.year));
+
+  for (let year = derivedStartYear; year <= currentYear; year++) {
+    if (!existingYears.has(year)) {
+      updatedUserDoc.years.push(createYearObject(year));
+    }
+  }
+
+  updatedUserDoc.years.sort((a, b) => a.year - b.year);
+
+  await updateUserDoc(userDoc.id, updatedUserDoc);
+  return updatedUserDoc;
 };
 
 export const addANewUserExpenseDoc = async (uid, displayName) => {
@@ -68,19 +109,19 @@ export const addANewUserExpenseDoc = async (uid, displayName) => {
 
   if (userDoc) {
     console.log("User doc exists");
+    await ensureUserYearsUpToDate(uid);
     return;
   }
+
+  const startYear = new Date().getFullYear();
 
   await addDoc(collection(db, "userExpenses"), {
     uid,
     displayName,
-    years: initializeYears(),
+    startYear,
+    years: initializeYears(startYear),
     defaultCategories: [],
   });
-};
-
-const updateUserDoc = async (docId, updatedUserDoc) => {
-  await setDoc(doc(db, "userExpenses", docId), updatedUserDoc);
 };
 
 export const addMonthIncome = async (uid, year, month, income) => {
@@ -138,7 +179,12 @@ export const addExpense = async (uid, year, month, category, expense) => {
   const monthData = yearData.months.find((m) => m.month === month);
   const categoryData = monthData.categories.find((c) => c.title === category);
 
-  categoryData.expenses.push(expense);
+  const expenseWithMeta = {
+    ...expense,
+    createdAt: Date.now(),
+  };
+
+  categoryData.expenses.push(expenseWithMeta);
   categoryData.totalCategoryExpenses += expense.amount;
 
   await updateUserDoc(userDoc.id, updatedUserDoc);
@@ -299,6 +345,7 @@ export const applyDefaultCategoriesToFutureMonths = async (
   const currentYearData = updatedUserDoc.years.find(
     (y) => y.year === currentYear,
   );
+
   if (currentYearData) {
     for (
       let i = currentMonthIndex + 1;

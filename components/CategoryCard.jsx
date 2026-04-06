@@ -83,7 +83,9 @@ export const CategoryCard = ({
   };
 
   return (
-    <div className={`flex flex-col shadow-2xl shadow-gray-900/10 w-full xs:max-w-[400px] bg-white rounded-2xl mb-6 md:mb-0 p-4 border border-gray-100 hover:shadow-3xl hover:shadow-gray-900/20 transition-all duration-300 ${isEditMode ? 'ring-2 ring-blue-500 ring-opacity-50 active:scale-95' : ''} ${isDragging ? 'shadow-3xl shadow-blue-500/30 scale-105' : ''}`}>
+    <div
+      className={`flex flex-col shadow-2xl shadow-gray-900/10 w-full xs:max-w-[400px] bg-slate-800/60 border border-slate-700 rounded-2xl mb-6 md:mb-0 p-4 hover:shadow-3xl hover:shadow-gray-900/20 transition-all duration-300 ${isEditMode ? "ring-2 ring-blue-500 ring-opacity-50 active:scale-95" : ""} ${isDragging ? "shadow-3xl shadow-blue-500/30 scale-105" : ""}`}
+    >
       <div className="flex justify-between items-center mb-3">
         {isEditMode && (
           <div className="text-gray-400 mr-2">
@@ -103,14 +105,14 @@ export const CategoryCard = ({
           />
         ) : (
           <span
-            className="cursor-pointer hover:bg-gray-50 px-2 py-2 rounded-lg font-medium text-gray-800 transition-colors"
+            className="cursor-pointer hover:bg-gray-50 px-2 py-2 rounded-lg font-medium text-slate-200 transition-colors"
             onClick={() => setIsEditingTitle(true)}
           >
             {title}
           </span>
         )}
         <button
-          className="border border-red-200 rounded-lg text-red-400 px-3 py-1 text-sm font-medium hover:bg-red-50 hover:border-red-300 transition-colors"
+          className="rounded-lg text-slate-400 px-3 py-1 text-sm font-medium hover:underline"
           onClick={() => handleCategoryDelete(title)}
         >
           Delete

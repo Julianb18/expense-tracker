@@ -1,22 +1,10 @@
-import { Dialog } from "@headlessui/react";
 import React, { useState, useEffect } from "react";
 
+import { AppDialog } from "./AppDialog";
 import { Button } from "./Button";
 import { XMarkSvg } from "./svg/XMarkSvg";
 import { ChevronDown } from "./svg/ChevronDown";
-
-const PREDEFINED_CATEGORIES = [
-  "Rent",
-  "Groceries",
-  "Car",
-  "Car Loan",
-  "Bills",
-  "Utilities",
-  "Loans",
-  "Insurance",
-  "Kita",
-  "Miscellaneous",
-];
+import { PREDEFINED_CATEGORIES } from "../utils/constants";
 
 export const DefaultCategoriesModal = ({
   isOpen,
@@ -32,13 +20,17 @@ export const DefaultCategoriesModal = ({
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
-    if (existingDefaults.length > 0) {
+    if (isOpen) {
       setDefaultCategories(existingDefaults);
     }
   }, [existingDefaults, isOpen]);
 
   const handleAddCategory = () => {
-    if (newCategory.title.trim() && newCategory.maxSpending !== "" && Number(newCategory.maxSpending) > 0) {
+    if (
+      newCategory.title.trim() &&
+      newCategory.maxSpending !== "" &&
+      Number(newCategory.maxSpending) > 0
+    ) {
       const category = {
         title: newCategory.title.trim(),
         maxSpending: Number(newCategory.maxSpending),
@@ -48,18 +40,20 @@ export const DefaultCategoriesModal = ({
       };
 
       const exists = defaultCategories.some(
-        (cat) => cat.title.toLowerCase() === category.title.toLowerCase()
+        (cat) => cat.title.toLowerCase() === category.title.toLowerCase(),
       );
+
       if (!exists) {
         setDefaultCategories([...defaultCategories, category]);
         setNewCategory({ title: "", maxSpending: "" });
+        setShowDropdown(false);
       }
     }
   };
 
   const handleRemoveCategory = (titleToRemove) => {
     setDefaultCategories(
-      defaultCategories.filter((cat) => cat.title !== titleToRemove)
+      defaultCategories.filter((cat) => cat.title !== titleToRemove),
     );
   };
 
@@ -71,163 +65,152 @@ export const DefaultCategoriesModal = ({
   const handleClose = () => {
     setDefaultCategories(existingDefaults);
     setNewCategory({ title: "", maxSpending: "" });
+    setShowDropdown(false);
     setIsOpen(false);
   };
 
   return (
-    <Dialog
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+    <AppDialog
       open={isOpen}
       onClose={handleClose}
-    >
-      <div className="fixed inset-0 bg-black bg-opacity-50" />
-
-      <Dialog.Panel className="relative bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100 w-full max-w-md max-h-[80vh] overflow-hidden">
-        <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2">
-          <Dialog.Title className="text-xl font-semibold">
-            Default Categories
-          </Dialog.Title>
-          <button className="cursor-pointer p-1" onClick={handleClose}>
-            <XMarkSvg />
-          </button>
-          <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-400"></span>
-        </div>
-
-        <div className="px-3 space-y-4 overflow-y-auto max-h-96">
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-4">Add Category</h3>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category Name
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    style={{ fontSize: "16px" }}
-                    placeholder="Type category name"
-                    value={newCategory.title}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      setNewCategory({ ...newCategory, title: inputValue });
-
-                      const hasMatches = PREDEFINED_CATEGORIES.some((cat) =>
-                        cat.toLowerCase().includes(inputValue.toLowerCase())
-                      );
-                      setShowDropdown(inputValue.length > 0 && hasMatches);
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 flex items-center pr-2"
-                    onClick={() => setShowDropdown(!showDropdown)}
-                  >
-                    <ChevronDown
-                      className="h-5 w-5 text-gray-400"
-                      aria-hidden="true"
-                    />
-                  </button>
-
-                  {showDropdown && (
-                    <div className="absolute mt-1 max-h-44 w-full overflow-auto rounded-xl bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-10">
-                      {PREDEFINED_CATEGORIES.filter((cat) =>
-                        cat
-                          .toLowerCase()
-                          .includes(newCategory.title.toLowerCase())
-                      ).map((categoryName) => (
-                        <div
-                          key={categoryName}
-                          className="relative cursor-pointer select-none py-2 pl-3 pr-4 hover:bg-blue-600 hover:text-white text-gray-900"
-                          onClick={() => {
-                            setNewCategory({
-                              ...newCategory,
-                              title: categoryName,
-                            });
-                            setShowDropdown(false);
-                          }}
-                        >
-                          <span className="block truncate">{categoryName}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Maximum Spending
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={newCategory.maxSpending}
-                  onChange={(e) =>
-                    setNewCategory({
-                      ...newCategory,
-                      maxSpending: e.target.value,
-                    })
-                  }
-                  className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  style={{ fontSize: "16px" }}
-                  placeholder="Enter amount (e.g., 500.00)"
-                />
-              </div>
-
-              <Button
-                onClick={handleAddCategory}
-                filled
-                customClassName="w-full"
-              >
-                Add Category
-              </Button>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-medium mb-4">
-              Current Default Categories
-            </h3>
-
-            {defaultCategories.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">
-                No default categories set
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {defaultCategories.map((category) => (
-                  <div
-                    key={category.title}
-                    className="flex items-center justify-between bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-3 border border-gray-200"
-                  >
-                    <div>
-                      <span className="font-medium">{category.title}</span>
-                      <span className="text-gray-500 ml-2">
-                        - {category.maxSpending}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveCategory(category.title)}
-                      className="text-red-500 hover:text-red-700 p-1"
-                    >
-                      <XMarkSvg />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3 px-3 py-3">
+      title="Default Categories"
+      maxWidthClassName="max-w-[560px]"
+      footer={
+        <>
           <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={handleSave} filled>
             Save Template
           </Button>
+        </>
+      }
+    >
+      <div className="space-y-6 overflow-visible">
+        <div className="rounded-2xl border border-slate-700 bg-slate-900/40 p-4">
+          <h3 className="mb-4 text-lg font-medium text-white">Add Category</h3>
+
+          <div className="space-y-4 overflow-visible">
+            <div className="overflow-visible">
+              <label className="mb-2 block text-sm font-medium text-slate-300">
+                Category Name
+              </label>
+
+              <div className="relative overflow-visible">
+                <input
+                  type="text"
+                  className="w-full rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  style={{ fontSize: "16px" }}
+                  placeholder="Type category name"
+                  value={newCategory.title}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    setNewCategory({ ...newCategory, title: inputValue });
+
+                    const hasMatches = PREDEFINED_CATEGORIES.some((cat) =>
+                      cat.toLowerCase().includes(inputValue.toLowerCase()),
+                    );
+
+                    setShowDropdown(inputValue.length > 0 && hasMatches);
+                  }}
+                />
+
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                >
+                  <ChevronDown className="h-5 w-5" aria-hidden="true" />
+                </button>
+
+                {showDropdown && (
+                  <div className="absolute z-50 mt-1 max-h-44 w-full overflow-auto rounded-2xl border border-slate-700 bg-slate-900 py-1 shadow-xl">
+                    {PREDEFINED_CATEGORIES.filter((cat) =>
+                      cat
+                        .toLowerCase()
+                        .includes(newCategory.title.toLowerCase()),
+                    ).map((categoryName) => (
+                      <div
+                        key={categoryName}
+                        className="cursor-pointer px-3 py-2 text-sm text-slate-200 transition hover:bg-buttonSecondary hover:text-white"
+                        onClick={() => {
+                          setNewCategory({
+                            ...newCategory,
+                            title: categoryName,
+                          });
+                          setShowDropdown(false);
+                        }}
+                      >
+                        {categoryName}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-300">
+                Maximum Spending
+              </label>
+
+              <input
+                type="number"
+                step="0.01"
+                value={newCategory.maxSpending}
+                onChange={(e) =>
+                  setNewCategory({
+                    ...newCategory,
+                    maxSpending: e.target.value,
+                  })
+                }
+                className="w-full rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                style={{ fontSize: "16px" }}
+                placeholder="Enter amount (e.g. 500.00)"
+              />
+            </div>
+
+            <Button onClick={handleAddCategory} filled customClassName="w-full">
+              Add Category
+            </Button>
+          </div>
         </div>
-      </Dialog.Panel>
-    </Dialog>
+
+        <div>
+          <h3 className="mb-4 text-lg font-medium text-white">
+            Current Default Categories
+          </h3>
+
+          {defaultCategories.length === 0 ? (
+            <p className="py-4 text-center text-slate-400">
+              No default categories set
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {defaultCategories.map((category) => (
+                <div
+                  key={category.title}
+                  className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-900/50 p-3"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-white">
+                      {category.title}
+                    </span>
+                    <span className="text-slate-400">
+                      - {category.maxSpending}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => handleRemoveCategory(category.title)}
+                    className="rounded-lg p-1 text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
+                  >
+                    <XMarkSvg />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </AppDialog>
   );
 };

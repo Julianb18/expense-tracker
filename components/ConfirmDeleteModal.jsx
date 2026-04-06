@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { Dialog } from "@headlessui/react";
-
+import React from "react";
+import { AppDialog } from "./AppDialog";
 import { Button } from "./Button";
 
-import { addMonthIncome, deleteCategory } from "../firebase/firestore";
+import { deleteCategory } from "../firebase/firestore";
 
 export const ConfirmDeleteModal = ({
   isConfirmDeleteModalOpen,
@@ -17,29 +16,32 @@ export const ConfirmDeleteModal = ({
     deleteCategory(uid, year, month, selectedCategory);
     setIsConfirmDeleteModalOpen(false);
   };
-  return (
-    <Dialog
-      className="fixed inset-0 z-30 flex items-center justify-center p-4"
-      open={isConfirmDeleteModalOpen}
-      onClose={() => setIsConfirmDeleteModalOpen(false)}
-    >
-      <div className="fixed inset-0 bg-black bg-opacity-50" />
-      <Dialog.Panel className="relative bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100 w-full max-w-[300px] p-3">
-        <div className="flex flex-col space-y-4">
-        <Dialog.Title>
-          Are you sure you want to delete - {selectedCategory}
-        </Dialog.Title>
 
-        <div className="flex justify-end gap-2">
-          <Button filled customColor="red-400" onClick={handleDelete}>
+  const handleClose = () => {
+    setIsConfirmDeleteModalOpen(false);
+  };
+
+  return (
+    <AppDialog
+      open={isConfirmDeleteModalOpen}
+      onClose={handleClose}
+      title="Confirm Delete"
+      maxWidthClassName="max-w-[360px]"
+      footer={
+        <>
+          <Button onClick={handleClose}>Cancel</Button>
+
+          <Button filled customColor="red-500" onClick={handleDelete}>
             Delete
           </Button>
-          <Button onClick={() => setIsConfirmDeleteModalOpen(false)}>
-            Cancel
-          </Button>
-        </div>
-        </div>
-      </Dialog.Panel>
-    </Dialog>
+        </>
+      }
+    >
+      <p className="text-sm text-slate-300">
+        Are you sure you want to delete{" "}
+        <span className="font-semibold text-white">{selectedCategory}</span>{" "}
+        category?
+      </p>
+    </AppDialog>
   );
 };

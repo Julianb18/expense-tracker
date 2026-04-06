@@ -1,10 +1,9 @@
-import { Dialog } from "@headlessui/react";
-import React, { useState } from "react";
-import { addCategory, addExpense, deleteExpense } from "../firebase/firestore";
-import { Button } from "./Button";
+import React from "react";
+import { AppDialog } from "./AppDialog";
 import { DeleteSvg } from "./svg/DeleteSvg";
-import { XMarkSvg } from "./svg/XMarkSvg";
 import { formatCurrency } from "../helperFunctions/currencyFormatter";
+
+import { deleteExpense } from "../firebase/firestore";
 
 export const ViewExpensesModal = ({
   uid,
@@ -18,76 +17,78 @@ export const ViewExpensesModal = ({
 }) => {
   const handleDelete = (e, expenseId) => {
     e.preventDefault();
+
     deleteExpense(uid, year, month, selectedCategory, expenseId);
+
     setSelectedExpenses(selectedExpenses.filter((e) => e.id !== expenseId));
   };
 
-  // Format date for display in a readable format
+  const handleClose = () => {
+    setIsViewExpensesModalOpen(false);
+  };
+
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
+
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
-  // Sort expenses by date (most recent first)
   const sortedExpenses = [...(selectedExpenses || [])].sort((a, b) => {
-    const dateA = new Date(a.date || 0);
-    const dateB = new Date(b.date || 0);
-    return dateB - dateA; // Descending order (newest first)
+    const expenseDateA = new Date(a.date || 0).getTime();
+    const expenseDateB = new Date(b.date || 0).getTime();
+
+    if (expenseDateB !== expenseDateA) {
+      return expenseDateB - expenseDateA;
+    }
+
+    return (b.createdAt || 0) - (a.createdAt || 0);
   });
 
   return (
-    <Dialog
-      className="fixed inset-0 z-30 flex items-center justify-center p-4"
+    <AppDialog
       open={isViewExpensesModalOpen}
-      onClose={() => setIsViewExpensesModalOpen(false)}
+      onClose={handleClose}
+      title={`${selectedCategory} - Expenses`}
+      maxWidthClassName="max-w-[500px]"
     >
-      <div className="fixed inset-0 bg-black bg-opacity-50" />
-      <Dialog.Panel className="relative bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100 w-full max-w-[500px] h-[400px] overflow-hidden">
-        <div className="flex flex-col h-full">
-        <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2 flex-shrink-0">
-          <Dialog.Title>{selectedCategory} - Expenses</Dialog.Title>
-          <button
-            className="cursor-pointer p-1"
-            onClick={() => setIsViewExpensesModalOpen(false)}
-          >
-            <XMarkSvg />
-          </button>
-          <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-400"></span>
-        </div>
-
-        <div className="flex flex-col pb-3 overflow-y-auto flex-1 min-h-0">
-          {sortedExpenses?.map((expense) => (
+      <div className="space-y-3">
+        {sortedExpenses.length === 0 ? (
+          <div className="py-8 text-center text-slate-400">No expenses yet</div>
+        ) : (
+          sortedExpenses.map((expense) => (
             <div
               key={expense.id}
-              className="flex justify-between items-center py-3 px-3 even:bg-gray-100 last:rounded-b-xl flex-shrink-0"
+              className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-900/50 p-3 transition hover:bg-slate-900/70"
             >
               <div className="flex flex-col">
-                <span className="font-medium">{expense.title}</span>
-                <span className="text-sm text-gray-500">
+                <span className="font-medium text-white">{expense.title}</span>
+                <span className="text-sm text-slate-400">
                   {formatDate(expense.date)}
                 </span>
               </div>
-              <div className="flex items-center">
-                <span className="mr-4 text-red-400 font-medium">
+
+              <div className="flex items-center gap-3">
+                <span className="font-medium text-red-400">
                   -{formatCurrency(expense.amount)}
                 </span>
-                <button 
+
+                <button
                   onClick={(e) => handleDelete(e, expense.id)}
-                  className="p-1 hover:bg-gray-200 rounded"
+                  className="rounded-lg p-1 text-slate-400 transition hover:bg-red-500/10 hover:text-red-400"
                 >
                   <DeleteSvg />
                 </button>
               </div>
             </div>
-          ))}
-        </div>
-        </div>
-      </Dialog.Panel>
-    </Dialog>
+          ))
+        )}
+      </div>
+    </AppDialog>
   );
 };

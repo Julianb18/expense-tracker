@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import { Dialog } from "@headlessui/react";
-
+import { AppDialog } from "./AppDialog";
 import { Button } from "./Button";
-import { XMarkSvg } from "./svg/XMarkSvg";
 import { formatCurrency } from "../helperFunctions/currencyFormatter";
 
 import { addMonthIncome } from "../firebase/firestore";
@@ -16,119 +14,117 @@ export const IncomeModal = ({
   currentIncome = 0,
 }) => {
   const [inputVal, setInputVal] = useState("");
-  const [isAddMode, setIsAddMode] = useState(true); // true = add to current, false = set total
+  const [isAddMode, setIsAddMode] = useState(true);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (inputVal !== "" && Number(inputVal) > 0) {
-      const amount = Number(inputVal);
-      const newIncome = isAddMode ? currentIncome + amount : amount;
-      addMonthIncome(uid, year, month, newIncome);
-      setIncomeModalIsOpen(false);
-    }
-    setInputVal("");
-  };
-
-  const handleClose = () => {
-    setIncomeModalIsOpen(false);
+  const resetState = () => {
     setInputVal("");
     setIsAddMode(true);
   };
 
+  const handleClose = () => {
+    setIncomeModalIsOpen(false);
+    resetState();
+  };
+
+  const handleSubmit = (e) => {
+    if (e) e.preventDefault();
+
+    if (inputVal !== "" && Number(inputVal) > 0) {
+      const amount = Number(inputVal);
+      const newIncome = isAddMode ? currentIncome + amount : amount;
+
+      addMonthIncome(uid, year, month, newIncome);
+      setIncomeModalIsOpen(false);
+      resetState();
+    }
+  };
+
   return (
-    <Dialog
-      className="fixed inset-0 z-30 flex items-center justify-center p-4"
+    <AppDialog
       open={incomeModalIsOpen}
       onClose={handleClose}
+      title="Manage Income"
+      maxWidthClassName="max-w-[500px]"
+      footer={
+        <>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button filled onClick={handleSubmit}>
+            {isAddMode ? "Add Income" : "Update Income"}
+          </Button>
+        </>
+      }
     >
-      <div className="fixed inset-0 bg-black bg-opacity-50" />
-      <Dialog.Panel className="relative bg-white rounded-2xl shadow-2xl shadow-gray-900/20 border border-gray-100 w-full max-w-[500px] max-h-[90vh] overflow-hidden">
-        <form onSubmit={handleSubmit}>
-          <div className="flex flex-col space-y-4">
-          <div className="relative flex items-center justify-between px-3 pt-3 pb-2 mb-2">
-            <Dialog.Title>Manage Income</Dialog.Title>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="rounded-2xl border border-slate-700 bg-slate-900/40 p-4 text-center">
+          <div className="mb-2 text-sm font-medium text-slate-300">
+            Current Income
+          </div>
+          <div className="text-xl font-bold text-buttonSecondary">
+            {formatCurrency(currentIncome)}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-700 bg-slate-900/40 p-1">
+          <div className="flex">
             <button
-              className="cursor-pointer p-1"
-              onClick={handleClose}
+              type="button"
+              onClick={() => setIsAddMode(true)}
+              className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
+                isAddMode
+                  ? "bg-slate-700 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
             >
-              <XMarkSvg />
+              Add Amount
             </button>
-            <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-400"></span>
-          </div>
 
-          <div className="px-3 space-y-4">
-            {/* Current Income Display */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 text-center border border-blue-200">
-              <div className="text-sm text-gray-600 mb-2 font-medium">Current Income</div>
-              <div className="text-xl font-bold text-buttonSecondary">
-                {formatCurrency(currentIncome)}
-              </div>
+            <button
+              type="button"
+              onClick={() => setIsAddMode(false)}
+              className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
+                !isAddMode
+                  ? "bg-slate-700 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              Set Total
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            {isAddMode ? "Amount to Add" : "Total Income Amount"}
+          </label>
+
+          <input
+            type="number"
+            step="0.01"
+            onChange={(e) => setInputVal(e.target.value)}
+            value={inputVal}
+            className="w-full rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            style={{ fontSize: "16px" }}
+            placeholder={
+              isAddMode
+                ? "Enter amount to add (e.g. 500.00)"
+                : "Enter total income (e.g. 3000.00)"
+            }
+          />
+        </div>
+
+        {inputVal !== "" && Number(inputVal) > 0 && (
+          <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/10 p-3 text-center">
+            <div className="mb-1 text-sm text-slate-300">
+              {isAddMode ? "New Total Income" : "New Income Amount"}
             </div>
-
-            {/* Mode Toggle */}
-            <div className="flex bg-gray-100 rounded-2xl p-1">
-              <button
-                type="button"
-                onClick={() => setIsAddMode(true)}
-                className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-colors ${
-                  isAddMode
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Add Amount
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAddMode(false)}
-                className={`flex-1 py-2 px-3 rounded-xl text-sm font-medium transition-colors ${
-                  !isAddMode
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Set Total
-              </button>
+            <div className="text-lg font-semibold text-indigo-300">
+              {formatCurrency(
+                isAddMode ? currentIncome + Number(inputVal) : Number(inputVal),
+              )}
             </div>
-
-            {/* Amount Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {isAddMode ? 'Amount to Add' : 'Total Income Amount'}
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                onChange={(e) => setInputVal(e.target.value)}
-                value={inputVal}
-                className="w-full border border-gray-300 rounded-xl pl-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                style={{ fontSize: '16px' }}
-                placeholder={isAddMode ? 'Enter amount to add (e.g., 500.00)' : 'Enter total income (e.g., 3000.00)'}
-              />
-            </div>
-
-            {/* Preview */}
-            {inputVal !== "" && Number(inputVal) > 0 && (
-              <div className="bg-blue-50 rounded-2xl p-3 text-center">
-                <div className="text-sm text-gray-600 mb-1">
-                  {isAddMode ? 'New Total Income' : 'New Income Amount'}
-                </div>
-                <div className="text-lg font-semibold text-blue-700">
-                  {formatCurrency(isAddMode ? currentIncome + Number(inputVal) : Number(inputVal))}
-                </div>
-              </div>
-            )}
           </div>
-
-          <div className="flex justify-end gap-3 px-3 py-3">
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button filled onClick={handleSubmit}>
-              {isAddMode ? 'Add Income' : 'Update Income'}
-            </Button>
-          </div>
-          </div>
-        </form>
-      </Dialog.Panel>
-    </Dialog>
+        )}
+      </form>
+    </AppDialog>
   );
 };
