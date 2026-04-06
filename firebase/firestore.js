@@ -66,7 +66,7 @@ const updateUserDoc = async (docId, updatedUserDoc) => {
   await setDoc(doc(db, "userExpenses", docId), updatedUserDoc);
 };
 
-const updateUserExpenseDoc = async (uid, updater) => {
+const updateUserData = async (uid, updater) => {
   const userDoc = await getUserDocRef(uid);
   if (!userDoc) return null;
 
@@ -87,7 +87,7 @@ const updateUserExpenseDoc = async (uid, updater) => {
 };
 
 export const ensureUserYearsUpToDate = async (uid) => {
-  return updateUserExpenseDoc(uid, async (nextUserData) => {
+  return updateUserData(uid, async (nextUserData) => {
     const currentYear = getCurrentYear();
 
     const existingYears = nextUserData.years || [];
@@ -138,7 +138,7 @@ export const addANewUserExpenseDoc = async (uid, displayName) => {
 };
 
 export const addMonthIncome = async (uid, year, month, income) => {
-  await updateUserExpenseDoc(uid, async (nextUserData) => {
+  await updateUserData(uid, async (nextUserData) => {
     const yearData = getYearData(nextUserData, year);
     if (!yearData) return false;
 
@@ -150,7 +150,7 @@ export const addMonthIncome = async (uid, year, month, income) => {
 };
 
 export const addCategory = async (uid, year, month, category) => {
-  await updateUserExpenseDoc(uid, async (nextUserData) => {
+  await updateUserData(uid, async (nextUserData) => {
     const yearData = getYearData(nextUserData, year);
     if (!yearData) return false;
 
@@ -162,7 +162,7 @@ export const addCategory = async (uid, year, month, category) => {
 };
 
 export const deleteCategory = async (uid, year, month, selectedCategory) => {
-  await updateUserExpenseDoc(uid, async (nextUserData) => {
+  await updateUserData(uid, async (nextUserData) => {
     const yearData = getYearData(nextUserData, year);
     if (!yearData) return false;
 
@@ -176,7 +176,7 @@ export const deleteCategory = async (uid, year, month, selectedCategory) => {
 };
 
 export const addExpense = async (uid, year, month, category, expense) => {
-  await updateUserExpenseDoc(uid, async (nextUserData) => {
+  await updateUserData(uid, async (nextUserData) => {
     const yearData = getYearData(nextUserData, year);
     if (!yearData) return false;
 
@@ -203,7 +203,7 @@ export const deleteExpense = async (
   selectedCategory,
   expenseId,
 ) => {
-  await updateUserExpenseDoc(uid, async (nextUserData) => {
+  await updateUserData(uid, async (nextUserData) => {
     const yearData = getYearData(nextUserData, year);
     if (!yearData) return false;
 
@@ -231,7 +231,7 @@ export const addMonthBalanceAndExpense = async (
   monthBalance,
   totalMonthlyExpenses,
 ) => {
-  await updateUserExpenseDoc(uid, async (nextUserData) => {
+  await updateUserData(uid, async (nextUserData) => {
     const yearData = getYearData(nextUserData, year);
     if (!yearData) return false;
 
@@ -244,7 +244,7 @@ export const addMonthBalanceAndExpense = async (
 };
 
 export const addYearBalance = async (uid, year, yearBalance) => {
-  await updateUserExpenseDoc(uid, async (nextUserData) => {
+  await updateUserData(uid, async (nextUserData) => {
     const yearData = getYearData(nextUserData, year);
     if (!yearData) return false;
 
@@ -259,7 +259,7 @@ export const updateCategoryTitle = async (
   oldTitle,
   newTitle,
 ) => {
-  await updateUserExpenseDoc(uid, async (nextUserData) => {
+  await updateUserData(uid, async (nextUserData) => {
     const yearData = getYearData(nextUserData, year);
     if (!yearData) return false;
 
@@ -280,7 +280,7 @@ export const updateCategoryMaxSpending = async (
   categoryTitle,
   newMaxSpending,
 ) => {
-  await updateUserExpenseDoc(uid, async (nextUserData) => {
+  await updateUserData(uid, async (nextUserData) => {
     const yearData = getYearData(nextUserData, year);
     if (!yearData) return false;
 
@@ -295,7 +295,7 @@ export const updateCategoryMaxSpending = async (
 };
 
 export const setDefaultCategories = async (uid, defaultCategories) => {
-  await updateUserExpenseDoc(uid, async (nextUserData) => {
+  await updateUserData(uid, async (nextUserData) => {
     nextUserData.defaultCategories = defaultCategories;
   });
 };
@@ -317,7 +317,7 @@ export const applyDefaultCategoriesToFutureMonths = async (
   currentYear,
   currentMonth,
 ) => {
-  await updateUserExpenseDoc(uid, async (nextUserData) => {
+  await updateUserData(uid, async (nextUserData) => {
     const defaultCategories = nextUserData.defaultCategories || [];
     if (defaultCategories.length === 0) return false;
 
@@ -344,7 +344,7 @@ export const applyDefaultCategoriesToFutureMonths = async (
 };
 
 export const ensureMonthHasCurrentDefaults = async (uid, year, month) => {
-  const result = await updateUserExpenseDoc(uid, async (nextUserData) => {
+  const result = await updateUserData(uid, async (nextUserData) => {
     const defaultCategories = nextUserData.defaultCategories || [];
     if (defaultCategories.length === 0) return false;
 
@@ -372,7 +372,7 @@ export const ensureMonthHasCurrentDefaults = async (uid, year, month) => {
 };
 
 export const resetMonthToDefaults = async (uid, year, month) => {
-  const result = await updateUserExpenseDoc(uid, async (nextUserData) => {
+  const result = await updateUserData(uid, async (nextUserData) => {
     const defaultCategories = nextUserData.defaultCategories || [];
     if (defaultCategories.length === 0) return false;
 
@@ -389,7 +389,7 @@ export const resetMonthToDefaults = async (uid, year, month) => {
 };
 
 export const updateCategoryOrder = async (uid, year, month, newCategories) => {
-  const result = await updateUserExpenseDoc(uid, async (nextUserData) => {
+  const result = await updateUserData(uid, async (nextUserData) => {
     const yearData = getYearData(nextUserData, year);
     if (!yearData) return false;
 
