@@ -17,7 +17,7 @@ export const Navbar = () => {
 
   return (
     <header className="fixed top-0 w-full shadow-lg shadow-primaryDark z-50 flex justify-between items-center px-3 py-3 bg-primaryDark text-white">
-      <Link href="/dashboard" className="text-buttonPrimary flex gap-4">
+      <Link href="/dashboard" className="text-slate-300 flex gap-4">
         <MoneySvg /> ExpenseTracker
       </Link>
 
