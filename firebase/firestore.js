@@ -9,34 +9,23 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
-const hardCodedArrayOfMonths = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+import { MONTHS } from "../utils/constants";
+
+const getCurrentYear = () => new Date().getFullYear();
 
 const getYearRange = (startYear) => {
-  const currentYear = new Date().getFullYear();
+  const currentYear = getCurrentYear();
   const years = [];
 
-  for (let y = startYear; y <= currentYear; y++) {
-    years.push(y);
+  for (let year = startYear; year <= currentYear; year++) {
+    years.push(year);
   }
 
   return years;
 };
 
 const initializeMonths = () =>
-  hardCodedArrayOfMonths.map((month) => ({
+  MONTHS.map((month) => ({
     income: 0,
     categories: [],
     month,
@@ -53,6 +42,15 @@ const createYearObject = (year) => ({
 const initializeYears = (startYear) =>
   getYearRange(startYear).map((year) => createYearObject(year));
 
+const getYearData = (userData, year) =>
+  userData?.years?.find((item) => item.year === year);
+
+const getMonthData = (yearData, month) =>
+  yearData?.months?.find((item) => item.month === month);
+
+const getCategoryData = (monthData, categoryTitle) =>
+  monthData?.categories?.find((item) => item.title === categoryTitle);
+
 const getUserDocRef = async (uid) => {
   const q = query(collection(db, "userExpenses"), where("uid", "==", uid));
   const querySnapshot = await getDocs(q);
@@ -68,40 +66,55 @@ const updateUserDoc = async (docId, updatedUserDoc) => {
   await setDoc(doc(db, "userExpenses", docId), updatedUserDoc);
 };
 
-export const ensureUserYearsUpToDate = async (uid) => {
+const updateUserExpenseDoc = async (uid, updater) => {
   const userDoc = await getUserDocRef(uid);
   if (!userDoc) return null;
 
   const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
+  const nextUserData = {
+    ...userData,
+    years: userData.years ? [...userData.years] : [],
+  };
 
-  const currentYear = new Date().getFullYear();
+  const didChange = await updater(nextUserData, userDoc);
 
-  const existingYearsArray = updatedUserDoc.years || [];
-  const derivedStartYear =
-    updatedUserDoc.startYear ||
-    (existingYearsArray.length > 0
-      ? Math.min(...existingYearsArray.map((y) => y.year))
-      : currentYear);
-
-  updatedUserDoc.startYear = derivedStartYear;
-
-  if (!updatedUserDoc.years) {
-    updatedUserDoc.years = [];
+  if (didChange === false) {
+    return null;
   }
 
-  const existingYears = new Set(updatedUserDoc.years.map((y) => y.year));
+  await updateUserDoc(userDoc.id, nextUserData);
+  return nextUserData;
+};
 
-  for (let year = derivedStartYear; year <= currentYear; year++) {
-    if (!existingYears.has(year)) {
-      updatedUserDoc.years.push(createYearObject(year));
+export const ensureUserYearsUpToDate = async (uid) => {
+  return updateUserExpenseDoc(uid, async (nextUserData) => {
+    const currentYear = getCurrentYear();
+
+    const existingYears = nextUserData.years || [];
+    const derivedStartYear =
+      nextUserData.startYear ||
+      (existingYears.length > 0
+        ? Math.min(...existingYears.map((item) => item.year))
+        : currentYear);
+
+    nextUserData.startYear = derivedStartYear;
+
+    if (!nextUserData.years) {
+      nextUserData.years = [];
     }
-  }
 
-  updatedUserDoc.years.sort((a, b) => a.year - b.year);
+    const existingYearSet = new Set(
+      nextUserData.years.map((item) => item.year),
+    );
 
-  await updateUserDoc(userDoc.id, updatedUserDoc);
-  return updatedUserDoc;
+    for (let year = derivedStartYear; year <= currentYear; year++) {
+      if (!existingYearSet.has(year)) {
+        nextUserData.years.push(createYearObject(year));
+      }
+    }
+
+    nextUserData.years.sort((a, b) => a.year - b.year);
+  });
 };
 
 export const addANewUserExpenseDoc = async (uid, displayName) => {
@@ -113,7 +126,7 @@ export const addANewUserExpenseDoc = async (uid, displayName) => {
     return;
   }
 
-  const startYear = new Date().getFullYear();
+  const startYear = getCurrentYear();
 
   await addDoc(collection(db, "userExpenses"), {
     uid,
@@ -125,69 +138,62 @@ export const addANewUserExpenseDoc = async (uid, displayName) => {
 };
 
 export const addMonthIncome = async (uid, year, month, income) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return;
+  await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
+    const monthData = getMonthData(yearData, month);
+    if (!monthData) return false;
 
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
-  const monthData = yearData.months.find((m) => m.month === month);
-  monthData.income = income;
-
-  await updateUserDoc(userDoc.id, updatedUserDoc);
+    monthData.income = income;
+  });
 };
 
 export const addCategory = async (uid, year, month, category) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return;
+  await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
+    const monthData = getMonthData(yearData, month);
+    if (!monthData) return false;
 
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
-  const monthData = yearData.months.find((m) => m.month === month);
-  monthData.categories.push(category);
-
-  await updateUserDoc(userDoc.id, updatedUserDoc);
+    monthData.categories.push(category);
+  });
 };
 
 export const deleteCategory = async (uid, year, month, selectedCategory) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return;
+  await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
+    const monthData = getMonthData(yearData, month);
+    if (!monthData) return false;
 
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
-  const monthData = yearData.months.find((m) => m.month === month);
-  monthData.categories = monthData.categories.filter(
-    (c) => c.title !== selectedCategory,
-  );
-
-  await updateUserDoc(userDoc.id, updatedUserDoc);
+    monthData.categories = monthData.categories.filter(
+      (category) => category.title !== selectedCategory,
+    );
+  });
 };
 
 export const addExpense = async (uid, year, month, category, expense) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return;
+  await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
+    const monthData = getMonthData(yearData, month);
+    if (!monthData) return false;
 
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
-  const monthData = yearData.months.find((m) => m.month === month);
-  const categoryData = monthData.categories.find((c) => c.title === category);
+    const categoryData = getCategoryData(monthData, category);
+    if (!categoryData) return false;
 
-  const expenseWithMeta = {
-    ...expense,
-    createdAt: Date.now(),
-  };
+    const expenseWithMeta = {
+      ...expense,
+      createdAt: Date.now(),
+    };
 
-  categoryData.expenses.push(expenseWithMeta);
-  categoryData.totalCategoryExpenses += expense.amount;
-
-  await updateUserDoc(userDoc.id, updatedUserDoc);
+    categoryData.expenses.push(expenseWithMeta);
+    categoryData.totalCategoryExpenses += expense.amount;
+  });
 };
 
 export const deleteExpense = async (
@@ -197,25 +203,25 @@ export const deleteExpense = async (
   selectedCategory,
   expenseId,
 ) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return;
+  await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
+    const monthData = getMonthData(yearData, month);
+    if (!monthData) return false;
 
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
-  const monthData = yearData.months.find((m) => m.month === month);
-  const categoryData = monthData.categories.find(
-    (c) => c.title === selectedCategory,
-  );
+    const categoryData = getCategoryData(monthData, selectedCategory);
+    if (!categoryData) return false;
 
-  const expenseIndex = categoryData.expenses.findIndex(
-    (e) => e.id === expenseId,
-  );
-  const deletedExpense = categoryData.expenses.splice(expenseIndex, 1)[0];
-  categoryData.totalCategoryExpenses -= deletedExpense.amount;
+    const expenseIndex = categoryData.expenses.findIndex(
+      (expense) => expense.id === expenseId,
+    );
 
-  await updateUserDoc(userDoc.id, updatedUserDoc);
+    if (expenseIndex === -1) return false;
+
+    const deletedExpense = categoryData.expenses.splice(expenseIndex, 1)[0];
+    categoryData.totalCategoryExpenses -= deletedExpense.amount;
+  });
 };
 
 export const addMonthBalanceAndExpense = async (
@@ -225,31 +231,25 @@ export const addMonthBalanceAndExpense = async (
   monthBalance,
   totalMonthlyExpenses,
 ) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return;
+  await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
+    const monthData = getMonthData(yearData, month);
+    if (!monthData) return false;
 
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
-  const monthData = yearData.months.find((m) => m.month === month);
-  monthData.monthBalance = monthBalance;
-  monthData.totalMonthlyExpenses = totalMonthlyExpenses;
-
-  await updateUserDoc(userDoc.id, updatedUserDoc);
+    monthData.monthBalance = monthBalance;
+    monthData.totalMonthlyExpenses = totalMonthlyExpenses;
+  });
 };
 
 export const addYearBalance = async (uid, year, yearBalance) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return;
+  await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
-
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
-  yearData.currentBalance = yearBalance;
-
-  await updateUserDoc(userDoc.id, updatedUserDoc);
+    yearData.currentBalance = yearBalance;
+  });
 };
 
 export const updateCategoryTitle = async (
@@ -259,20 +259,18 @@ export const updateCategoryTitle = async (
   oldTitle,
   newTitle,
 ) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return;
+  await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
+    const monthData = getMonthData(yearData, month);
+    if (!monthData) return false;
 
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
-  const monthData = yearData.months.find((m) => m.month === month);
-  const categoryData = monthData.categories.find((c) => c.title === oldTitle);
+    const categoryData = getCategoryData(monthData, oldTitle);
+    if (!categoryData) return false;
 
-  if (categoryData) {
     categoryData.title = newTitle;
-    await updateUserDoc(userDoc.id, updatedUserDoc);
-  }
+  });
 };
 
 export const updateCategoryMaxSpending = async (
@@ -282,45 +280,36 @@ export const updateCategoryMaxSpending = async (
   categoryTitle,
   newMaxSpending,
 ) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return;
+  await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
+    const monthData = getMonthData(yearData, month);
+    if (!monthData) return false;
 
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
-  const monthData = yearData.months.find((m) => m.month === month);
-  const categoryData = monthData.categories.find(
-    (c) => c.title === categoryTitle,
-  );
+    const categoryData = getCategoryData(monthData, categoryTitle);
+    if (!categoryData) return false;
 
-  if (categoryData) {
     categoryData.maxSpending = newMaxSpending;
-    await updateUserDoc(userDoc.id, updatedUserDoc);
-  }
+  });
 };
 
 export const setDefaultCategories = async (uid, defaultCategories) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return;
-
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
-
-  updatedUserDoc.defaultCategories = defaultCategories;
-  await updateUserDoc(userDoc.id, updatedUserDoc);
+  await updateUserExpenseDoc(uid, async (nextUserData) => {
+    nextUserData.defaultCategories = defaultCategories;
+  });
 };
 
 export const getDefaultCategories = async (uid) => {
   const userDoc = await getUserDocRef(uid);
+
   if (!userDoc) {
     console.log("Firestore: No user doc found");
     return [];
   }
 
   const userData = userDoc.data();
-  const defaults = userData.defaultCategories || [];
-  return defaults;
+  return userData.defaultCategories || [];
 };
 
 export const applyDefaultCategoriesToFutureMonths = async (
@@ -328,128 +317,87 @@ export const applyDefaultCategoriesToFutureMonths = async (
   currentYear,
   currentMonth,
 ) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return;
+  await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const defaultCategories = nextUserData.defaultCategories || [];
+    if (defaultCategories.length === 0) return false;
 
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
-  const defaultCategories = userData.defaultCategories || [];
+    const currentMonthIndex = MONTHS.indexOf(currentMonth);
+    const currentYearData = getYearData(nextUserData, currentYear);
 
-  if (defaultCategories.length === 0) {
-    return;
-  }
-
-  const currentMonthIndex = hardCodedArrayOfMonths.indexOf(currentMonth);
-  let updatedMonthsCount = 0;
-
-  const currentYearData = updatedUserDoc.years.find(
-    (y) => y.year === currentYear,
-  );
-
-  if (currentYearData) {
-    for (
-      let i = currentMonthIndex + 1;
-      i < hardCodedArrayOfMonths.length;
-      i++
-    ) {
-      const monthData = currentYearData.months[i];
-      monthData.categories = [...defaultCategories];
-      updatedMonthsCount++;
+    if (currentYearData) {
+      for (let i = currentMonthIndex + 1; i < MONTHS.length; i++) {
+        const monthData = currentYearData.months[i];
+        if (monthData) {
+          monthData.categories = [...defaultCategories];
+        }
+      }
     }
-  }
 
-  updatedUserDoc.years.forEach((yearData) => {
-    if (yearData.year > currentYear) {
-      yearData.months.forEach((monthData) => {
-        monthData.categories = [...defaultCategories];
-        updatedMonthsCount++;
-      });
-    }
+    nextUserData.years.forEach((yearData) => {
+      if (yearData.year > currentYear) {
+        yearData.months.forEach((monthData) => {
+          monthData.categories = [...defaultCategories];
+        });
+      }
+    });
   });
-
-  await updateUserDoc(userDoc.id, updatedUserDoc);
 };
 
 export const ensureMonthHasCurrentDefaults = async (uid, year, month) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return false;
+  const result = await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const defaultCategories = nextUserData.defaultCategories || [];
+    if (defaultCategories.length === 0) return false;
 
-  const userData = userDoc.data();
-  const defaultCategories = userData.defaultCategories || [];
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonthIndex = currentDate.getMonth();
+    const targetMonthIndex = MONTHS.indexOf(month);
 
-  if (defaultCategories.length === 0) return false;
+    const isFutureMonth =
+      year > currentYear ||
+      (year === currentYear && targetMonthIndex > currentMonthIndex);
 
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonthIndex = currentDate.getMonth();
-  const targetMonthIndex = hardCodedArrayOfMonths.indexOf(month);
+    if (!isFutureMonth) return false;
 
-  const isFutureMonth =
-    year > currentYear ||
-    (year === currentYear && targetMonthIndex > currentMonthIndex);
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  if (!isFutureMonth) {
-    return false;
-  }
+    const monthData = getMonthData(yearData, month);
+    if (!monthData) return false;
 
-  const updatedUserDoc = { ...userData };
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
+    monthData.categories = [...defaultCategories];
+  });
 
-  if (yearData) {
-    const monthData = yearData.months.find((m) => m.month === month);
-
-    if (monthData) {
-      monthData.categories = [...defaultCategories];
-      await updateUserDoc(userDoc.id, updatedUserDoc);
-      return true;
-    }
-  }
-
-  return false;
+  return !!result;
 };
 
 export const resetMonthToDefaults = async (uid, year, month) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return false;
+  const result = await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const defaultCategories = nextUserData.defaultCategories || [];
+    if (defaultCategories.length === 0) return false;
 
-  const userData = userDoc.data();
-  const defaultCategories = userData.defaultCategories || [];
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  if (defaultCategories.length === 0) return false;
+    const monthData = getMonthData(yearData, month);
+    if (!monthData) return false;
 
-  const updatedUserDoc = { ...userData };
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
+    monthData.categories = [...defaultCategories];
+  });
 
-  if (yearData) {
-    const monthData = yearData.months.find((m) => m.month === month);
-
-    if (monthData) {
-      monthData.categories = [...defaultCategories];
-      await updateUserDoc(userDoc.id, updatedUserDoc);
-      return true;
-    }
-  }
-
-  return false;
+  return !!result;
 };
 
 export const updateCategoryOrder = async (uid, year, month, newCategories) => {
-  const userDoc = await getUserDocRef(uid);
-  if (!userDoc) return false;
+  const result = await updateUserExpenseDoc(uid, async (nextUserData) => {
+    const yearData = getYearData(nextUserData, year);
+    if (!yearData) return false;
 
-  const userData = userDoc.data();
-  const updatedUserDoc = { ...userData };
-  const yearData = updatedUserDoc.years.find((y) => y.year === year);
+    const monthData = getMonthData(yearData, month);
+    if (!monthData) return false;
 
-  if (yearData) {
-    const monthData = yearData.months.find((m) => m.month === month);
+    monthData.categories = newCategories;
+  });
 
-    if (monthData) {
-      monthData.categories = newCategories;
-      await updateUserDoc(userDoc.id, updatedUserDoc);
-      return true;
-    }
-  }
-
-  return false;
+  return !!result;
 };

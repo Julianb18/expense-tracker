@@ -27,7 +27,8 @@ const Dashboard = () => {
   const { authUser, isLoading } = useAuth();
   const router = useRouter();
 
-  const [isDefaultCategoriesModalOpen, setIsDefaultCategoriesModalOpen] = useState(false);
+  const [isDefaultCategoriesModalOpen, setIsDefaultCategoriesModalOpen] =
+    useState(false);
 
   useEffect(() => {
     if (!isLoading && !authUser) {
@@ -35,12 +36,10 @@ const Dashboard = () => {
     }
   }, [authUser, isLoading, router]);
 
-  // Calculate accumulated balance from all months in the selected year
   const accumulatedBalance = selectedYear?.months.reduce((total, month) => {
     return total + month.monthBalance;
   }, 0);
 
-  // Update year balance in database when accumulated balance changes
   useEffect(() => {
     if (authUser && selectedYear) {
       addYearBalance(authUser.uid, selectedYear.year, accumulatedBalance);
@@ -71,7 +70,7 @@ const Dashboard = () => {
       <div className="flex flex-col items-center flex-1 mt-6 px-4 pb-20">
         {(() => {
           const selectedMonthData = selectedYear.months.find(
-            (month) => month.month === selectedMonth
+            (month) => month.month === selectedMonth,
           );
 
           if (!selectedMonthData) {

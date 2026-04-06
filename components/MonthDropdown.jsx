@@ -4,24 +4,11 @@ import { Listbox, Transition } from "@headlessui/react";
 import { ChevronDown } from "./svg/ChevronDown";
 import { Check } from "./svg/Check";
 
+import { MONTHS } from "../utils/constants";
+
 const classNames = (...classes) => {
   return classes.filter(Boolean).join(" ");
 };
-
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
 
 export const MonthDropdown = ({ selectedMonth, onMonthChange }) => {
   return (
