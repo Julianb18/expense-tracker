@@ -54,7 +54,7 @@ export const Dropdown = ({ years, changeEvent, selectedYear }) => {
                       className={({ active }) =>
                         classNames(
                           active
-                            ? "bg-buttonSecondary text-white"
+                            ? "bg-buttonPrimary text-white"
                             : "text-slate-200",
                           "relative cursor-default select-none py-2 pl-3 pr-9 transition",
                         )
@@ -76,7 +76,7 @@ export const Dropdown = ({ years, changeEvent, selectedYear }) => {
                           {selected ? (
                             <span
                               className={classNames(
-                                active ? "text-white" : "text-buttonSecondary",
+                                active ? "text-white" : "text-buttonPrimary",
                                 "absolute inset-y-0 right-0 flex items-center pr-4",
                               )}
                             >

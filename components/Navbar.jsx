@@ -26,21 +26,25 @@ export const Navbar = () => {
           as="div"
           className=" border border-secondaryDark bg-buttonSecondary w-8 h-8 rounded-full text-white relative inline-block text-left"
         >
-          <Menu.Button className="w-full h-full rounded-full">
-            {authUser?.displayName.charAt(0)}
+          <Menu.Button className="w-full h-full rounded-full text-sm font-medium">
+            {(authUser?.displayName || authUser?.email || "G")
+              .charAt(0)
+              .toUpperCase()}
           </Menu.Button>
-          <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg">
-            <Menu.Item as="div" onClick={signOut} className="px-2 py-1">
+          <Menu.Items className="absolute right-0 z-[60] mt-2 w-56 origin-top-right rounded-xl border border-slate-600 bg-slate-900/98 shadow-xl shadow-black/40 backdrop-blur-sm focus:outline-none">
+            <Menu.Item>
               {({ active }) => (
-                <a
-                  className={`${
+                <button
+                  type="button"
+                  onClick={signOut}
+                  className={`flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
                     active
-                      ? " text-buttonPrimary underline w-full"
-                      : " text-black w-full"
+                      ? "bg-slate-700 text-white"
+                      : "text-slate-200 hover:bg-slate-800/90"
                   }`}
                 >
                   Sign Out
-                </a>
+                </button>
               )}
             </Menu.Item>
           </Menu.Items>

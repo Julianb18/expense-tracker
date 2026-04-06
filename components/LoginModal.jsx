@@ -3,7 +3,9 @@ import { EmailAuthProvider, GoogleAuthProvider } from "firebase/auth";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 
 import { AppDialog } from "./AppDialog";
+import { Button } from "./Button";
 import { auth } from "../firebase/firebase";
+import { useAuth } from "../context/AuthContext";
 
 const REDIRECT_PAGE = "/dashboard";
 
@@ -18,6 +20,8 @@ const uiConfig = {
 
 export const LoginModal = forwardRef((props, ref) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { signInAsGuest, guestSignInError, clearGuestSignInError } =
+    useAuth();
 
   useImperativeHandle(ref, () => ({
     open: () => setIsOpen(true),
@@ -25,7 +29,13 @@ export const LoginModal = forwardRef((props, ref) => {
   }));
 
   const handleClose = () => {
+    clearGuestSignInError();
     setIsOpen(false);
+  };
+
+  const handleGuest = async () => {
+    const ok = await signInAsGuest();
+    if (ok) setIsOpen(false);
   };
 
   return (
@@ -40,10 +50,29 @@ export const LoginModal = forwardRef((props, ref) => {
           <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth} />
         </div>
 
+        <div className="relative flex items-center gap-3 py-1">
+          <span className="h-px flex-1 bg-slate-700" />
+          <span className="text-xs text-slate-500">or</span>
+          <span className="h-px flex-1 bg-slate-700" />
+        </div>
+
+        <Button
+          type="button"
+          onClick={handleGuest}
+          customClassName="w-full border border-slate-600 bg-slate-900/50 text-slate-200 hover:bg-slate-800"
+        >
+          Try without email (guest demo)
+        </Button>
+
+        {guestSignInError ? (
+          <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-5 text-amber-100">
+            {guestSignInError}
+          </p>
+        ) : null}
+
         <p className="text-xs leading-5 text-slate-400">
-          You can sign up or log in from here. Even if you do not have an
-          account yet, start the sign-in flow and the sign-up process will
-          begin.
+          Guest mode uses an anonymous session—your data is real in the demo,
+          but tied only to this browser until you clear it or sign out.
         </p>
       </div>
     </AppDialog>

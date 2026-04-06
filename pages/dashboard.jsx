@@ -27,8 +27,11 @@ const Dashboard = () => {
 
   if (!isReady) {
     return (
-      <div className="h-[40vh] flex justify-center items-center">
+      <div className="flex min-h-[60vh] w-full flex-col items-center justify-center px-4">
         <LoadingSpinner />
+        <p className="mt-4 text-center text-sm text-slate-400">
+          Loading your budget data…
+        </p>
       </div>
     );
   }

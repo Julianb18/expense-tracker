@@ -10,18 +10,27 @@ import { useAuth } from "../context/AuthContext";
 const REDIRECT_PAGE = "/dashboard";
 
 const Home = () => {
-  const { authUser, isLoading } = useAuth();
+  const { authUser, isLoading, signInAsGuest, guestSignInError } = useAuth();
   const router = useRouter();
   const loginModalRef = useRef();
 
   useEffect(() => {
     if (!isLoading && authUser) {
-      router.push(REDIRECT_PAGE);
+      router.replace(REDIRECT_PAGE);
     }
   }, [authUser, isLoading, router]);
 
-  if (isLoading || (!isLoading && authUser)) {
-    return <LoadingSpinner />;
+  if (isLoading || authUser) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-primaryDark via-secondaryDark to-primaryDark px-4">
+        <LoadingSpinner />
+        {authUser ? (
+          <p className="mt-4 text-center text-sm text-slate-400">
+            Taking you to your dashboard…
+          </p>
+        ) : null}
+      </div>
+    );
   }
 
   return (
@@ -46,7 +55,7 @@ const Home = () => {
             dashboard.
           </p>
 
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Button
               filled
               customClassName="px-8 py-3 text-base"
@@ -54,7 +63,23 @@ const Home = () => {
             >
               Open App
             </Button>
+            <Button
+              customClassName="border border-white/20 bg-white/5 px-8 py-3 text-base text-white hover:bg-white/10"
+              onClick={() => signInAsGuest()}
+            >
+              Try guest demo
+            </Button>
           </div>
+          {guestSignInError ? (
+            <p className="mx-auto mt-4 max-w-lg rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-center text-sm leading-snug text-amber-100">
+              {guestSignInError}
+            </p>
+          ) : (
+            <p className="mx-auto mt-4 max-w-md text-center text-xs text-slate-500">
+              Guest demo skips email and Google—Firebase creates a temporary
+              account for your browser session.
+            </p>
+          )}
         </div>
       </div>
 

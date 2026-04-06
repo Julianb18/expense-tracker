@@ -22,7 +22,7 @@ export function useDashboard() {
 
   useEffect(() => {
     if (!isLoading && !authUser) {
-      router.push("/");
+      router.replace("/");
     }
   }, [authUser, isLoading, router]);
 
@@ -45,8 +45,14 @@ export function useDashboard() {
     setIsDefaultCategoriesModalOpen(true);
   }, []);
 
-  const isReady =
-    Boolean(authUser && userData && userData.years && selectedYear);
+  const isReady = Boolean(
+    authUser &&
+      userData &&
+      Array.isArray(userData.years) &&
+      userData.years.length > 0 &&
+      selectedYear &&
+      typeof selectedYear.year === "number",
+  );
 
   return {
     userData,

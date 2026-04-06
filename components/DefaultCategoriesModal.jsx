@@ -38,6 +38,7 @@ export const DefaultCategoriesModal = ({
       onClose={handleClose}
       title="Default Categories"
       maxWidthClassName="max-w-[560px]"
+      bodyClassName="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden px-4 py-4"
       footer={
         <>
           <Button onClick={handleClose}>Cancel</Button>
@@ -47,83 +48,83 @@ export const DefaultCategoriesModal = ({
         </>
       }
     >
-      <div className="space-y-6 overflow-visible">
-        <div className="rounded-2xl border border-slate-700 bg-slate-900/40 p-4">
-          <h3 className="mb-4 text-lg font-medium text-white">Add Category</h3>
+      <div className="shrink-0 rounded-2xl border border-slate-700 bg-slate-900/40 p-4">
+        <h3 className="mb-4 text-lg font-medium text-white">Add Category</h3>
 
-          <div className="space-y-4 overflow-visible">
-            <div className="overflow-visible">
-              <label className="mb-2 block text-sm font-medium text-slate-300">
-                Category Name
-              </label>
+        <div className="space-y-4 overflow-visible">
+          <div className="overflow-visible">
+            <label className="mb-2 block text-sm font-medium text-slate-300">
+              Category Name
+            </label>
 
-              <div className="relative overflow-visible">
-                <input
-                  type="text"
-                  className="w-full rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  style={{ fontSize: "16px" }}
-                  placeholder="Type category name"
-                  value={newCategory.title}
-                  onChange={(e) => onNewTitleChange(e.target.value)}
-                />
-
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400"
-                  onClick={() => setShowDropdown(!showDropdown)}
-                >
-                  <ChevronDown className="h-5 w-5" aria-hidden="true" />
-                </button>
-
-                {showDropdown && (
-                  <div className="absolute z-50 mt-1 max-h-44 w-full overflow-auto rounded-2xl border border-slate-700 bg-slate-900 py-1 shadow-xl">
-                    {filteredPredefined.map((categoryName) => (
-                      <div
-                        key={categoryName}
-                        className="cursor-pointer px-3 py-2 text-sm text-slate-200 transition hover:bg-buttonSecondary hover:text-white"
-                        onClick={() => selectNewTitle(categoryName)}
-                      >
-                        {categoryName}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-300">
-                Maximum Spending
-              </label>
-
+            <div className="relative overflow-visible">
               <input
-                type="number"
-                step="0.01"
-                value={newCategory.maxSpending}
-                onChange={(e) => setMaxSpending(e.target.value)}
+                type="text"
                 className="w-full rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 style={{ fontSize: "16px" }}
-                placeholder="Enter amount (e.g. 500.00)"
+                placeholder="Type category name"
+                value={newCategory.title}
+                onChange={(e) => onNewTitleChange(e.target.value)}
               />
+
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400"
+                onClick={() => setShowDropdown(!showDropdown)}
+              >
+                <ChevronDown className="h-5 w-5" aria-hidden="true" />
+              </button>
+
+              {showDropdown && (
+                <div className="absolute z-50 mt-1 max-h-44 w-full overflow-auto rounded-2xl border border-slate-700 bg-slate-900 py-1 shadow-xl">
+                  {filteredPredefined.map((categoryName) => (
+                    <div
+                      key={categoryName}
+                      className="cursor-pointer px-3 py-2 text-sm text-slate-200 transition hover:bg-buttonPrimary hover:text-white"
+                      onClick={() => selectNewTitle(categoryName)}
+                    >
+                      {categoryName}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-
-            <Button onClick={handleAddCategory} filled customClassName="w-full">
-              Add Category
-            </Button>
           </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-300">
+              Maximum Spending
+            </label>
+
+            <input
+              type="number"
+              step="0.01"
+              value={newCategory.maxSpending}
+              onChange={(e) => setMaxSpending(e.target.value)}
+              className="w-full rounded-xl border border-slate-600 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              style={{ fontSize: "16px" }}
+              placeholder="Enter amount (e.g. 500.00)"
+            />
+          </div>
+
+          <Button onClick={handleAddCategory} filled customClassName="w-full">
+            Add Category
+          </Button>
         </div>
+      </div>
 
-        <div>
-          <h3 className="mb-4 text-lg font-medium text-white">
-            Current Default Categories
-          </h3>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <h3 className="mb-4 shrink-0 text-lg font-medium text-white">
+          Current Default Categories
+        </h3>
 
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
           {defaultCategories.length === 0 ? (
             <p className="py-4 text-center text-slate-400">
               No default categories set
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 pb-1">
               {defaultCategories.map((category) => (
                 <div
                   key={category.title}

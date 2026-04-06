@@ -20,7 +20,7 @@ export const AppDialog = ({
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
 
       <Dialog.Panel
-        className={`relative z-10 flex w-full ${maxWidthClassName} max-h-[90vh] flex-col overflow-y-auto rounded-2xl border border-slate-700 bg-slate-800/95 text-slate-200 shadow-2xl`}
+        className={`relative z-10 flex w-full ${maxWidthClassName} max-h-[90vh] min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-700 bg-slate-800/95 text-slate-200 shadow-2xl`}
       >
         <Dialog.Title
           as="div"

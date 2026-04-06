@@ -44,7 +44,7 @@ export const CategoryModal = ({
             Cancel
           </Button>
           <Button filled onClick={handleSubmit} customClassName="px-3 py-1">
-            Submit
+            Add Category
           </Button>
         </>
       }
