@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useCallback } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import { ChevronDown } from "./svg/ChevronDown";
@@ -26,6 +26,44 @@ export const MonthCard = ({
     toggleExpanded,
     stopPropagation,
   } = useMonthCard({ income, totalMonthlyExpenses, categories });
+
+  const chartRef = useRef(null);
+
+  const handleLegendSegmentClick = useCallback((dataIndex) => {
+    const chart = chartRef.current;
+    if (!chart) return;
+
+    const meta = chart.getDatasetMeta(0);
+    const arc = meta?.data?.[dataIndex];
+    if (!arc) return;
+
+    const active = chart.tooltip?.getActiveElements?.() ?? [];
+    if (
+      active.length === 1 &&
+      active[0].datasetIndex === 0 &&
+      active[0].index === dataIndex
+    ) {
+      chart.setActiveElements([]);
+      chart.tooltip?.setActiveElements?.([], { x: 0, y: 0 });
+      chart.update();
+      return;
+    }
+
+    const { x, y } =
+      typeof arc.getCenterPoint === "function"
+        ? arc.getCenterPoint()
+        : {
+            x: (chart.chartArea.left + chart.chartArea.right) / 2,
+            y: (chart.chartArea.top + chart.chartArea.bottom) / 2,
+          };
+
+    chart.setActiveElements([{ datasetIndex: 0, index: dataIndex }]);
+    chart.tooltip?.setActiveElements?.(
+      [{ datasetIndex: 0, index: dataIndex }],
+      { x, y },
+    );
+    chart.update();
+  }, []);
 
   return (
     <div
@@ -89,10 +127,10 @@ export const MonthCard = ({
             Spending by Category
           </h3>
 
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-h-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex h-56 w-full flex-shrink-0 justify-center lg:w-56">
               <div className="relative w-full max-w-xs lg:w-56 lg:max-w-none">
-                <Doughnut data={chartData} options={chartOptions} />
+                <Doughnut ref={chartRef} data={chartData} options={chartOptions} />
 
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                   <div className="text-sm text-slate-400">Total</div>
@@ -103,33 +141,49 @@ export const MonthCard = ({
               </div>
             </div>
 
-            <div className="flex-1 lg:ml-6">
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1">
-                {legendData.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-800/80 p-3 transition hover:border-slate-600 hover:bg-slate-800"
-                  >
-                    <div className="flex min-w-0 flex-1 items-center">
-                      <div
-                        className="mr-3 h-3 w-3 flex-shrink-0 rounded-full"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="truncate text-sm text-slate-200">
-                        {item.title}
-                      </span>
-                    </div>
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col lg:ml-6">
+              <div className="max-h-[min(50vh,16rem)] overflow-y-auto overflow-x-hidden pr-1 sm:max-h-[18rem] lg:max-h-56">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1">
+                  {legendData.map((item) => (
+                    <div
+                      key={item.dataIndex}
+                      role="button"
+                      tabIndex={0}
+                      className="flex cursor-pointer select-none items-center justify-between rounded-xl border border-slate-700 bg-slate-800/80 p-3 outline-none transition hover:border-slate-600 hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleLegendSegmentClick(item.dataIndex);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleLegendSegmentClick(item.dataIndex);
+                        }
+                      }}
+                    >
+                      <div className="flex min-w-0 flex-1 items-center">
+                        <div
+                          className="mr-3 h-3 w-3 flex-shrink-0 rounded-full"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="truncate text-sm text-slate-200">
+                          {item.title}
+                        </span>
+                      </div>
 
-                    <div className="ml-2 flex items-center text-right">
-                      <span className="mr-2 text-sm font-medium text-white">
-                        {formatCurrency(item.value)}
-                      </span>
-                      <span className="w-10 text-xs text-slate-400">
-                        {item.percentage}%
-                      </span>
+                      <div className="ml-2 flex items-center text-right">
+                        <span className="mr-2 text-sm font-medium text-white">
+                          {formatCurrency(item.value)}
+                        </span>
+                        <span className="w-10 text-xs text-slate-400">
+                          {item.percentage}%
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
               <div className="mt-4 border-t border-slate-700 pt-3">

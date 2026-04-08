@@ -70,14 +70,15 @@ export function useMonthCard({
   const legendData = useMemo(
     () =>
       categories
-        .map((cat, index) => ({
+        .map((cat, dataIndex) => ({
+          dataIndex,
           title: cat.title,
           value: cat.totalCategoryExpenses || 0,
           percentage:
             total > 0
               ? (((cat.totalCategoryExpenses || 0) / total) * 100).toFixed(1)
               : 0,
-          color: dynamicColors[index],
+          color: dynamicColors[dataIndex],
         }))
         .filter((item) => item.value > 0),
     [categories, dynamicColors, total],
